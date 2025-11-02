@@ -1,36 +1,20 @@
 package me.whereareiam.intercept;
 
-import java.util.Collection;
-
 /**
- * Generic registry interface for managing registered components.
+ * A generic registry interface that provides registration functionality for
+ * different types of components in the Intercept plugin.
  *
- * @param <T> The type of components this registry manages
+ * <p>This interface allows for type-safe registration of various elements
+ * such as commands, events, or integrations. The generic type parameter T
+ * represents the type of element that can be registered.</p>
+ *
+ * @param <T> the type of element that can be registered in this registry
  */
 public interface Registry<T> {
 	/**
-	 * Registers a component.
+	 * Registers a new element in this registry.
 	 *
-	 * @param component The component to register
+	 * @param integration the element to register
 	 */
-	void register(T component);
-
-	/**
-	 * Unregisters a component.
-	 *
-	 * @param component The component to unregister
-	 */
-	void unregister(T component);
-
-	/**
-	 * Gets all registered components.
-	 *
-	 * @return A collection of all registered components
-	 */
-	Collection<T> getAll();
-
-	/**
-	 * Clears all registered components.
-	 */
-	void clear();
+	void register(T integration);
 }

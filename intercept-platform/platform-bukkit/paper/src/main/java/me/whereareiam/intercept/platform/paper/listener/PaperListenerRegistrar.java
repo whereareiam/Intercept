@@ -1,0 +1,57 @@
+package me.whereareiam.intercept.platform.paper.listener;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import me.whereareiam.intercept.common.CommonListenerRegistrar;
+import me.whereareiam.intercept.listener.DynamicListener;
+import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.platform.common.util.BukkitUtil;
+import org.bukkit.event.Event;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
+
+@Singleton
+public class PaperListenerRegistrar extends CommonListenerRegistrar {
+	private final Injector injector;
+	private final Plugin plugin;
+	private final PluginManager pluginManager;
+
+	@Inject
+	public PaperListenerRegistrar(
+			Injector injector,
+			Provider<Settings> settingsProvider,
+			Plugin plugin,
+			PluginManager pluginManager
+	) {
+		super(settingsProvider);
+		this.injector = injector;
+		this.plugin = plugin;
+		this.pluginManager = pluginManager;
+	}
+
+	@Override
+	@SuppressWarnings("UnstableApiUsage")
+	public void registerListeners() {
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> void registerListener(Class<T> eventClass, DynamicListener<T> listener) {
+		if (settings.get().getListeners().getEvents().get(eventClass.getName()) == null
+				|| !settings.get().getListeners().getEvents().get(eventClass.getName()).isRegister()) return;
+		Logger.debug("Registering listener for event " + eventClass.getName());
+
+		pluginManager.registerEvent(
+				(Class<? extends Event>) eventClass,
+				new Listener() {
+				},
+				BukkitUtil.of(determinePriority(eventClass)),
+				(l, e) -> listener.onEvent(eventClass.cast(e)),
+				plugin
+		);
+	}
+}

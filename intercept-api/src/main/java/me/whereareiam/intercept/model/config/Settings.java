@@ -1,8 +1,11 @@
-package me.whereareiam.intercept.model;
+package me.whereareiam.intercept.model.config;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import me.whereareiam.intercept.model.Event;
+
+import java.util.Map;
 
 /**
  * Main configuration settings class for the Intercept plugin.
@@ -27,6 +30,11 @@ public class Settings {
 	 * Update checker configuration
 	 */
 	private Updater updater;
+
+	/**
+	 * Event listener configurations
+	 */
+	private Listeners listeners;
 
 	/**
 	 * Configuration for the plugin's updater checker.
@@ -60,5 +68,19 @@ public class Settings {
 		 * Update check interval in minutes
 		 */
 		private int interval;
+	}
+
+	/**
+	 * Configuration for event listeners.
+	 * Maps event names to their corresponding event configurations.
+	 */
+	@Getter
+	@Setter
+	@ToString
+	public static class Listeners {
+		/**
+		 * Map of event name to event configuration
+		 */
+		private Map<String, Event> events;
 	}
 }

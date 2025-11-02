@@ -24,7 +24,7 @@ subprojects {
         "annotationProcessor"(rootProject.libs.lombok)
 
         // general
-        "compileOnly"(rootProject.libs.guice)
-        "compileOnly"(rootProject.libs.configura)
+        "implementation"(rootProject.libs.guice) // TODO Temporary
+        "implementation"(rootProject.libs.configura) // TODO Temporary
     }
 }

@@ -2,7 +2,7 @@ package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
-import me.whereareiam.intercept.model.Settings;
+import me.whereareiam.intercept.model.config.Settings;
 
 @Singleton
 public class SettingsTemplate implements TemplateProvider<Settings> {

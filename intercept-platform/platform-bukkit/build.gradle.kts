@@ -5,6 +5,10 @@ tasks.named("shadowJar").configure { enabled = false }
 
 subprojects {
     if (project.name != "common") {
+        dependencies {
+            "implementation"(project(":intercept-platform:platform-bukkit:common"))
+        }
+
         tasks.named<Copy>("processResources") {
             filter<ReplaceTokens>(
                 "tokens" to mapOf(

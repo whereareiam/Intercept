@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.provider;
+package me.whereareiam.intercept.common.provider.config;
 
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Registry;

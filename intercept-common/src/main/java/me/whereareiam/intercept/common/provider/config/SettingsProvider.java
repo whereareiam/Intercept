@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.provider;
+package me.whereareiam.intercept.common.provider.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -7,7 +7,7 @@ import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.model.Settings;
+import me.whereareiam.intercept.model.config.Settings;
 
 import java.nio.file.Path;
 
