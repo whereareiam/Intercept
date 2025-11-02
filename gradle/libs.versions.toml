@@ -1,0 +1,60 @@
+[versions]
+
+# plugins
+shadow = "9.2.2"
+
+# compile time processing
+lombok = "1.18.42"
+
+# general
+guice = "7.0.0"
+configura = "dev-c938983"
+
+# platform api versions
+velocity = "3.4.0-SNAPSHOT"
+spigot = "1.21.8-R0.1-SNAPSHOT"
+paper = "1.21.8-R0.1-SNAPSHOT"
+
+# platform hooks
+packetevents = "2.10.0"
+
+# adventure
+adventure = "4.25.0"
+adventure-platform-bukkit = "4.4.1"
+
+[libraries]
+
+# compile time processing
+lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
+
+# general
+guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
+configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
+
+# platform api
+velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+spigot = { group = "org.spigotmc", name = "spigot-api", version.ref = "spigot" }
+paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+
+# platform hooks
+packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
+packetevents-velocity = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
+
+# adventure
+adventure = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
+adventure-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
+adventure-legacy = { group = "net.kyori", name = "adventure-text-serializer-legacy", version.ref = "adventure" }
+adventure-plain = { group = "net.kyori", name = "adventure-text-serializer-plain", version.ref = "adventure" }
+adventure-gson = { group = "net.kyori", name = "adventure-text-serializer-gson", version.ref = "adventure" }
+adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform-bukkit" }
+
+[bundles]
+
+adventure = ["adventure", "adventure-minimessage", "adventure-legacy", "adventure-plain", "adventure-gson"]
+bukkit = ["spigot", "packetevents-spigot", "adventure-platform-bukkit"]
+paper = ["paper", "packetevents-spigot"]
+velocity = ["velocity", "packetevents-velocity"]
+
+[plugins]
+
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
