@@ -8,7 +8,7 @@ lombok = "1.18.42"
 
 # general
 guice = "7.0.0"
-configura = "dev-c938983"
+configura = "dev-a76adc6"
 
 # platform api versions
 velocity = "3.4.0-SNAPSHOT"
