@@ -24,6 +24,7 @@ subprojects {
         "annotationProcessor"(rootProject.libs.lombok)
 
         // general
+        "implementation"(rootProject.libs.bundles.adventure) // TODO Temporary
         "implementation"(rootProject.libs.guice) // TODO Temporary
         "implementation"(rootProject.libs.configura) // TODO Temporary
     }

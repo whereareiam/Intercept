@@ -1,33 +1,49 @@
 package me.whereareiam.intercept.common;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.PlatformInteractor;
+import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
+import me.whereareiam.intercept.common.updater.UpdateScheduler;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.base.IntercepticEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptBootstrappedEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
+import me.whereareiam.intercept.listener.ListenerRegistrar;
 import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.logging.LoggingHelper;
+import me.whereareiam.intercept.util.EventUtil;
 
 public class Intercept implements EventListener {
-	private final EventManager eventManager;
+	private final Injector injector;
 
 	@Inject
-	public Intercept(EventManager eventManager) {
-		this.eventManager = eventManager;
-		this.eventManager.register(this);
+	public Intercept(
+			EventManager eventManager,
+			Injector injector
+	) {
+		this.injector = injector;
+
+		eventManager.register(this);
 	}
 
 	@IntercepticEvent
 	public void onBootstrapped(InterceptBootstrappedEvent event) {
-		Logger.info("Intercept has been bootstrapped - core infrastructure ready");
+		Constants.SERVER_VERSION = injector.getInstance(PlatformInteractor.class).getServerVersion();
+		Logger.init(injector.getInstance(LoggingHelper.class));
 	}
 
 	@IntercepticEvent
 	public void onReady(InterceptReadyEvent event) {
-		Logger.info("Intercept is ready - plugin fully operational");
-		
+		injector.getInstance(ListenerRegistrar.class).registerListeners();
+
+		injector.getInstance(WelcomeBannerPrinter.class).print();
+		injector.getInstance(UpdateScheduler.class).start();
+
 		// Fire InterceptStartedEvent to signal complete startup
-		eventManager.call(new InterceptStartedEvent());
+		EventUtil.callEvent(new InterceptStartedEvent());
 	}
 }

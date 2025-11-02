@@ -45,4 +45,15 @@ public class EventUtil {
 		callback.run();
 		return true;
 	}
+
+	/**
+	 * Calls an event and executes a callback if the event is not cancelled.
+	 *
+	 * @param event the event to call
+	 * @return true if the callback was executed, false if the event was cancelled
+	 */
+	public static boolean callEvent(Event event) {
+		return callEvent(event, () -> {
+		});
+	}
 }
