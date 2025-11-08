@@ -12,12 +12,14 @@ import me.whereareiam.intercept.common.config.ConfiguraBootstrap;
 import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
 import me.whereareiam.intercept.common.event.EventController;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
+import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
 import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
 import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
@@ -47,6 +49,8 @@ public class CommonConfiguration extends AbstractModule {
 		// Configs
 		bind(SettingsProvider.class);
 		bind(Settings.class).toProvider(SettingsProvider.class);
+		bind(InterceptionProvider.class);
+		bind(Interception.class).toProvider(InterceptionProvider.class);
 
 		// Services
 		bind(EventManager.class).to(EventController.class);
