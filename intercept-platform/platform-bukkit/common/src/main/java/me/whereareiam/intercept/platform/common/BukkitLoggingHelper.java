@@ -38,7 +38,7 @@ public class BukkitLoggingHelper implements LoggingHelper {
 
 	@Override
 	public void debug(String message, Object... objects) {
-		if (settings.get().getLevel() >= 3)
+		if (settings.get().getLevel() >= 4)
 			logger.info(String.format(message, objects));
 	}
 }

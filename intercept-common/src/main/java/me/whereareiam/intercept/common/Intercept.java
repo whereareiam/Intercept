@@ -17,6 +17,7 @@ import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
 import me.whereareiam.intercept.listener.ListenerRegistrar;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
+import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.util.EventUtil;
 
 public class Intercept implements EventListener {
@@ -36,6 +37,9 @@ public class Intercept implements EventListener {
 	public void onBootstrapped(InterceptBootstrappedEvent event) {
 		Constants.SERVER_VERSION = injector.getInstance(PlatformInteractor.class).getServerVersion();
 		Logger.init(injector.getInstance(LoggingHelper.class));
+		
+		// Load settings early - this will trigger @PostProcess which initializes InterceptionHelper
+		injector.getInstance(Settings.class);
 	}
 
 	@IntercepticEvent

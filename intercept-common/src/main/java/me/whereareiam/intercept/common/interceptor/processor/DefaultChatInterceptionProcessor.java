@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
+import me.whereareiam.intercept.logging.InterceptionHelper;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.interception.chat.ChatInterceptionContext;
 import net.kyori.adventure.text.Component;
@@ -28,6 +29,6 @@ public class DefaultChatInterceptionProcessor implements ChatInterceptionProcess
 
 		Component message = context.getMessage();
 
-		return message.append(Component.text(" [INTERCEPTED]"));
+		return InterceptionHelper.modify(message);
 	}
 }

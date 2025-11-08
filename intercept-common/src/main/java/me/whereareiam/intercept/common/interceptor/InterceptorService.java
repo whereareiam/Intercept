@@ -91,8 +91,6 @@ public class InterceptorService implements Reloadable {
 
 			// Register the interceptor (already initialized by provider)
 			registry.setActiveInterceptor(type, interceptor);
-			Logger.info("Initialized %s interceptor using %s (priority: %s)",
-					type, provider.getName(), provider.getPriority());
 		} catch (Exception e) {
 			Logger.severe("Failed to initialize interceptor for component " + type + ": " + e.getMessage());
 			e.printStackTrace();

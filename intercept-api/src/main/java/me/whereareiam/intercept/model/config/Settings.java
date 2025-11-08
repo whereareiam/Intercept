@@ -3,6 +3,8 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import me.whereareiam.configura.annotation.PostProcess;
+import me.whereareiam.intercept.logging.InterceptionHelper;
 import me.whereareiam.intercept.model.Event;
 
 import java.util.Map;
@@ -25,6 +27,11 @@ public class Settings {
 	 * Debug level for logging
 	 */
 	private int level;
+
+	@PostProcess
+	public void updateInterceptionHelper() {
+		InterceptionHelper.init(level > 2);
+	}
 
 	/**
 	 * Update checker configuration
