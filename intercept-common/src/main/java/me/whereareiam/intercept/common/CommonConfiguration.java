@@ -11,6 +11,9 @@ import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.ConfiguraBootstrap;
 import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
 import me.whereareiam.intercept.common.event.EventController;
+import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
+import me.whereareiam.intercept.common.interceptor.InterceptorService;
+import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
@@ -19,6 +22,7 @@ import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.ProviderType;
@@ -55,6 +59,11 @@ public class CommonConfiguration extends AbstractModule {
 		// Services
 		bind(EventManager.class).to(EventController.class);
 		bind(EventUtil.class).asEagerSingleton();
+
+		// Interceptors
+		bind(InterceptorRegistry.class).asEagerSingleton();
+		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
+		bind(InterceptorService.class).asEagerSingleton();
 
 		// Plugin
 		bind(Intercept.class).asEagerSingleton();

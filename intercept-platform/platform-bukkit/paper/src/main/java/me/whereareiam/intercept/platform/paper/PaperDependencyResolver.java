@@ -60,12 +60,5 @@ public class PaperDependencyResolver extends CommonDependencyResolver {
 				.artifactId("adventure-platform-bukkit")
 				.version(Constants.Dependency.ADVENTURE_PLATFORM_BUKKIT)
 				.build());
-
-		addDependency(Library.builder()
-				.groupId("com.github.retrooper")
-				.artifactId("packetevents-spigot")
-				.version(Constants.Dependency.PACKETEVENTS)
-				.resolveTransitiveDependencies(true)
-				.build());
 	}
 }

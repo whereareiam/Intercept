@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.PlatformInteractor;
+import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
 import me.whereareiam.intercept.common.updater.UpdateScheduler;
 import me.whereareiam.intercept.event.EventListener;
@@ -11,6 +12,7 @@ import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.base.IntercepticEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptBootstrappedEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
+import me.whereareiam.intercept.event.lifecycle.InterceptShutdownEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
 import me.whereareiam.intercept.listener.ListenerRegistrar;
 import me.whereareiam.intercept.logging.Logger;
@@ -40,10 +42,18 @@ public class Intercept implements EventListener {
 	public void onReady(InterceptReadyEvent event) {
 		injector.getInstance(ListenerRegistrar.class).registerListeners();
 
+		// Initialize interceptors (providers registered by platform classes)
+		injector.getInstance(InterceptorService.class).initialize();
+
 		injector.getInstance(WelcomeBannerPrinter.class).print();
 		injector.getInstance(UpdateScheduler.class).start();
 
 		// Fire InterceptStartedEvent to signal complete startup
 		EventUtil.callEvent(new InterceptStartedEvent());
+	}
+
+	@IntercepticEvent
+	public void onShutdown(InterceptShutdownEvent event) {
+		injector.getInstance(InterceptorService.class).shutdown();
 	}
 }
