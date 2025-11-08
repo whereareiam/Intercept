@@ -13,9 +13,11 @@ allprojects {
 
 subprojects {
     repositories {
+        // mavenLocal()
         mavenCentral()
         maven("https://jitpack.io")
         maven("https://maven.whereareiam.me/development")
+        maven("https://maven.whereareiam.me/release")
     }
 
     dependencies {
@@ -24,8 +26,9 @@ subprojects {
         "annotationProcessor"(rootProject.libs.lombok)
 
         // general
-        "implementation"(rootProject.libs.bundles.adventure) // TODO Temporary
-        "implementation"(rootProject.libs.guice) // TODO Temporary
-        "implementation"(rootProject.libs.configura) // TODO Temporary
+        "compileOnly"(rootProject.libs.bundles.adventure)
+        "compileOnly"(rootProject.libs.attache.common)
+        "compileOnly"(rootProject.libs.configura)
+        "compileOnly"(rootProject.libs.guice)
     }
 }

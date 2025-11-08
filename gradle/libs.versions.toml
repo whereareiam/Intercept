@@ -2,6 +2,7 @@
 
 # plugins
 shadow = "9.2.2"
+buildconfig = "5.7.1"
 
 # compile time processing
 lombok = "1.18.42"
@@ -9,6 +10,7 @@ lombok = "1.18.42"
 # general
 guice = "7.0.0"
 configura = "dev-a76adc6"
+attache = "dev-5fad19f"
 
 # platform api versions
 velocity = "3.4.0-SNAPSHOT"
@@ -30,6 +32,10 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 # general
 guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
+
+# attache
+attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }
+attache-common = { group = "me.whereareiam", name = "attache-common", version.ref = "attache" }
 
 # platform api
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
@@ -58,3 +64,4 @@ velocity = ["velocity", "packetevents-velocity"]
 [plugins]
 
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }

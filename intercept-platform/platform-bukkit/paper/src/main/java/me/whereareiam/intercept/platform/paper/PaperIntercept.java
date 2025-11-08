@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.platform.paper;
 
+import me.whereareiam.intercept.DependencyResolver;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.lifecycle.InterceptBootstrappedEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
@@ -21,6 +22,11 @@ public class PaperIntercept extends JavaPlugin {
 		PluginType.setPluginType(PluginType.PAPER);
 		BukkitLoggingHelper.setLogger(logger);
 
+		// Load dependencies first
+		DependencyResolver dependencyResolver = new PaperDependencyResolver(this);
+		dependencyResolver.loadLibraries();
+		dependencyResolver.resolveDependencies();
+
 		paperInjector = new PaperInjector(this, dataPath);
 
 		// Call InterceptBootstrappedEvent after core infrastructure is initialized
@@ -33,9 +39,5 @@ public class PaperIntercept extends JavaPlugin {
 		// Call InterceptReadyEvent after plugin is fully operational
 		EventManager eventManager = paperInjector.getInjector().getInstance(EventManager.class);
 		eventManager.call(new InterceptReadyEvent());
-	}
-
-	@Override
-	public void onDisable() {
 	}
 }

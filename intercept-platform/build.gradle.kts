@@ -10,6 +10,11 @@ subprojects {
     tasks.withType<ShadowJar> {
         archiveBaseName.set(rootProject.name)
 
+        relocate("me.whereareiam.attache", "me.whereareiam.intercept.library.attache")
+
+        relocate("com.google.common", "me.whereareiam.intercept.library.guava")
+        relocate("com.google.inject", "me.whereareiam.intercept.library.guice")
+
         val defaultDestination = rootProject.layout.buildDirectory.dir("libs")
 
         val customOutputDir = if (project.hasProperty("output")) {
@@ -28,6 +33,7 @@ subprojects {
     }
 
     dependencies {
+        "implementation"(rootProject.libs.attache.common)
         rootProject.allprojects
             .filter { it != project && it.parent == rootProject }
             .forEach { subproject ->
