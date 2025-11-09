@@ -13,6 +13,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 /**
  * PacketEvents-based implementation of chat interceptor.
  */
@@ -39,8 +41,14 @@ public class PacketEventsChatInterceptionProcessor implements ChatInterceptor {
 		Player player = event.getPlayer();
 		Component message = packet.getMessage();
 
+		String[] parts = player.getLocale().split("_", 2);
+		Locale locale = parts.length > 1
+				? new Locale(parts[0], parts[1])
+				: new Locale(parts[0]);
+
 		ChatInterceptionContext context = new ChatInterceptionContext(
 				player.getUniqueId(),
+				locale,
 				message
 		);
 

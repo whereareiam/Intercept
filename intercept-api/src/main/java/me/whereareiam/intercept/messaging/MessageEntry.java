@@ -1,7 +1,9 @@
 package me.whereareiam.intercept.messaging;
 
+import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.MessageType;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -54,4 +56,18 @@ public interface MessageEntry {
 	 * @return true if multi-language, false if single-language
 	 */
 	boolean hasTranslations();
+
+	/**
+	 * Get regex patterns that can trigger this message.
+	 *
+	 * @return list of compiled regex patterns, or empty list if none
+	 */
+	List<CompiledRegexPattern> getRegexPatterns();
+
+	/**
+	 * Check if this entry has regex patterns.
+	 *
+	 * @return true if this entry has regex patterns
+	 */
+	boolean hasRegexPatterns();
 }

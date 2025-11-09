@@ -115,6 +115,11 @@ public class Settings {
 		private Cache cache;
 
 		/**
+		 * Regex matching configuration
+		 */
+		private Regex regex;
+
+		/**
 		 * Whether to pre-render static messages at load time
 		 */
 		private boolean prerenderStatic;
@@ -160,6 +165,54 @@ public class Settings {
 			 * Cache expiration in minutes for render cache
 			 */
 			private int expireMinutes;
+		}
+
+		/**
+		 * Regex matching configuration for performance optimization.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Regex {
+			/**
+			 * Whether regex matching is enabled globally
+			 */
+			private boolean enabled;
+
+			/**
+			 * Timeout in milliseconds for each pattern match
+			 */
+			private int timeoutMs;
+
+			/**
+			 * Whether to use literal prefix optimization
+			 */
+			private boolean useLiteralPrefix;
+
+			/**
+			 * Whether to cache regex match results
+			 */
+			private boolean cacheResults;
+
+			/**
+			 * Maximum number of cached regex results
+			 */
+			private int cacheSize;
+
+			/**
+			 * Cache expiration in minutes
+			 */
+			private int cacheExpireMinutes;
+
+			/**
+			 * Maximum pattern complexity score
+			 */
+			private int maxPatternComplexity;
+
+			/**
+			 * Log warning for patterns taking longer than this (ms)
+			 */
+			private int warnSlowPatternsMs;
 		}
 	}
 }

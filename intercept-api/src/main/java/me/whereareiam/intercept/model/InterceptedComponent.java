@@ -23,4 +23,10 @@ public class InterceptedComponent {
 	 * Tag is enclosed in angle brackets, e.g., "&lt;lang&gt;".
 	 */
 	private String tag;
+
+	/**
+	 * Whether to enable regex pattern matching for this component.
+	 * When enabled, messages without tags will be matched against regex patterns.
+	 */
+	private boolean regex = false;
 }

@@ -3,6 +3,7 @@ package me.whereareiam.intercept.model.interception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -16,4 +17,10 @@ public abstract class InterceptionContext {
 	 * The UUID of the player associated with this interception.
 	 */
 	private final UUID playerId;
+
+	/**
+	 * The locale of the player.
+	 * Used for resolving messages in the player's preferred language.
+	 */
+	private final Locale locale;
 }

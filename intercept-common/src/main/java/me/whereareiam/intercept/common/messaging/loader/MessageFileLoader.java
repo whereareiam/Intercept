@@ -3,9 +3,13 @@ package me.whereareiam.intercept.common.messaging.loader;
 import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
+import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.MessageType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,6 +57,9 @@ public class MessageFileLoader {
 			type = autoDetectType(entryData);
 		}
 
+		// Compile regex patterns if present
+		List<CompiledRegexPattern> regexPatterns = compileRegexPatterns(entryData.getRegex());
+
 		// Convert text/translations
 		if (entryData.getTranslations() != null && !entryData.getTranslations().isEmpty()) {
 			// Multi-language message
@@ -62,25 +69,55 @@ public class MessageFileLoader {
 				String text = textProcessor.process(trans.getValue());
 				processedTranslations.put(locale, text);
 			}
-			return new DefaultMessageEntry(type, processedTranslations);
+			return new DefaultMessageEntry(type, processedTranslations, regexPatterns);
 		} else if (entryData.getText() != null) {
 			// Single-language message or template
 			String text = textProcessor.process(entryData.getText());
-			return new DefaultMessageEntry(type, text);
+			return new DefaultMessageEntry(type, text, regexPatterns);
 		} else {
 			throw new IllegalArgumentException("Message entry must have either 'text' or 'translations'");
 		}
 	}
 
+	/**
+	 * Compile regex patterns from pattern data.
+	 *
+	 * @param patterns the regex pattern data list
+	 * @return list of compiled patterns, or empty list if none
+	 */
+	private List<CompiledRegexPattern> compileRegexPatterns(List<RegexPatternData> patterns) {
+		if (patterns == null || patterns.isEmpty()) {
+			return List.of();
+		}
+
+		List<CompiledRegexPattern> compiled = new ArrayList<>();
+		for (RegexPatternData patternData : patterns) {
+			try {
+				CompiledRegexPattern compiledPattern = new CompiledRegexPattern(
+						patternData.getPattern(),
+						patternData.getPlaceholders(),
+						patternData.getPriority()
+				);
+				compiled.add(compiledPattern);
+			} catch (Exception e) {
+				// Log error but continue with other patterns
+				Logger.severe("[Intercept] Failed to compile regex pattern: " + patternData.getPattern());
+				e.printStackTrace();
+			}
+		}
+
+		return compiled;
+	}
+
 	private MessageType autoDetectType(MessageEntryData entryData) {
 		// If has translations, it's a message
-		if (entryData.getTranslations() != null && !entryData.getTranslations().isEmpty()) {
+		if (entryData.getTranslations() != null && !entryData.getTranslations().isEmpty())
 			return MessageType.MESSAGE;
-		}
+
 		// If only has text, it's a template
-		if (entryData.getText() != null) {
+		if (entryData.getText() != null)
 			return MessageType.TEMPLATE;
-		}
+
 		// Default to message
 		return MessageType.MESSAGE;
 	}

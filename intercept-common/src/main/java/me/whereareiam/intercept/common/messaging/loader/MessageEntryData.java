@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.whereareiam.intercept.type.MessageType;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,4 +31,10 @@ public class MessageEntryData {
 	 * Key = locale, Value = text (String or List&lt;String&gt;)
 	 */
 	private Map<String, Object> translations;
+
+	/**
+	 * Optional regex patterns that can trigger this message.
+	 * When text matches any of these patterns, this message will be resolved.
+	 */
+	private List<RegexPatternData> regex;
 }

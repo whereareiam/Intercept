@@ -19,6 +19,7 @@ public class InterceptionConfigTemplate implements TemplateProvider<Interception
 		InterceptedComponent chat = new InterceptedComponent();
 		chat.setEnabled(true);
 		chat.setTag("<lang>");
+		chat.setRegex(false);
 		components.put(InterceptedComponentType.CHAT, chat);
 
 		config.setComponents(components);
