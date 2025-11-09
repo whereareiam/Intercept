@@ -14,6 +14,9 @@ import me.whereareiam.intercept.common.event.EventController;
 import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
+import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.DefaultMessageService;
+import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
@@ -23,6 +26,8 @@ import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
+import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.ProviderType;
@@ -68,6 +73,11 @@ public class CommonConfiguration extends AbstractModule {
 		// Plugin
 		bind(Intercept.class).asEagerSingleton();
 
+		// Messages system
+		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
+		bind(MessageService.class).to(DefaultMessageService.class);
+		bind(MessagesService.class).asEagerSingleton();
+
 		// Updater
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))
 				.to(ModrinthProvider.class);
@@ -94,6 +104,13 @@ public class CommonConfiguration extends AbstractModule {
 	@Named("dataPath")
 	Path provideNamedDataPath() {
 		return ensureDirectory(dataPath, "data");
+	}
+
+	@Provides
+	@Singleton
+	@Named("messagesPath")
+	Path provideMessagesPath(@Named("dataPath") Path dataPath) {
+		return ensureDirectory(dataPath.resolve("messages"), "messages");
 	}
 
 	private Path ensureDirectory(Path path, String label) {

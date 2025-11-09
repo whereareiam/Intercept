@@ -30,5 +30,11 @@ subprojects {
         "compileOnly"(rootProject.libs.attache.common)
         "compileOnly"(rootProject.libs.configura)
         "compileOnly"(rootProject.libs.guice)
+
+        // test
+        "testImplementation"(rootProject.libs.configura)
+        "testImplementation"(rootProject.libs.guice)
+        "testImplementation"(rootProject.libs.junit.jupiter)
+        "testRuntimeOnly"(rootProject.libs.junit.platform)
     }
 }

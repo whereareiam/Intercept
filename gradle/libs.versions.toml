@@ -11,6 +11,7 @@ lombok = "1.18.42"
 guice = "7.0.0"
 configura = "dev-a76adc6"
 attache = "dev-5fad19f"
+junit = "6.0.0"
 
 # platform api versions
 velocity = "3.4.0-SNAPSHOT"
@@ -32,6 +33,10 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 # general
 guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
+
+# testing
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
 # attache
 attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }

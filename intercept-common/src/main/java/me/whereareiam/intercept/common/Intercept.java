@@ -6,6 +6,7 @@ import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
+import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.updater.UpdateScheduler;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
@@ -37,7 +38,7 @@ public class Intercept implements EventListener {
 	public void onBootstrapped(InterceptBootstrappedEvent event) {
 		Constants.SERVER_VERSION = injector.getInstance(PlatformInteractor.class).getServerVersion();
 		Logger.init(injector.getInstance(LoggingHelper.class));
-		
+
 		// Load settings early - this will trigger @PostProcess which initializes InterceptionHelper
 		injector.getInstance(Settings.class);
 	}
@@ -45,6 +46,9 @@ public class Intercept implements EventListener {
 	@IntercepticEvent
 	public void onReady(InterceptReadyEvent event) {
 		injector.getInstance(ListenerRegistrar.class).registerListeners();
+
+		// Initialize messages system
+		injector.getInstance(MessagesService.class).initialize();
 
 		// Initialize interceptors (providers registered by platform classes)
 		injector.getInstance(InterceptorService.class).initialize();

@@ -7,6 +7,7 @@ import me.whereareiam.configura.annotation.PostProcess;
 import me.whereareiam.intercept.logging.InterceptionHelper;
 import me.whereareiam.intercept.model.Event;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -28,6 +29,11 @@ public class Settings {
 	 */
 	private int level;
 
+	/**
+	 * Default locale for messages
+	 */
+	private Locale locale;
+
 	@PostProcess
 	public void updateInterceptionHelper() {
 		InterceptionHelper.init(level > 2);
@@ -42,6 +48,11 @@ public class Settings {
 	 * Event listener configurations
 	 */
 	private Listeners listeners;
+
+	/**
+	 * Performance configuration
+	 */
+	private Performance performance;
 
 	/**
 	 * Configuration for the plugin's updater checker.
@@ -89,5 +100,66 @@ public class Settings {
 		 * Map of event name to event configuration
 		 */
 		private Map<String, Event> events;
+	}
+
+	/**
+	 * Performance configuration for the plugin.
+	 */
+	@Getter
+	@Setter
+	@ToString
+	public static class Performance {
+		/**
+		 * Cache configuration
+		 */
+		private Cache cache;
+
+		/**
+		 * Whether to pre-render static messages at load time
+		 */
+		private boolean prerenderStatic;
+
+		/**
+		 * Whether to build dependency graph for optimization
+		 */
+		private boolean buildDependencyGraph;
+
+		/**
+		 * Cache configuration for messages.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Cache {
+			/**
+			 * Whether caching is enabled
+			 */
+			private boolean enabled;
+
+			/**
+			 * Maximum size for semi-static cache
+			 */
+			private int semiStaticSize;
+
+			/**
+			 * Maximum size for dynamic cache
+			 */
+			private int dynamicSize;
+
+			/**
+			 * Cache expiration in minutes for semi-static cache
+			 */
+			private int semiStaticExpireMinutes;
+
+			/**
+			 * Cache expiration in minutes for dynamic cache
+			 */
+			private int dynamicExpireMinutes;
+
+			/**
+			 * Cache expiration in minutes for render cache
+			 */
+			private int expireMinutes;
+		}
 	}
 }

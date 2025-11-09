@@ -7,6 +7,7 @@ import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.LoggingHelper;
+import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.type.AnsiColor;
 import me.whereareiam.intercept.type.InterceptedComponentType;
 import me.whereareiam.intercept.type.PlatformType;
@@ -21,10 +22,12 @@ import java.util.stream.Collectors;
 public class WelcomeBannerPrinter {
 	private final LoggingHelper loggingHelper;
 	private final InterceptorRegistry interceptorRegistry;
+	private final MessageRegistry messageRegistry;
 
 	public void print() {
 		List<String> lines = new ArrayList<>();
 		lines.addAll(buildTitleLines());
+		lines.addAll(buildMessagesLine());
 		lines.addAll(buildAdapterLines());
 		lines.add("");
 
@@ -33,6 +36,7 @@ public class WelcomeBannerPrinter {
 
 	private List<String> buildTitleLines() {
 		List<String> l = new ArrayList<>();
+
 		l.add("");
 		l.add(AnsiColor.CYAN +
 				"  █ █▀▀   " + AnsiColor.RESET +
@@ -45,6 +49,17 @@ public class WelcomeBannerPrinter {
 				PluginType.getType() + "]" +
 				AnsiColor.RESET);
 		l.add("");
+
+		return l;
+	}
+
+	private List<String> buildMessagesLine() {
+		List<String> l = new ArrayList<>();
+		int totalKeys = messageRegistry.getKeys().size();
+
+		l.add("  Messages: " + AnsiColor.CYAN + totalKeys + " keys" + AnsiColor.RESET);
+		l.add("");
+
 		return l;
 	}
 
