@@ -32,6 +32,7 @@ subprojects {
         "compileOnly"(rootProject.libs.guice)
 
         // test
+        "testImplementation"(rootProject.libs.bundles.adventure)
         "testImplementation"(rootProject.libs.configura)
         "testImplementation"(rootProject.libs.guice)
         "testImplementation"(rootProject.libs.junit.jupiter)

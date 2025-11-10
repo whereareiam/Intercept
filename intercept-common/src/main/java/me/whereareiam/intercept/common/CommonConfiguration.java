@@ -16,6 +16,7 @@ import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
+import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
@@ -28,6 +29,7 @@ import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.ProviderType;
@@ -65,11 +67,6 @@ public class CommonConfiguration extends AbstractModule {
 		bind(EventManager.class).to(EventController.class);
 		bind(EventUtil.class).asEagerSingleton();
 
-		// Interceptors
-		bind(InterceptorRegistry.class).asEagerSingleton();
-		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
-		bind(InterceptorService.class).asEagerSingleton();
-
 		// Plugin
 		bind(Intercept.class).asEagerSingleton();
 
@@ -77,6 +74,12 @@ public class CommonConfiguration extends AbstractModule {
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
 		bind(MessageService.class).to(DefaultMessageService.class);
 		bind(MessagesService.class).asEagerSingleton();
+		bind(TagReplacementService.class).to(DefaultTagReplacementService.class);
+
+		// Interceptors
+		bind(InterceptorRegistry.class).asEagerSingleton();
+		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
+		bind(InterceptorService.class).asEagerSingleton();
 
 		// Updater
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))

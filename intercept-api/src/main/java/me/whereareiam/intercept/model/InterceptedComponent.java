@@ -19,8 +19,21 @@ public class InterceptedComponent {
 	private boolean enabled;
 
 	/**
-	 * The tag that should be processed in this component.
-	 * Tag is enclosed in angle brackets, e.g., "&lt;lang&gt;".
+	 * The tag format that should be processed in this component.
+	 * Must include both the opening delimiter, tag name, and closing delimiter.
+	 * <p>
+	 * Common examples:
+	 * <ul>
+	 *   <li>{@code <lang>} - Angle brackets (XML-like)</li>
+	 *   <li>{@code [l]} - Square brackets</li>
+	 *   <li>{@code {tr}} - Curly braces</li>
+	 *   <li>{@code (translate)} - Parentheses</li>
+	 * </ul>
+	 * <p>
+	 * The format is flexible - you can use any single character as delimiters
+	 * and any name for the tag.
+	 * <p>
+	 * Usage in messages: {@code <lang key="message.key" param1="value1">}
 	 */
 	private String tag;
 
