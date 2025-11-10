@@ -1,14 +1,20 @@
 package me.whereareiam.intercept.messaging;
 
-import me.whereareiam.intercept.Registry;
-
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Registry for message entries.
+ * Manages registration and retrieval of localized message entries by key.
  */
-public interface MessageRegistry extends Registry<MessageEntry> {
+public interface MessageRegistry {
+	/**
+	 * Register a message entry with a key.
+	 *
+	 * @param key   the message key
+	 * @param entry the message entry
+	 */
+	void register(String key, MessageEntry entry);
 	/**
 	 * Get a message entry by key.
 	 *

@@ -17,19 +17,9 @@ import java.util.stream.Collectors;
 public class DefaultMessageRegistry implements MessageRegistry {
 	private final Map<String, MessageEntry> entries = new ConcurrentHashMap<>();
 
-	/**
-	 * Register a message entry with a key.
-	 *
-	 * @param key   the message key
-	 * @param entry the message entry
-	 */
+	@Override
 	public void register(String key, MessageEntry entry) {
 		entries.put(key, entry);
-	}
-
-	@Override
-	public void register(MessageEntry entry) {
-		throw new UnsupportedOperationException("Use register(String key, MessageEntry entry) instead");
 	}
 
 	@Override
