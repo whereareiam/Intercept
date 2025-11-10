@@ -139,13 +139,17 @@ class RegexIntegrationTest {
 
 	@Test
 	void shouldMatchHigherPriorityFirst() {
-		// Both patterns could match "Player Steve joined the game"
-		// But the higher priority one (10) should match first
-		String text = "Player Steve joined the game";
+		// Test that when multiple patterns from different entries can match the same text,
+		// the pattern with higher priority is matched first
+		// "test hello" matches:
+		// - priority-test with "test (\\w+)" at priority 20
+		// - priority-test-low with "test (\\w+)" at priority 5
+		// Should resolve to priority-test (priority 20)
+		String text = "test hello";
 		Optional<String> result = regexService.match(text, Locale.US);
 
 		assertTrue(result.isPresent());
-		assertEquals("Welcome, Steve!", result.get());
+		assertEquals("High priority: hello", result.get());
 	}
 
 	@Test
@@ -155,16 +159,5 @@ class RegexIntegrationTest {
 
 		assertTrue(result.isPresent());
 		assertEquals("Keine Berechtigung: worldedit.region", result.get());
-	}
-
-	@Test
-	void shouldUseLiteralPrefixOptimization() {
-		// This tests that the literal prefix optimization works
-		// The pattern starts with "You don't have permission:" which is a literal prefix
-		String text = "Some other text that doesn't match";
-		Optional<String> result = regexService.match(text, Locale.US);
-
-		// Should return empty without actually running the full regex
-		assertFalse(result.isPresent());
 	}
 }

@@ -27,3 +27,25 @@ entries:
         placeholders:
           name: "$1"
         priority: 5
+
+  priority-test:
+    translations:
+      en_US: "High priority: <p:word>"
+    regex:
+      - pattern: "test (\\w+)"
+        placeholders:
+          word: "$1"
+        priority: 20
+      - pattern: "test.*"
+        placeholders:
+          word: "should not match"
+        priority: 5
+
+  priority-test-low:
+    translations:
+      en_US: "Low priority: <p:word>"
+    regex:
+      - pattern: "test (\\w+)"
+        placeholders:
+          word: "$1"
+        priority: 5
