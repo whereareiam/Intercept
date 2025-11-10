@@ -24,5 +24,5 @@ public class MessageFileData {
 	 * Keys are relative to the file (e.g., "no-permission", "player-not-found")
 	 * The scanner will prepend directory-based keys (e.g., "errors.permissions.")
 	 */
-	private Map<String, MessageEntryData> entries;
+	private Map<String, MessageEntryData> items;
 }

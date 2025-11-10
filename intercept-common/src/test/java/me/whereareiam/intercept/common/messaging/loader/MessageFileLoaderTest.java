@@ -31,7 +31,7 @@ class MessageFileLoaderTest {
 		MessageEntryData entry = new MessageEntryData();
 		entry.setText("Welcome!");
 
-		fileData.setEntries(Map.of("welcome", entry));
+		fileData.setItems(Map.of("welcome", entry));
 
 		loader.loadFromData("test", fileData);
 
@@ -50,7 +50,7 @@ class MessageFileLoaderTest {
 				"de_DE", "Willkommen!"
 		));
 
-		fileData.setEntries(Map.of("welcome", entry));
+		fileData.setItems(Map.of("welcome", entry));
 
 		loader.loadFromData("test", fileData);
 
@@ -67,7 +67,7 @@ class MessageFileLoaderTest {
 		MessageEntryData entry = new MessageEntryData();
 		entry.setText("[Prefix]");
 
-		fileData.setEntries(Map.of("prefix", entry));
+		fileData.setItems(Map.of("prefix", entry));
 
 		loader.loadFromData("templates", fileData);
 
@@ -83,7 +83,7 @@ class MessageFileLoaderTest {
 		MessageEntryData entry = new MessageEntryData();
 		entry.setText(List.of("Line 1", "Line 2", "Line 3"));
 
-		fileData.setEntries(Map.of("banner", entry));
+		fileData.setItems(Map.of("banner", entry));
 
 		loader.loadFromData("test", fileData);
 
@@ -102,7 +102,7 @@ class MessageFileLoaderTest {
 				"de_DE", List.of("Zeile 1", "Zeile 2")
 		));
 
-		fileData.setEntries(Map.of("banner", entry));
+		fileData.setItems(Map.of("banner", entry));
 
 		loader.loadFromData("test", fileData);
 
@@ -119,7 +119,7 @@ class MessageFileLoaderTest {
 		// No type set on entry
 		entry.setText("Template text");
 
-		fileData.setEntries(Map.of("tpl", entry));
+		fileData.setItems(Map.of("tpl", entry));
 
 		loader.loadFromData("templates", fileData);
 
@@ -135,7 +135,7 @@ class MessageFileLoaderTest {
 		entry.setType(MessageType.TEMPLATE); // Override
 		entry.setText("Template text");
 
-		fileData.setEntries(Map.of("tpl", entry));
+		fileData.setItems(Map.of("tpl", entry));
 
 		loader.loadFromData("test", fileData);
 
@@ -153,7 +153,7 @@ class MessageFileLoaderTest {
 		MessageEntryData tplEntry = new MessageEntryData();
 		tplEntry.setText("Text");
 
-		fileData.setEntries(Map.of("msg", msgEntry, "tpl", tplEntry));
+		fileData.setItems(Map.of("msg", msgEntry, "tpl", tplEntry));
 
 		loader.loadFromData("test", fileData);
 
@@ -173,7 +173,7 @@ class MessageFileLoaderTest {
 				"de_DE", "Hallo"
 		));
 
-		fileData.setEntries(Map.of("greeting", entry));
+		fileData.setItems(Map.of("greeting", entry));
 
 		loader.loadFromData("test", fileData);
 
@@ -195,7 +195,7 @@ class MessageFileLoaderTest {
 		MessageEntryData entry3 = new MessageEntryData();
 		entry3.setText("Message 3");
 
-		fileData.setEntries(Map.of(
+		fileData.setItems(Map.of(
 				"msg1", entry1,
 				"msg2", entry2,
 				"msg3", entry3

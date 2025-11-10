@@ -34,7 +34,7 @@ public class MessageFileLoader {
 	public void loadFromData(String keyPrefix, MessageFileData fileData) {
 		MessageType fileType = fileData.getType();
 
-		for (Map.Entry<String, MessageEntryData> entry : fileData.getEntries().entrySet()) {
+		for (Map.Entry<String, MessageEntryData> entry : fileData.getItems().entrySet()) {
 			String entryKey = entry.getKey();
 			MessageEntryData entryData = entry.getValue();
 
