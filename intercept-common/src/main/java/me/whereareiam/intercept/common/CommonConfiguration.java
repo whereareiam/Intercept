@@ -20,6 +20,7 @@ import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
+import me.whereareiam.intercept.common.provider.config.MessagesProvider;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
 import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
 import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
@@ -31,6 +32,7 @@ import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Interception;
+import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
@@ -58,8 +60,10 @@ public class CommonConfiguration extends AbstractModule {
 		bind(ConfiguraBootstrap.class).asEagerSingleton();
 
 		// Configs
-		bind(SettingsProvider.class);
+		bind(SettingsProvider.class).asEagerSingleton();
 		bind(Settings.class).toProvider(SettingsProvider.class);
+		bind(MessagesProvider.class).asEagerSingleton();
+		bind(Messages.class).toProvider(MessagesProvider.class);
 		bind(InterceptionProvider.class);
 		bind(Interception.class).toProvider(InterceptionProvider.class);
 

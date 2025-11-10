@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.messaging.MessageEntry;
-import me.whereareiam.intercept.type.MessageType;
+import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

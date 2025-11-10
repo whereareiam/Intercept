@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.messaging;
 
+import me.whereareiam.intercept.type.message.MessageSource;
 import net.kyori.adventure.text.Component;
 
 import java.util.Locale;
@@ -33,6 +34,7 @@ public interface TagReplacementService {
 	/**
 	 * Replace all translation tags in a component with resolved messages.
 	 * Preserves all component formatting, colors, and style.
+	 * Uses UNKNOWN as the message source.
 	 *
 	 * @param component the component to process
 	 * @param tagFormat the full tag format (e.g., "&lt;lang&gt;", "[l]", "{tr}")
@@ -40,6 +42,19 @@ public interface TagReplacementService {
 	 * @return new component with tags replaced by resolved messages
 	 */
 	Component replaceTags(Component component, String tagFormat, Locale locale);
+
+	/**
+	 * Replace all translation tags in a component with resolved messages.
+	 * Preserves all component formatting, colors, and style.
+	 * Uses source-specific fallback formatting when translations are missing.
+	 *
+	 * @param component the component to process
+	 * @param tagFormat the full tag format (e.g., "&lt;lang&gt;", "[l]", "{tr}")
+	 * @param locale    the locale for message resolution
+	 * @param source    the source context of the message (CHAT, COMMAND, etc.)
+	 * @return new component with tags replaced by resolved messages
+	 */
+	Component replaceTags(Component component, String tagFormat, Locale locale, MessageSource source);
 
 	/**
 	 * Check if a component contains any tags for the given tag format.

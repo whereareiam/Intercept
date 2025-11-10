@@ -14,6 +14,7 @@ import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.interception.chat.ChatInterceptionContext;
 import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.message.MessageSource;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,7 +69,8 @@ public class DefaultChatInterceptionProcessor implements ChatInterceptionProcess
 			Component processed = tagReplacementService.replaceTags(
 					message,
 					chatConfig.getTag(),
-					context.getLocale()
+					context.getLocale(),
+					MessageSource.CHAT
 			);
 
 			return InterceptionHelper.modify(processed);

@@ -1,12 +1,16 @@
 package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
+import me.whereareiam.intercept.model.config.Messages;
+import me.whereareiam.intercept.type.message.MessageSource;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,14 +24,23 @@ import java.util.Map;
 @Singleton
 public class DefaultTagReplacementService implements TagReplacementService {
 	private final MessageService messageService;
+	private final Provider<Messages> messagesProvider;
+	private final MiniMessage miniMessage;
 
 	@Inject
-	public DefaultTagReplacementService(MessageService messageService) {
+	public DefaultTagReplacementService(MessageService messageService, Provider<Messages> messagesProvider) {
 		this.messageService = messageService;
+		this.messagesProvider = messagesProvider;
+		this.miniMessage = MiniMessage.miniMessage();
 	}
 
 	@Override
 	public Component replaceTags(Component component, String tagFormat, Locale locale) {
+		return replaceTags(component, tagFormat, locale, MessageSource.UNKNOWN);
+	}
+
+	@Override
+	public Component replaceTags(Component component, String tagFormat, Locale locale, MessageSource source) {
 		// Extract plain text from component
 		String plainText = ComponentHelper.extractPlainText(component);
 
@@ -36,8 +49,8 @@ public class DefaultTagReplacementService implements TagReplacementService {
 
 		if (tags.isEmpty()) return component;
 
-		// Build replacement map
-		Map<String, String> replacements = new HashMap<>();
+		// Build replacement map - Component to Component (proper way!)
+		Map<String, Component> replacements = new HashMap<>();
 
 		for (ComponentHelper.TagData tag : tags) {
 			try {
@@ -50,28 +63,98 @@ public class DefaultTagReplacementService implements TagReplacementService {
 				// Resolve the message
 				String resolved = messageService.resolve(tag.getKey(), locale, placeholders);
 
-				if (resolved != null) {
-					// Add to replacement map
-					replacements.put(tag.getOriginalTag(), resolved);
+				if (resolved != null && !resolved.equals(tag.getKey())) {
+					replacements.put(tag.getOriginalTag(), Component.text(resolved));
 					continue;
 				}
 
-				Logger.warn("Failed to resolve message key: %s for locale: %s", tag.getKey(), locale);
-				// Use key as fallback
-				replacements.put(tag.getOriginalTag(), tag.getKey());
+				// Resolution failed - use fallback Component with MiniMessage formatting
+				Component fallbackComponent = formatFallbackComponent(tag.getKey(), locale, source);
+				replacements.put(tag.getOriginalTag(), fallbackComponent);
+
+				// Log the missing translation
+				logMissingTranslation(tag.getKey(), locale, source);
 			} catch (Exception e) {
-				Logger.warn("Error resolving tag '%s': %s", tag.getOriginalTag(), e.getMessage());
-				// Keep original tag on error
-				replacements.put(tag.getOriginalTag(), tag.getOriginalTag());
+				// On exception, keep original tag as plain text
+				replacements.put(tag.getOriginalTag(), Component.text(tag.getOriginalTag()));
 			}
 		}
 
-		// Apply replacements to component
-		return ComponentHelper.replaceTextInComponent(component, replacements);
+		return ComponentHelper.replaceTextWithComponents(component, replacements);
 	}
 
 	@Override
 	public boolean containsTags(Component component, String tagFormat) {
 		return ComponentHelper.containsTag(component, tagFormat);
+	}
+
+	/**
+	 * Format a fallback message as a proper Component with MiniMessage formatting.
+	 * This is the RIGHT way - no legacy codes, pure Component API!
+	 *
+	 * @param key    the message key that was not found
+	 * @param locale the requested locale
+	 * @param source the message source
+	 * @return formatted fallback Component with proper styling
+	 */
+	private Component formatFallbackComponent(String key, Locale locale, MessageSource source) {
+		Messages messages = messagesProvider.get();
+		if (messages == null || messages.getFallback() == null || !messages.getFallback().isEnabled())
+			return Component.text(key);
+
+		Messages.Fallback fallback = messages.getFallback();
+		Messages.Fallback.SourceFormat format = getFormatForSource(fallback, source);
+
+		if (format == null || !format.isEnabled())
+			return Component.text(key);
+
+		// Apply placeholder replacements
+		String formatted = format.getFormat()
+				.replace("{key}", key)
+				.replace("{locale}", locale.toString())
+				.replace("{source}", source.name());
+
+		return miniMessage.deserialize(formatted);
+	}
+
+	/**
+	 * Get the appropriate format configuration for the given source.
+	 *
+	 * @param fallback the fallback configuration
+	 * @param source   the message source
+	 * @return the source format, or default format if none found
+	 */
+	private Messages.Fallback.SourceFormat getFormatForSource(Messages.Fallback fallback, MessageSource source) {
+		if (fallback.getFormats() != null && fallback.getFormats().containsKey(source))
+			return fallback.getFormats().get(source);
+
+		return fallback.getDefaultFormat();
+	}
+
+	/**
+	 * Log missing translation based on source configuration.
+	 *
+	 * @param key    the message key that was not found
+	 * @param locale the requested locale
+	 * @param source the message source
+	 */
+	private void logMissingTranslation(String key, Locale locale, MessageSource source) {
+		try {
+			Messages messages = messagesProvider.get();
+			if (messages == null || messages.getFallback() == null || !messages.getFallback().isEnabled())
+				return;
+
+			Messages.Fallback fallback = messages.getFallback();
+			Messages.Fallback.SourceFormat format = getFormatForSource(fallback, source);
+
+			if (format == null || !format.isLogMissing()) return;
+
+			String logMessage = String.format("Missing translation for key '%s' (locale: %s, source: %s)",
+					key, locale, source);
+
+			Logger.warn(logMessage);
+		} catch (Exception e) {
+			// Silently ignore logging errors (e.g., Logger not initialized in tests)
+		}
 	}
 }

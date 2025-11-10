@@ -2,7 +2,7 @@ package me.whereareiam.intercept.common.messaging.loader;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.whereareiam.intercept.type.MessageType;
+import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
 import java.util.Map;

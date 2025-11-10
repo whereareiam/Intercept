@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.messaging;
 
 import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
-import me.whereareiam.intercept.type.MessageType;
+import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
 import java.util.Set;

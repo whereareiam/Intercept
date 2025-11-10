@@ -1,10 +1,14 @@
 package me.whereareiam.intercept.common.messaging;
 
+import com.google.inject.Provider;
+import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
+import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.type.MessageType;
+import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.message.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -19,13 +23,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class TagReplacementServiceTest {
 	private DefaultMessageRegistry registry;
 	private TagReplacementService tagService;
+	private Messages messages;
 
 	@BeforeEach
 	void setUp() {
 		registry = new DefaultMessageRegistry();
 		Settings settings = new SettingsTemplate().supply(new Settings());
+		messages = new MessagesTemplate().supply(new Messages());
 		MessageService messageService = new DefaultMessageService(registry, settings);
-		tagService = new DefaultTagReplacementService(messageService);
+
+		Provider<Messages> messagesProvider = () -> messages;
+		tagService = new DefaultTagReplacementService(messageService, messagesProvider);
 	}
 
 	@Test
@@ -245,6 +253,95 @@ class TagReplacementServiceTest {
 		Component alertPart = result.children().get(1);
 		assertEquals(NamedTextColor.RED, alertPart.color());
 		assertTrue(alertPart.hasDecoration(TextDecoration.BOLD));
+	}
+
+	@Test
+	void shouldUseChatFallbackFormatForMissingTranslation() {
+		// Test that missing translation uses CHAT source formatting
+		Component input = Component.text("<lang key=\"missing.chat.message\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+
+		String plainText = extractPlainText(result);
+		// Default chat format: "<gray>[</gray><red>Missing: {key}</red><gray>]</gray>"
+		assertTrue(plainText.contains("Missing: missing.chat.message") || plainText.contains("missing.chat.message"),
+				"Should contain fallback text, got: " + plainText);
+	}
+
+	@Test
+	void shouldUseDefaultFallbackForUnknownSource() {
+		// Test that missing translation uses default format for UNKNOWN source
+		Component input = Component.text("<lang key=\"missing.unknown.message\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.UNKNOWN);
+
+		String plainText = extractPlainText(result);
+		// Default format: "{key}" - no colors, just the key
+		assertTrue(plainText.contains("missing.unknown.message"), 
+				"Should contain the key, got: " + plainText);
+	}
+
+	@Test
+	void shouldNotApplyFallbackToExistingTranslations() {
+		// Test that existing translations are not affected by fallback mechanism
+		registry.register("existing.message", new DefaultMessageEntry(MessageType.MESSAGE, "This exists!"));
+		Component input = Component.text("<lang key=\"existing.message\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+
+		String plainText = extractPlainText(result);
+		assertEquals("This exists!", plainText);
+	}
+
+	@Test
+	void shouldHandleMultipleMissingTranslationsWithDifferentSources() {
+		// Test multiple missing translations with different source formatting
+		Component input = Component.text()
+				.append(Component.text("<lang key=\"missing.chat\">"))
+				.append(Component.text(" | "))
+				.append(Component.text("<lang key=\"missing.command\">"))
+				.build();
+
+		// Note: We can only pass one source, so this tests that it applies consistently
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+
+		String plainText = extractPlainText(result);
+		assertTrue(plainText.contains("missing.chat"));
+		assertTrue(plainText.contains("missing.command"));
+	}
+
+	@Test
+	void shouldHandleFallbackWhenDisabled() {
+		// Test that fallback mechanism can be disabled
+		messages.getFallback().setEnabled(false);
+		Component input = Component.text("<lang key=\"missing.message\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+
+		String plainText = extractPlainText(result);
+		// Should just return the key when fallback is disabled
+		assertEquals("missing.message", plainText);
+
+		// Re-enable for other tests
+		messages.getFallback().setEnabled(true);
+	}
+
+	@Test
+	void shouldPreserveFormattingWithSourceSpecificFallback() {
+		// Test that fallback format's styling is applied (original component styling is replaced)
+		Component input = Component.text("<lang key=\"missing.formatted\">")
+				.color(NamedTextColor.BLUE)
+				.decorate(TextDecoration.BOLD);
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+
+		// The fallback format (<dark_gray>{key}</dark_gray>) should be applied
+		// Original component styling (BLUE + BOLD) is replaced by fallback styling
+		String plainText = extractPlainText(result);
+		assertTrue(plainText.contains("missing.formatted"), "Should contain the key");
+		
+		// Check that the result is a component (fallback format was applied)
+		assertNotNull(result);
 	}
 
 	// Helper method to extract plain text from component

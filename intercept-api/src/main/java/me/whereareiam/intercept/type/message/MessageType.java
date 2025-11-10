@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.type;
+package me.whereareiam.intercept.type.message;
 
 /**
  * Type of message entry.
