@@ -1,6 +1,6 @@
 type: MESSAGE
 
-entries:
+items:
   no-permission:
     translations:
       en_US: "<m:common.styles.prefix> <tpl:common.styles.error-format message='You lack permission: <m:common.colors.accent><p:permission>'>"

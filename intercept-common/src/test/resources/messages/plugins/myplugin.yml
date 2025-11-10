@@ -1,6 +1,6 @@
 type: MESSAGE
 
-entries:
+items:
   debug:
     text: "<m:common.styles.prefix> <m:common.colors.info>Debug: <p:info>"
 

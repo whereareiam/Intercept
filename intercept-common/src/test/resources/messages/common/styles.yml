@@ -1,6 +1,6 @@
 type: TEMPLATE
 
-entries:
+items:
   prefix:
     text: "<m:common.colors.secondary>[<m:common.colors.primary>Intercept<m:common.colors.secondary>]"
 

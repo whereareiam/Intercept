@@ -1,6 +1,6 @@
 type: MESSAGE
 
-entries:
+items:
   permission-error:
     translations:
       en_US: "You lack permission: <p:permission>"
