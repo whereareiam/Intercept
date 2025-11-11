@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Performance test to verify caching effectiveness.
- * These tests demonstrate the performance improvements from caching.
+ * These tests demonstrate the performance improvements from caching in TagParser.
  */
 class ComponentHelperPerformanceTest {
 	@Test
@@ -20,20 +20,20 @@ class ComponentHelperPerformanceTest {
 
 		// Warm up
 		for (int i = 0; i < 100; i++) {
-			ComponentHelper.extractTags(text, tagFormat);
+			TagParser.extractTags(text, tagFormat);
 		}
 
 		// Measure with caching (subsequent calls)
 		long start = System.nanoTime();
 		int iterations = 10000;
 		for (int i = 0; i < iterations; i++) {
-			ComponentHelper.extractTags(text, tagFormat);
+			TagParser.extractTags(text, tagFormat);
 		}
 		long cachedTime = System.nanoTime() - start;
 
 		double avgMs = cachedTime / 1_000_000.0 / iterations;
 
-		System.out.println("=== ComponentHelper Performance Test ===");
+		System.out.println("=== TagParser Performance Test ===");
 		System.out.println("Total time: " + (cachedTime / 1_000_000.0) + " ms");
 		System.out.println("Iterations: " + iterations);
 		System.out.println("Average per call: " + String.format("%.4f", avgMs) + " ms");
@@ -55,7 +55,7 @@ class ComponentHelperPerformanceTest {
 		// First pass - builds cache for all formats
 		long firstPassStart = System.nanoTime();
 		for (int i = 0; i < formats.length; i++) {
-			ComponentHelper.extractTags(texts[i], formats[i]);
+			TagParser.extractTags(texts[i], formats[i]);
 		}
 		long firstPassTime = System.nanoTime() - firstPassStart;
 
@@ -64,7 +64,7 @@ class ComponentHelperPerformanceTest {
 		int iterations = 10000;
 		for (int i = 0; i < iterations; i++) {
 			for (int j = 0; j < formats.length; j++) {
-				ComponentHelper.extractTags(texts[j], formats[j]);
+				TagParser.extractTags(texts[j], formats[j]);
 			}
 		}
 		long secondPassTime = System.nanoTime() - secondPassStart;
@@ -86,18 +86,18 @@ class ComponentHelperPerformanceTest {
 
 		// Warm up
 		for (int i = 0; i < 100; i++) {
-			ComponentHelper.extractTags(text, tagFormat);
+			TagParser.extractTags(text, tagFormat);
 		}
 
 		// Measure
 		long start = System.nanoTime();
 		int iterations = 10000;
 		for (int i = 0; i < iterations; i++) {
-			List<ComponentHelper.TagData> tags = ComponentHelper.extractTags(text, tagFormat);
+			List<TagParser.TagData> tags = TagParser.extractTags(text, tagFormat);
 			// Verify it's working
 			if (i == 0) {
 				assertEquals(1, tags.size());
-				assertEquals(5, tags.get(0).getPlaceholders().size());
+				assertEquals(5, tags.get(0).placeholders().size());
 			}
 		}
 		long time = System.nanoTime() - start;
@@ -115,18 +115,19 @@ class ComponentHelperPerformanceTest {
 	@Test
 	void performanceContainsTag() {
 		Component component = Component.text("Welcome <lang key=\"message\">");
+		String plainText = ComponentHelper.extractPlainText(component);
 		String tagFormat = "<lang>";
 
 		// Warm up
 		for (int i = 0; i < 100; i++) {
-			ComponentHelper.containsTag(component, tagFormat);
+			TagParser.containsTag(plainText, tagFormat);
 		}
 
 		// Measure
 		long start = System.nanoTime();
 		int iterations = 100000;
 		for (int i = 0; i < iterations; i++) {
-			ComponentHelper.containsTag(component, tagFormat);
+			TagParser.containsTag(plainText, tagFormat);
 		}
 		long time = System.nanoTime() - start;
 
@@ -148,14 +149,14 @@ class ComponentHelperPerformanceTest {
 
 		// Warm up
 		for (int i = 0; i < 100; i++) {
-			ComponentHelper.extractTags(text, tagFormat);
+			TagParser.extractTags(text, tagFormat);
 		}
 
 		// Measure
 		long start = System.nanoTime();
 		int iterations = 10000;
 		for (int i = 0; i < iterations; i++) {
-			List<ComponentHelper.TagData> tags = ComponentHelper.extractTags(text, tagFormat);
+			List<TagParser.TagData> tags = TagParser.extractTags(text, tagFormat);
 			if (i == 0) {
 				assertEquals(3, tags.size());
 			}

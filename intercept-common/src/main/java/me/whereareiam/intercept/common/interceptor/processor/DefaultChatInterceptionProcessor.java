@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.common.messaging.regex.RegexMatchingService;
 import me.whereareiam.intercept.common.util.ComponentHelper;
+import me.whereareiam.intercept.common.util.TagParser;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.logging.InterceptionHelper;
 import me.whereareiam.intercept.messaging.TagReplacementService;
@@ -64,7 +65,7 @@ public class DefaultChatInterceptionProcessor implements ChatInterceptionProcess
 		String plainText = ComponentHelper.extractPlainText(message);
 
 		// Step 1: Check for tag (primary method)
-		if (chatConfig.getTag() != null && ComponentHelper.containsTag(message, chatConfig.getTag())) {
+		if (chatConfig.getTag() != null && TagParser.containsTag(plainText, chatConfig.getTag())) {
 			// Tag found - use tag-based processing
 			Component processed = tagReplacementService.replaceTags(
 					message,

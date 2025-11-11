@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.common.util.ComponentHelper;
+import me.whereareiam.intercept.common.util.TagParser;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
@@ -44,39 +45,39 @@ public class DefaultTagReplacementService implements TagReplacementService {
 		// Extract plain text from component
 		String plainText = ComponentHelper.extractPlainText(component);
 
-		// Find all tags in the text
-		List<ComponentHelper.TagData> tags = ComponentHelper.extractTags(plainText, tagFormat);
+		// Find all tags in the text using TagParser
+		List<TagParser.TagData> tags = TagParser.extractTags(plainText, tagFormat);
 
 		if (tags.isEmpty()) return component;
 
 		// Build replacement map - Component to Component (proper way!)
 		Map<String, Component> replacements = new HashMap<>();
 
-		for (ComponentHelper.TagData tag : tags) {
+		for (TagParser.TagData tag : tags) {
 			try {
 				// Convert placeholders to Map<String, Object>
 				Map<String, Object> placeholders = new HashMap<>();
-				for (ComponentHelper.TagData.Placeholder placeholder : tag.getPlaceholders()) {
-					placeholders.put(placeholder.getName(), placeholder.getValue());
+				for (TagParser.TagData.Placeholder placeholder : tag.placeholders()) {
+					placeholders.put(placeholder.name(), placeholder.value());
 				}
 
 				// Resolve the message
-				String resolved = messageService.resolve(tag.getKey(), locale, placeholders);
+				String resolved = messageService.resolve(tag.key(), locale, placeholders);
 
-				if (resolved != null && !resolved.equals(tag.getKey())) {
-					replacements.put(tag.getOriginalTag(), Component.text(resolved));
+				if (resolved != null && !resolved.equals(tag.key())) {
+					replacements.put(tag.originalTag(), Component.text(resolved));
 					continue;
 				}
 
 				// Resolution failed - use fallback Component with MiniMessage formatting
-				Component fallbackComponent = formatFallbackComponent(tag.getKey(), locale, source);
-				replacements.put(tag.getOriginalTag(), fallbackComponent);
+				Component fallbackComponent = formatFallbackComponent(tag.key(), locale, source);
+				replacements.put(tag.originalTag(), fallbackComponent);
 
 				// Log the missing translation
-				logMissingTranslation(tag.getKey(), locale, source);
+				logMissingTranslation(tag.key(), locale, source);
 			} catch (Exception e) {
 				// On exception, keep original tag as plain text
-				replacements.put(tag.getOriginalTag(), Component.text(tag.getOriginalTag()));
+				replacements.put(tag.originalTag(), Component.text(tag.originalTag()));
 			}
 		}
 
@@ -85,7 +86,8 @@ public class DefaultTagReplacementService implements TagReplacementService {
 
 	@Override
 	public boolean containsTags(Component component, String tagFormat) {
-		return ComponentHelper.containsTag(component, tagFormat);
+		String plainText = ComponentHelper.extractPlainText(component);
+		return TagParser.containsTag(plainText, tagFormat);
 	}
 
 	/**
