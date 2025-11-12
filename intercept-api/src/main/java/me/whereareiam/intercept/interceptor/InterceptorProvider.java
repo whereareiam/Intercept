@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.interceptor;
 
-import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Set;
 
@@ -36,7 +36,7 @@ public interface InterceptorProvider {
 	 *
 	 * @return Set of supported component types
 	 */
-	Set<InterceptedComponentType> getSupportedComponents();
+	Set<ComponentType> getSupportedComponents();
 
 	/**
 	 * Creates an interceptor for the specified component type.
@@ -44,5 +44,5 @@ public interface InterceptorProvider {
 	 * @param type The component type
 	 * @return The interceptor, or null if not supported
 	 */
-	Interceptor createInterceptor(InterceptedComponentType type);
+	Interceptor createInterceptor(ComponentType type);
 }

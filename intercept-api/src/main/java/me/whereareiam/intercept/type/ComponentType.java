@@ -2,8 +2,9 @@ package me.whereareiam.intercept.type;
 
 /**
  * Enum representing different types of Minecraft components that can be intercepted.
+ * Also used as source context for message resolution and fallback formatting.
  */
-public enum InterceptedComponentType {
+public enum ComponentType {
 	/**
 	 * Chat messages displayed in the chat area.
 	 * Includes:
@@ -19,9 +20,15 @@ public enum InterceptedComponentType {
 	 * Note: The Minecraft protocol does not distinguish between these message types at the packet level.
 	 */
 	CHAT,
-	
+
 	/**
 	 * Action bar messages (messages displayed above the hotbar)
 	 */
-	ACTION_BAR
+	ACTION_BAR,
+
+	/**
+	 * Unknown or unspecified source.
+	 * Used when the component type is not known or when processing messages outside interception context.
+	 */
+	UNKNOWN
 }

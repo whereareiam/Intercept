@@ -9,7 +9,7 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -37,11 +37,11 @@ public class DefaultTagReplacementService implements TagReplacementService {
 
 	@Override
 	public Component replaceTags(Component component, String tagFormat, Locale locale) {
-		return replaceTags(component, tagFormat, locale, MessageSource.UNKNOWN);
+		return replaceTags(component, tagFormat, locale, ComponentType.UNKNOWN);
 	}
 
 	@Override
-	public Component replaceTags(Component component, String tagFormat, Locale locale, MessageSource source) {
+	public Component replaceTags(Component component, String tagFormat, Locale locale, ComponentType source) {
 		// Extract plain text from component
 		String plainText = ComponentHelper.extractPlainText(component);
 
@@ -96,10 +96,10 @@ public class DefaultTagReplacementService implements TagReplacementService {
 	 *
 	 * @param key    the message key that was not found
 	 * @param locale the requested locale
-	 * @param source the message source
+	 * @param source the component type source
 	 * @return formatted fallback Component with proper styling
 	 */
-	private Component formatFallbackComponent(String key, Locale locale, MessageSource source) {
+	private Component formatFallbackComponent(String key, Locale locale, ComponentType source) {
 		Messages messages = messagesProvider.get();
 		if (messages == null || messages.getFallback() == null || !messages.getFallback().isEnabled())
 			return Component.text(key);
@@ -123,10 +123,10 @@ public class DefaultTagReplacementService implements TagReplacementService {
 	 * Get the appropriate format configuration for the given source.
 	 *
 	 * @param fallback the fallback configuration
-	 * @param source   the message source
+	 * @param source   the component type source
 	 * @return the source format, or default format if none found
 	 */
-	private Messages.Fallback.SourceFormat getFormatForSource(Messages.Fallback fallback, MessageSource source) {
+	private Messages.Fallback.SourceFormat getFormatForSource(Messages.Fallback fallback, ComponentType source) {
 		if (fallback.getFormats() != null && fallback.getFormats().containsKey(source))
 			return fallback.getFormats().get(source);
 
@@ -138,9 +138,9 @@ public class DefaultTagReplacementService implements TagReplacementService {
 	 *
 	 * @param key    the message key that was not found
 	 * @param locale the requested locale
-	 * @param source the message source
+	 * @param source the component type source
 	 */
-	private void logMissingTranslation(String key, Locale locale, MessageSource source) {
+	private void logMissingTranslation(String key, Locale locale, ComponentType source) {
 		try {
 			Messages messages = messagesProvider.get();
 			if (messages == null || messages.getFallback() == null || !messages.getFallback().isEnabled())

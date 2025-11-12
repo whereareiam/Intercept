@@ -8,7 +8,7 @@ import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.type.message.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -262,7 +262,7 @@ class TagReplacementServiceTest {
 		// Test that missing translation uses CHAT source formatting
 		Component input = Component.text("<lang key=\"missing.chat.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		// Default chat format: "<gray>[</gray><red>Missing: {key}</red><gray>]</gray>"
@@ -275,7 +275,7 @@ class TagReplacementServiceTest {
 		// Test that missing translation uses default format for UNKNOWN source
 		Component input = Component.text("<lang key=\"missing.unknown.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.UNKNOWN);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.UNKNOWN);
 
 		String plainText = extractPlainText(result);
 		// Default format: "{key}" - no colors, just the key
@@ -289,7 +289,7 @@ class TagReplacementServiceTest {
 		registry.register("existing.message", new DefaultMessageEntry(MessageType.MESSAGE, "This exists!"));
 		Component input = Component.text("<lang key=\"existing.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		assertEquals("This exists!", plainText);
@@ -305,7 +305,7 @@ class TagReplacementServiceTest {
 				.build();
 
 		// Note: We can only pass one source, so this tests that it applies consistently
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.chat"));
@@ -318,7 +318,7 @@ class TagReplacementServiceTest {
 		messages.getFallback().setEnabled(false);
 		Component input = Component.text("<lang key=\"missing.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		// Should just return the key when fallback is disabled
@@ -335,7 +335,7 @@ class TagReplacementServiceTest {
 				.color(NamedTextColor.BLUE)
 				.decorate(TextDecoration.BOLD);
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, MessageSource.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
 		// The fallback format (<dark_gray>{key}</dark_gray>) should be applied
 		// Original component styling (BLUE + BOLD) is replaced by fallback styling

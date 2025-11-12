@@ -4,7 +4,7 @@ import com.google.inject.Singleton;
 import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Singleton
 public class InterceptorRegistry {
-	private final Map<InterceptedComponentType, List<InterceptorProvider>> providers = new ConcurrentHashMap<>();
-	private final Map<InterceptedComponentType, Interceptor> activeInterceptors = new ConcurrentHashMap<>();
+	private final Map<ComponentType, List<InterceptorProvider>> providers = new ConcurrentHashMap<>();
+	private final Map<ComponentType, Interceptor> activeInterceptors = new ConcurrentHashMap<>();
 
 	/**
 	 * Registers a provider for specific component types.
@@ -29,7 +29,7 @@ public class InterceptorRegistry {
 			return;
 		}
 
-		for (InterceptedComponentType type : provider.getSupportedComponents()) {
+		for (ComponentType type : provider.getSupportedComponents()) {
 			providers.computeIfAbsent(type, k -> new ArrayList<>()).add(provider);
 		}
 
@@ -44,7 +44,7 @@ public class InterceptorRegistry {
 	 * @param type The component type
 	 * @return The best provider, or null if none available
 	 */
-	public InterceptorProvider getBestProvider(InterceptedComponentType type) {
+	public InterceptorProvider getBestProvider(ComponentType type) {
 		List<InterceptorProvider> typeProviders = providers.get(type);
 		if (typeProviders == null || typeProviders.isEmpty())
 			return null;
@@ -61,7 +61,7 @@ public class InterceptorRegistry {
 	 * @param type        The component type
 	 * @param interceptor The interceptor to set as active
 	 */
-	public void setActiveInterceptor(InterceptedComponentType type, Interceptor interceptor) {
+	public void setActiveInterceptor(ComponentType type, Interceptor interceptor) {
 		activeInterceptors.put(type, interceptor);
 	}
 
@@ -70,7 +70,7 @@ public class InterceptorRegistry {
 	 *
 	 * @return Map of component types to active interceptors
 	 */
-	public Map<InterceptedComponentType, Interceptor> getActiveInterceptors() {
+	public Map<ComponentType, Interceptor> getActiveInterceptors() {
 		return new HashMap<>(activeInterceptors);
 	}
 

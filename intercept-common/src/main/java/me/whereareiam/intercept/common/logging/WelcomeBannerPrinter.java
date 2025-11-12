@@ -9,7 +9,7 @@ import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.type.AnsiColor;
-import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.type.PlatformType;
 import me.whereareiam.intercept.type.PluginType;
 
@@ -65,7 +65,7 @@ public class WelcomeBannerPrinter {
 
 	private List<String> buildAdapterLines() {
 		List<String> l = new ArrayList<>();
-		Map<InterceptedComponentType, Interceptor> activeInterceptors = interceptorRegistry.getActiveInterceptors();
+		Map<ComponentType, Interceptor> activeInterceptors = interceptorRegistry.getActiveInterceptors();
 
 		if (activeInterceptors.isEmpty()) {
 			l.add(AnsiColor.YELLOW + "  No interceptors active" + AnsiColor.RESET);

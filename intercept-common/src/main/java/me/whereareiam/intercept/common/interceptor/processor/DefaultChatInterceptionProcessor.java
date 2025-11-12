@@ -9,8 +9,7 @@ import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.interception.chat.ChatInterceptionContext;
-import me.whereareiam.intercept.type.InterceptedComponentType;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,12 +39,7 @@ public class DefaultChatInterceptionProcessor
 	}
 
 	@Override
-	protected InterceptedComponentType getComponentType() {
-		return InterceptedComponentType.CHAT;
-	}
-
-	@Override
-	protected MessageSource getMessageSource() {
-		return MessageSource.CHAT;
+	protected ComponentType getComponentType() {
+		return ComponentType.CHAT;
 	}
 }

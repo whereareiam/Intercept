@@ -11,8 +11,7 @@ import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.interception.InterceptionContext;
-import me.whereareiam.intercept.type.InterceptedComponentType;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,7 +75,7 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 					message,
 					componentConfig.getTag(),
 					context.getLocale(),
-					getMessageSource()
+					getComponentType()
 			);
 
 			return InterceptionHelper.modify(processed);
@@ -106,16 +105,10 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 
 	/**
 	 * Gets the component type that this processor handles.
+	 * Also used as the source context for message resolution and fallback formatting.
 	 *
 	 * @return The component type
 	 */
-	protected abstract InterceptedComponentType getComponentType();
-
-	/**
-	 * Gets the message source for this component type.
-	 *
-	 * @return The message source
-	 */
-	protected abstract MessageSource getMessageSource();
+	protected abstract ComponentType getComponentType();
 }
 

@@ -3,7 +3,7 @@ package me.whereareiam.intercept.common.config.template;
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
 import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,14 +24,14 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		fallback.setDefaultFormat(defaultFormat);
 
 		// Source-specific formats
-		Map<MessageSource, Messages.Fallback.SourceFormat> formats = new HashMap<>();
+		Map<ComponentType, Messages.Fallback.SourceFormat> formats = new HashMap<>();
 
 		// CHAT - Simple bracket notation for missing chat messages
 		Messages.Fallback.SourceFormat chatFormat = new Messages.Fallback.SourceFormat();
 		chatFormat.setEnabled(true);
 		chatFormat.setFormat("<dark_gray>{key}</dark_gray>");
 		chatFormat.setLogMissing(true);
-		formats.put(MessageSource.CHAT, chatFormat);
+		formats.put(ComponentType.CHAT, chatFormat);
 
 		fallback.setFormats(formats);
 		messages.setFallback(fallback);

@@ -3,7 +3,7 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;
 
@@ -40,10 +40,10 @@ public class Messages {
 
 		/**
 		 * Source-specific fallback formats
-		 * Key: source name (CHAT, COMMAND, SYSTEM, etc.)
+		 * Key: component type (CHAT, ACTION_BAR, etc.)
 		 * Value: format configuration for that source
 		 */
-		private Map<MessageSource, SourceFormat> formats;
+		private Map<ComponentType, SourceFormat> formats;
 
 		/**
 		 * Default fallback format when source is not specified or no specific format exists

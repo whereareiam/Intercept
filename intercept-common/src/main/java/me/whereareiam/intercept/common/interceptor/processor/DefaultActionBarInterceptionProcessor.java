@@ -9,8 +9,7 @@ import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.interception.actionbar.ActionBarInterceptionContext;
-import me.whereareiam.intercept.type.InterceptedComponentType;
-import me.whereareiam.intercept.type.message.MessageSource;
+import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,13 +39,8 @@ public class DefaultActionBarInterceptionProcessor
 	}
 
 	@Override
-	protected InterceptedComponentType getComponentType() {
-		return InterceptedComponentType.ACTION_BAR;
-	}
-
-	@Override
-	protected MessageSource getMessageSource() {
-		return MessageSource.ACTION_BAR;
+	protected ComponentType getComponentType() {
+		return ComponentType.ACTION_BAR;
 	}
 }
 

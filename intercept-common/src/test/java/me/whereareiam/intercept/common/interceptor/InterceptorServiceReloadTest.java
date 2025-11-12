@@ -9,15 +9,15 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
-import me.whereareiam.intercept.type.InterceptedComponentType;
-import org.junit.jupiter.api.BeforeEach;
+import me.whereareiam.intercept.type.ComponentType;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 class InterceptorServiceReloadTest {
@@ -88,7 +88,7 @@ class InterceptorServiceReloadTest {
 
 		// Should reinitialize - verify shutdown was called
 		verify(registry).shutdownAllInterceptors();
-		
+
 		// Should create new interceptor and set it as active
 		verify(provider).createInterceptor(any());
 		verify(registry).setActiveInterceptor(any(), eq(interceptor));
@@ -196,11 +196,11 @@ class InterceptorServiceReloadTest {
 
 	private Interception createMockInterception(boolean enabled) {
 		Interception interception = mock(Interception.class);
-		Map<InterceptedComponentType, InterceptedComponent> components = new EnumMap<>(InterceptedComponentType.class);
+		Map<ComponentType, InterceptedComponent> components = new EnumMap<>(ComponentType.class);
 
 		InterceptedComponent chatComponent = mock(InterceptedComponent.class);
 		when(chatComponent.isEnabled()).thenReturn(enabled);
-		components.put(InterceptedComponentType.CHAT, chatComponent);
+		components.put(ComponentType.CHAT, chatComponent);
 
 		when(interception.getComponents()).thenReturn(components);
 		return interception;

@@ -57,7 +57,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel existing tasks
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 	}
 
 	@Test
@@ -69,7 +69,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel old tasks and schedule new ones
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler).schedule(any(PeriodicalRunnableTask.class), eq(true));
 	}
 
@@ -82,7 +82,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel old tasks but not schedule new ones
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler, never()).schedule(any(PeriodicalRunnableTask.class), anyBoolean());
 	}
 
@@ -95,7 +95,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel old tasks but not schedule new ones
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler, never()).schedule(any(PeriodicalRunnableTask.class), anyBoolean());
 	}
 
@@ -108,7 +108,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel old tasks but not schedule new ones
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler, never()).schedule(any(PeriodicalRunnableTask.class), anyBoolean());
 	}
 
@@ -122,7 +122,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel 3 times
-		verify(scheduler, times(3)).cancelByModule("updater");
+		verify(scheduler, times(3)).cancelByModule("main");
 		// Should schedule 3 times
 		verify(scheduler, times(3)).schedule(any(PeriodicalRunnableTask.class), eq(true));
 	}
@@ -141,7 +141,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel and reschedule with new interval
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler).schedule(any(PeriodicalRunnableTask.class), eq(true));
 	}
 
@@ -158,7 +158,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel but not reschedule
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler, never()).schedule(any(PeriodicalRunnableTask.class), anyBoolean());
 	}
 
@@ -175,7 +175,7 @@ class UpdateSchedulerReloadTest {
 		updateScheduler.reload();
 
 		// Should cancel and schedule
-		verify(scheduler).cancelByModule("updater");
+		verify(scheduler).cancelByModule("main");
 		verify(scheduler).schedule(any(PeriodicalRunnableTask.class), eq(true));
 	}
 

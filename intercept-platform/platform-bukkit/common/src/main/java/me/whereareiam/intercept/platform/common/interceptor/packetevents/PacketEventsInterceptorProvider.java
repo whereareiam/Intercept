@@ -8,7 +8,7 @@ import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProce
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.actionbar.PacketEventsActionBarInterceptionProcessor;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.chat.PacketEventsChatInterceptionProcessor;
-import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.ComponentType;
 import org.bukkit.Bukkit;
 
 import java.util.EnumSet;
@@ -49,12 +49,12 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 	}
 
 	@Override
-	public Set<InterceptedComponentType> getSupportedComponents() {
-		return EnumSet.of(InterceptedComponentType.CHAT, InterceptedComponentType.ACTION_BAR);
+	public Set<ComponentType> getSupportedComponents() {
+		return EnumSet.of(ComponentType.CHAT, ComponentType.ACTION_BAR);
 	}
 
 	@Override
-	public Interceptor createInterceptor(InterceptedComponentType type) {
+	public Interceptor createInterceptor(ComponentType type) {
 		if (router == null) router = new PacketEventsPacketRouter();
 
 		// Create the appropriate processor
@@ -63,6 +63,7 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 		Interceptor interceptor = switch (type) {
 			case CHAT -> new PacketEventsChatInterceptionProcessor(chatInterceptionProcessor);
 			case ACTION_BAR -> new PacketEventsActionBarInterceptionProcessor(actionBarInterceptionProcessor);
+			case UNKNOWN -> throw new IllegalArgumentException("Cannot create interceptor for UNKNOWN component type");
 		};
 
 		PacketProcessor packetProcessor = (PacketProcessor) interceptor;

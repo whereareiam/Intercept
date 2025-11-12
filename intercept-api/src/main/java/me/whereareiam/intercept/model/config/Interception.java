@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import me.whereareiam.intercept.model.InterceptedComponent;
-import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;
 
@@ -26,8 +26,8 @@ import java.util.Map;
 public class Interception {
 	/**
 	 * Map of component type to component configuration.
-	 * Keys are InterceptedComponentType enum values (e.g., CHAT).
+	 * Keys are ComponentType enum values (e.g., CHAT).
 	 * Values are InterceptedComponent instances or their extensions.
 	 */
-	private Map<InterceptedComponentType, InterceptedComponent> components;
+	private Map<ComponentType, InterceptedComponent> components;
 }

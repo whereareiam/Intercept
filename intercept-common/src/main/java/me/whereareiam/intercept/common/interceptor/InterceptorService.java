@@ -10,7 +10,7 @@ import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
-import me.whereareiam.intercept.type.InterceptedComponentType;
+import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;
 
@@ -49,11 +49,11 @@ public class InterceptorService implements Reloadable {
 			return;
 		}
 
-		Map<InterceptedComponentType, InterceptedComponent> components = interception.getComponents();
+		Map<ComponentType, InterceptedComponent> components = interception.getComponents();
 
 		// Process each component type
-		for (Map.Entry<InterceptedComponentType, InterceptedComponent> entry : components.entrySet()) {
-			InterceptedComponentType type = entry.getKey();
+		for (Map.Entry<ComponentType, InterceptedComponent> entry : components.entrySet()) {
+			ComponentType type = entry.getKey();
 			InterceptedComponent component = entry.getValue();
 
 			if (!component.isEnabled()) {
@@ -72,7 +72,7 @@ public class InterceptorService implements Reloadable {
 	 *
 	 * @param type The component type
 	 */
-	private void initializeInterceptor(InterceptedComponentType type) {
+	private void initializeInterceptor(ComponentType type) {
 		InterceptorProvider provider = registry.getBestProvider(type);
 
 		if (provider == null) {
