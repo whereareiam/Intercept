@@ -24,7 +24,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import com.google.inject.Provider;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Integration test for regex matching system.
@@ -37,7 +42,8 @@ class RegexIntegrationTest {
 	@BeforeEach
 	void setUp() throws URISyntaxException {
 		// Setup registry
-		registry = new DefaultMessageRegistry();
+		Registry<Reloadable> mockRegistry = mock(Registry.class);
+		registry = new DefaultMessageRegistry(mockRegistry);
 
 		// Setup settings with regex enabled
 		Settings settings = new SettingsTemplate().supply(new Settings());
@@ -53,8 +59,9 @@ class RegexIntegrationTest {
 		// Create message service
 		MessageService messageService = new DefaultMessageService(registry, settings);
 
-		// Create regex matching service
-		regexService = new RegexMatchingService(registry, messageService, settings);
+		// Create regex matching service with Provider
+		Provider<Settings> settingsProvider = () -> settings;
+		regexService = new RegexMatchingService(registry, messageService, settingsProvider, mockRegistry);
 	}
 
 	private void loadTestMessages() throws URISyntaxException {

@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
+import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.type.message.MessageType;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 class MessageReferenceProcessorTest {
 	private DefaultMessageRegistry registry;
@@ -15,7 +17,7 @@ class MessageReferenceProcessorTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		registry = new DefaultMessageRegistry(mock(Registry.class));
 		processor = new MessageReferenceProcessor(registry);
 	}
 

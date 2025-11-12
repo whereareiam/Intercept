@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Integration tests that load real YAML files from test resources.
@@ -35,7 +36,7 @@ class FileLoadingIntegrationTest {
 
 	@BeforeEach
 	void setUp() throws URISyntaxException {
-		registry = new DefaultMessageRegistry();
+		registry = new DefaultMessageRegistry(mock(me.whereareiam.intercept.Registry.class));
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		service = new DefaultMessageService(registry, settings);
 

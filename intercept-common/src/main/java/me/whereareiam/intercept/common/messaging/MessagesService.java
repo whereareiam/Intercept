@@ -5,6 +5,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import me.whereareiam.configura.Config;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.messaging.cache.CacheKey;
 import me.whereareiam.intercept.common.messaging.cache.CacheLevel;
 import me.whereareiam.intercept.common.messaging.cache.CacheStrategy;
@@ -29,7 +31,7 @@ import java.util.Map;
  * Handles initialization and loading of all message files from the messages directory.
  */
 @Singleton
-public class MessagesService {
+public class MessagesService implements Reloadable {
 	private final Path messagesPath;
 	private final DefaultMessageRegistry registry;
 	private final MessageFileScanner scanner;
@@ -44,7 +46,8 @@ public class MessagesService {
 			@Named("messagesPath") Path messagesPath,
 			DefaultMessageRegistry registry,
 			Provider<Settings> settingsProvider,
-			MessageService messageService
+			MessageService messageService,
+			Registry<Reloadable> reloadableRegistry
 	) {
 		this.messagesPath = messagesPath;
 		this.registry = registry;
@@ -57,6 +60,8 @@ public class MessagesService {
 
 		this.dependencyGraph = new DependencyGraph();
 		this.cacheStrategy = new CacheStrategy();
+
+		reloadableRegistry.register(this);
 	}
 
 	/**
@@ -174,5 +179,11 @@ public class MessagesService {
 
 		// Load into registry
 		loader.loadFromData(keyPrefix, data);
+	}
+
+	@Override
+	public void reload() {
+		registry.reload();
+		initialize();
 	}
 }

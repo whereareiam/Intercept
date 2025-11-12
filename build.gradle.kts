@@ -36,6 +36,8 @@ subprojects {
         "testImplementation"(rootProject.libs.configura)
         "testImplementation"(rootProject.libs.guice)
         "testImplementation"(rootProject.libs.junit.jupiter)
+        "testImplementation"(rootProject.libs.mockito.core)
+        "testImplementation"(rootProject.libs.mockito.junit)
         "testRuntimeOnly"(rootProject.libs.junit.platform)
     }
 }

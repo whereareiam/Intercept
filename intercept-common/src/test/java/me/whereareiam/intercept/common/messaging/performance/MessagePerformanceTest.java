@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.messaging.performance;
 
+import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Performance tests for message resolution.
@@ -28,7 +30,7 @@ class MessagePerformanceTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		registry = new DefaultMessageRegistry(mock(Registry.class));
 
 		// Create settings with cache enabled
 		Settings settings = new Settings();

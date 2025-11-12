@@ -12,6 +12,7 @@ guice = "7.0.0"
 configura = "dev-a76adc6"
 attache = "dev-5fad19f"
 junit = "6.0.0"
+mockito = "5.20.0"
 
 # platform api versions
 velocity = "3.4.0-SNAPSHOT"
@@ -37,6 +38,8 @@ configura = { group = "me.whereareiam", name = "configura", version.ref = "confi
 # testing
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
 junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-junit = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
 
 # attache
 attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }

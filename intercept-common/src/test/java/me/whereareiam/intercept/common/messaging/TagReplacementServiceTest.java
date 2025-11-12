@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Provider;
+import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.messaging.MessageService;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class TagReplacementServiceTest {
 	private DefaultMessageRegistry registry;
@@ -27,7 +29,7 @@ class TagReplacementServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		registry = new DefaultMessageRegistry(mock(Registry.class));
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		messages = new MessagesTemplate().supply(new Messages());
 		MessageService messageService = new DefaultMessageService(registry, settings);
@@ -277,7 +279,7 @@ class TagReplacementServiceTest {
 
 		String plainText = extractPlainText(result);
 		// Default format: "{key}" - no colors, just the key
-		assertTrue(plainText.contains("missing.unknown.message"), 
+		assertTrue(plainText.contains("missing.unknown.message"),
 				"Should contain the key, got: " + plainText);
 	}
 
@@ -339,7 +341,7 @@ class TagReplacementServiceTest {
 		// Original component styling (BLUE + BOLD) is replaced by fallback styling
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.formatted"), "Should contain the key");
-		
+
 		// Check that the result is a component (fallback format was applied)
 		assertNotNull(result);
 	}

@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.messaging.loader;
 
+import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.type.message.MessageType;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 class MessageFileLoaderTest {
 	private MessageFileLoader loader;
@@ -18,7 +20,7 @@ class MessageFileLoaderTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		registry = new DefaultMessageRegistry(mock(Registry.class));
 		TextProcessor textProcessor = new TextProcessor();
 		loader = new MessageFileLoader(textProcessor, registry);
 	}

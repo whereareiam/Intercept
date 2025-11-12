@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.MessageRequest;
@@ -12,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class DefaultMessageServiceTest {
 	private DefaultMessageRegistry registry;
@@ -19,7 +22,8 @@ class DefaultMessageServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		Registry<Reloadable> mockRegistry = mock(Registry.class);
+		registry = new DefaultMessageRegistry(mockRegistry);
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		service = new DefaultMessageService(registry, settings);
 	}

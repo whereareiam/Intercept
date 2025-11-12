@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * Integration tests for the complete message resolution pipeline.
@@ -24,7 +25,7 @@ class MessageResolutionIntegrationTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		registry = new DefaultMessageRegistry(mock(me.whereareiam.intercept.Registry.class));
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		service = new DefaultMessageService(registry, settings);
 	}

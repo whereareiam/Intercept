@@ -1,6 +1,9 @@
 package me.whereareiam.intercept.common.messaging;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 
@@ -14,8 +17,13 @@ import java.util.stream.Collectors;
  * Thread-safe registry for message entries.
  */
 @Singleton
-public class DefaultMessageRegistry implements MessageRegistry {
+public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
 	private final Map<String, MessageEntry> entries = new ConcurrentHashMap<>();
+
+	@Inject
+	public DefaultMessageRegistry(Registry<Reloadable> reloadableRegistry) {
+		reloadableRegistry.register(this);
+	}
 
 	@Override
 	public void register(String key, MessageEntry entry) {
@@ -47,5 +55,10 @@ public class DefaultMessageRegistry implements MessageRegistry {
 	@Override
 	public Map<String, MessageEntry> getAllEntries() {
 		return Map.copyOf(entries);
+	}
+
+	@Override
+	public void reload() {
+		entries.clear();
 	}
 }

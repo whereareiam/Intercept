@@ -3,8 +3,9 @@ package me.whereareiam.intercept.common.updater;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Scheduler;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Settings;
@@ -20,10 +21,10 @@ import java.util.List;
 import java.util.Locale;
 
 @Singleton
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class UpdateScheduler {
+public final class UpdateScheduler implements Reloadable {
 	private static final long MS_PER_HOUR = 3_600_000L;
 	private static final int BRANCH_UPDATE_LIMIT = 50;
+	private static final String UPDATER_MODULE = "main";
 
 	/**
 	 * Core plugin: release via Modrinth, dev via GitHub
@@ -43,19 +44,38 @@ public final class UpdateScheduler {
 	private final Scheduler scheduler;
 	private final UpdateProviderRegistry providers;
 
+	@Inject
+	public UpdateScheduler(
+			Provider<Settings> settings,
+			Scheduler scheduler,
+			UpdateProviderRegistry providers,
+			Registry<Reloadable> reloadableRegistry
+	) {
+		this.settings = settings;
+		this.scheduler = scheduler;
+		this.providers = providers;
+
+		reloadableRegistry.register(this);
+	}
+
 	public void start() {
 		var cfg = settings.get().getUpdater();
-		if (!cfg.isCheckForUpdates() || cfg.getInterval() <= 0) return;
+		if (!cfg.isCheckForUpdates() || cfg.getInterval() <= 0) {
+			Logger.debug("Update checking is disabled");
+			return;
+		}
 
 		scheduler.schedule(
 				PeriodicalRunnableTask.builder()
 						.period(cfg.getInterval() * MS_PER_HOUR)
 						.runnable(this::runOnce)
-						.module("main")
+						.module(UPDATER_MODULE)
 						.delay(0)
 						.build(),
 				true
 		);
+
+		Logger.debug("Update scheduler started with interval: %d hours", cfg.getInterval());
 	}
 
 	private void runOnce() {
@@ -173,5 +193,11 @@ public final class UpdateScheduler {
 		}
 
 		return 0;
+	}
+
+	@Override
+	public void reload() {
+		scheduler.cancelByModule(UPDATER_MODULE);
+		start();
 	}
 }

@@ -1,7 +1,10 @@
 package me.whereareiam.intercept.common.messaging.regex;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
@@ -16,10 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides optimization through pattern indexing, literal prefix checking, and caching.
  */
 @Singleton
-public class RegexMatchingService {
+public class RegexMatchingService implements Reloadable {
 	private final MessageRegistry registry;
 	private final MessageService messageService;
-	private final Settings settings;
+	private final Provider<Settings> settingsProvider;
 
 	// Pattern index cache (rebuilt on message reload)
 	private volatile List<PatternMatch> patternIndex;
@@ -28,11 +31,18 @@ public class RegexMatchingService {
 	private final Map<CacheKey, CachedResult> resultCache;
 
 	@Inject
-	public RegexMatchingService(MessageRegistry registry, MessageService messageService, Settings settings) {
+	public RegexMatchingService(
+			MessageRegistry registry,
+			MessageService messageService,
+			Provider<Settings> settingsProvider,
+			Registry<Reloadable> reloadableRegistry
+	) {
 		this.registry = registry;
 		this.messageService = messageService;
-		this.settings = settings;
+		this.settingsProvider = settingsProvider;
 		this.resultCache = new ConcurrentHashMap<>();
+
+		reloadableRegistry.register(this);
 	}
 
 	/**
@@ -44,6 +54,7 @@ public class RegexMatchingService {
 	 * @return the resolved message, or empty if no match
 	 */
 	public Optional<String> match(String text, Locale locale) {
+		Settings settings = settingsProvider.get();
 		// Check if regex is enabled
 		if (!settings.getPerformance().getRegex().isEnabled()) return Optional.empty();
 
@@ -79,6 +90,7 @@ public class RegexMatchingService {
 	 * Try to match text against all patterns in the index.
 	 */
 	private Optional<String> tryMatchPatterns(String text, Locale locale) {
+		Settings settings = settingsProvider.get();
 		for (PatternMatch candidate : patternIndex) {
 			// Literal prefix optimization
 			if (settings.getPerformance().getRegex().isUseLiteralPrefix()) {
@@ -143,6 +155,12 @@ public class RegexMatchingService {
 	private void cleanupCache() {
 		long now = System.currentTimeMillis();
 		resultCache.entrySet().removeIf(entry -> entry.getValue().isExpired(now));
+	}
+
+	@Override
+	public void reload() {
+		patternIndex = null;
+		resultCache.clear();
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,13 +11,15 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MessageRegistryTest {
 	private DefaultMessageRegistry registry;
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry();
+		Registry<Reloadable> mockRegistry = mock(Registry.class);
+		registry = new DefaultMessageRegistry(mockRegistry);
 	}
 
 	@Test

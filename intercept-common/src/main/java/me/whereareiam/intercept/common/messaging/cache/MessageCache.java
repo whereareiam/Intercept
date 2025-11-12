@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.common.messaging.cache;
 
+import me.whereareiam.intercept.Reloadable;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - L2 (SEMI_STATIC): Limited size, longer expiry
  * - L3 (DYNAMIC): Small size, short expiry
  */
-public class MessageCache {
+public class MessageCache implements Reloadable {
 	private final Map<CacheKey, String> staticCache;
 	private final Map<CacheKey, CacheEntry> semiStaticCache;
 	private final Map<CacheKey, CacheEntry> dynamicCache;
@@ -108,6 +110,11 @@ public class MessageCache {
 		}
 
 		cache.put(key, new CacheEntry(text, System.currentTimeMillis()));
+	}
+
+	@Override
+	public void reload() {
+		clear();
 	}
 
 	private record CacheEntry(String text, long timestamp) {
