@@ -4,27 +4,27 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.common.messaging.regex.RegexMatchingService;
-import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
+import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.model.interception.chat.ChatInterceptionContext;
+import me.whereareiam.intercept.model.interception.actionbar.ActionBarInterceptionContext;
 import me.whereareiam.intercept.type.InterceptedComponentType;
 import me.whereareiam.intercept.type.message.MessageSource;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Default implementation of chat interception processing.
+ * Default implementation of action bar interception processing.
  * Delegates all common processing logic to {@link AbstractComponentInterceptionProcessor}.
  */
 @Singleton
-public class DefaultChatInterceptionProcessor
-		extends AbstractComponentInterceptionProcessor<ChatInterceptionContext>
-		implements ChatInterceptionProcessor {
+public class DefaultActionBarInterceptionProcessor
+		extends AbstractComponentInterceptionProcessor<ActionBarInterceptionContext>
+		implements ActionBarInterceptionProcessor {
 
 	@Inject
-	public DefaultChatInterceptionProcessor(
+	public DefaultActionBarInterceptionProcessor(
 			Provider<Interception> interceptionProvider,
 			Provider<Settings> settingsProvider,
 			RegexMatchingService regexMatchingService,
@@ -35,17 +35,18 @@ public class DefaultChatInterceptionProcessor
 
 	@Override
 	@Nullable
-	public Component processChat(ChatInterceptionContext context) {
+	public Component processActionBar(ActionBarInterceptionContext context) {
 		return process(context);
 	}
 
 	@Override
 	protected InterceptedComponentType getComponentType() {
-		return InterceptedComponentType.CHAT;
+		return InterceptedComponentType.ACTION_BAR;
 	}
 
 	@Override
 	protected MessageSource getMessageSource() {
-		return MessageSource.CHAT;
+		return MessageSource.ACTION_BAR;
 	}
 }
+

@@ -4,7 +4,9 @@ import com.google.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
+import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
+import me.whereareiam.intercept.platform.common.interceptor.packetevents.actionbar.PacketEventsActionBarInterceptionProcessor;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.chat.PacketEventsChatInterceptionProcessor;
 import me.whereareiam.intercept.type.InterceptedComponentType;
 import org.bukkit.Bukkit;
@@ -15,6 +17,9 @@ import java.util.Set;
 /**
  * Provider for PacketEvents-based interceptors.
  * Creates interceptors that use the PacketEvents library for component interception.
+ * <p>
+ * Uses a centralized packet router pattern to avoid duplicate packet registrations
+ * and ensure efficient packet processing across multiple component types.
  */
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class PacketEventsInterceptorProvider implements InterceptorProvider {
@@ -22,6 +27,9 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 	private static final int PRIORITY = 100;
 
 	private final ChatInterceptionProcessor chatInterceptionProcessor;
+	private final ActionBarInterceptionProcessor actionBarInterceptionProcessor;
+
+	private PacketEventsPacketRouter router;
 
 	@Override
 	public String getName() {
@@ -42,14 +50,25 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 
 	@Override
 	public Set<InterceptedComponentType> getSupportedComponents() {
-		return EnumSet.of(InterceptedComponentType.CHAT);
+		return EnumSet.of(InterceptedComponentType.CHAT, InterceptedComponentType.ACTION_BAR);
 	}
 
 	@Override
 	public Interceptor createInterceptor(InterceptedComponentType type) {
-		return switch (type) {
+		if (router == null) router = new PacketEventsPacketRouter();
+
+		// Create the appropriate processor
+		// Each processor declares its own packet handlers via PacketProcessor interface
+		// Router will auto-register the listener when needed
+		Interceptor interceptor = switch (type) {
 			case CHAT -> new PacketEventsChatInterceptionProcessor(chatInterceptionProcessor);
+			case ACTION_BAR -> new PacketEventsActionBarInterceptionProcessor(actionBarInterceptionProcessor);
 		};
+
+		PacketProcessor packetProcessor = (PacketProcessor) interceptor;
+		router.registerProcessor(packetProcessor);
+
+		return interceptor;
 	}
 }
 

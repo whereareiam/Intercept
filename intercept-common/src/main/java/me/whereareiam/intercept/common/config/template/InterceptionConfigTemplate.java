@@ -22,6 +22,13 @@ public class InterceptionConfigTemplate implements TemplateProvider<Interception
 		chat.setRegex(false);
 		components.put(InterceptedComponentType.CHAT, chat);
 
+		// Setup action bar component interception
+		InterceptedComponent actionBar = new InterceptedComponent();
+		actionBar.setEnabled(true);
+		actionBar.setTag("<lang>");
+		actionBar.setRegex(false);
+		components.put(InterceptedComponentType.ACTION_BAR, actionBar);
+
 		config.setComponents(components);
 
 		return config;

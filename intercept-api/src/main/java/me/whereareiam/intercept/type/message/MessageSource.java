@@ -6,9 +6,14 @@ package me.whereareiam.intercept.type.message;
  */
 public enum MessageSource {
 	/**
-	 * Message originated from chat (player chat messages).
+	 * Message originated from chat (player chat messages, sendMessage, broadcast, etc.).
 	 */
 	CHAT,
+
+	/**
+	 * Message originated from action bar.
+	 */
+	ACTION_BAR,
 
 	/**
 	 * Unknown or unspecified source.

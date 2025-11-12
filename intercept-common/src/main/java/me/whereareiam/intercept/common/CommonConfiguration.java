@@ -13,6 +13,7 @@ import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTy
 import me.whereareiam.intercept.common.event.EventController;
 import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
+import me.whereareiam.intercept.common.interceptor.processor.DefaultActionBarInterceptionProcessor;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
@@ -27,6 +28,7 @@ import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
@@ -83,6 +85,7 @@ public class CommonConfiguration extends AbstractModule {
 		// Interceptors
 		bind(InterceptorRegistry.class).asEagerSingleton();
 		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
+		bind(ActionBarInterceptionProcessor.class).to(DefaultActionBarInterceptionProcessor.class).asEagerSingleton();
 		bind(InterceptorService.class).asEagerSingleton();
 
 		// Updater

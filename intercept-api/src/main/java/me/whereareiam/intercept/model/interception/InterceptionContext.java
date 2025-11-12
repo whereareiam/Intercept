@@ -2,6 +2,7 @@ package me.whereareiam.intercept.model.interception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -23,4 +24,11 @@ public abstract class InterceptionContext {
 	 * Used for resolving messages in the player's preferred language.
 	 */
 	private final Locale locale;
+
+	/**
+	 * Gets the message component from this context.
+	 *
+	 * @return The message component
+	 */
+	public abstract Component getMessage();
 }
