@@ -237,5 +237,10 @@ public class Settings {
 		 * Whether to register asynchronous completions when available
 		 */
 		private boolean useAsyncCompletions;
+
+		/**
+		 * Number of commands to display per page in help command
+		 */
+		private int commandsPerPage;
 	}
 }

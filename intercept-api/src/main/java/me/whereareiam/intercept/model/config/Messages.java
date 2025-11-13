@@ -3,7 +3,9 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.commandant.model.ExceptionMessages;
+import me.whereareiam.commandant.model.message.ExceptionMessages;
+import me.whereareiam.commandant.model.message.HelpMessages;
+import me.whereareiam.commandant.model.message.PaginationMessages;
 import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;
@@ -42,6 +44,23 @@ public class Messages {
 		 * Exception messages from Commandant
 		 */
 		private ExceptionMessages exceptions;
+
+		/**
+		 * Pagination configuration from Commandant
+		 */
+		private PaginationMessages pagination;
+
+		/**
+		 * Help command formatting configuration from Commandant
+		 */
+		private HelpMessages help;
+
+		/**
+		 * Custom argument display names (project-specific)
+		 * Key: argument name (e.g., "page")
+		 * Value: display name (e.g., "page number")
+		 */
+		private Map<String, String> arguments;
 	}
 
 	/**

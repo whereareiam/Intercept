@@ -5,8 +5,8 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.commandant.Command;
-import me.whereareiam.commandant.CommandExceptionHandler;
 import me.whereareiam.commandant.CommandRegistrar;
+import me.whereareiam.commandant.Commandant;
 import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.command.executor.HelpCommand;
 import me.whereareiam.intercept.command.executor.MainCommand;
@@ -77,7 +77,7 @@ public class DefaultCommandService implements CommandService {
 	}
 
 	private void registerExceptionHandlers(@NotNull CommandRegistrar<Actor> registrar) {
-		CommandExceptionHandler.register(
+		Commandant.registerExceptionHandler(
 				messagesProvider.get().getCommands().getExceptions(),
 				messageFormatter,
 				registrar.getCommandManager(),

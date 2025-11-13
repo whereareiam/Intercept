@@ -1,12 +1,15 @@
 package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
-import me.whereareiam.commandant.model.ExceptionMessages;
+import me.whereareiam.commandant.model.message.ExceptionMessages;
+import me.whereareiam.commandant.model.message.HelpMessages;
+import me.whereareiam.commandant.model.message.PaginationMessages;
 import me.whereareiam.configura.TemplateProvider;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -30,6 +33,43 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		exceptionMessages.setInvalidSender("{prefix}<white>You cannot execute this command from this context.</white>");
 
 		commands.setExceptions(exceptionMessages);
+
+		// Configure pagination messages
+		PaginationMessages paginationMessages = new PaginationMessages();
+		paginationMessages.setShowPaginationIfOnePage(false);
+		paginationMessages.setFormat("\n {previous}<white>Pagination</white> <gray>[{current}/{max}]</gray>{next} \n");
+		paginationMessages.setShowPreviousEvenIfFirst(false);
+		paginationMessages.setPreviousTagFormat("<red><click:run_command:/intercept help {previousPage}>«</red> ");
+		paginationMessages.setShowNextEvenIfLast(false);
+		paginationMessages.setNextTagFormat(" <green><click:run_command:/intercept help {nextPage}>»</green>");
+
+		commands.setPagination(paginationMessages);
+
+		// Configure help messages
+		HelpMessages helpMessages = new HelpMessages();
+		helpMessages.setFormat(List.of(
+				" ",
+				"<gold><bold> Intercept</bold> <white>Command help",
+				" ",
+				"{commands}",
+				"{pagination}"
+		));
+		helpMessages.setCommandFormat(" <yellow>/{command}{arguments}</yellow> <dark_gray>- <white>{description}");
+		helpMessages.setNoCommands("  <red>No commands found</red>");
+
+		// Configure argument formatting
+		HelpMessages.Format argumentFormat = new HelpMessages.Format();
+		argumentFormat.setArgument("<gray>[{argument}]</gray>");
+		argumentFormat.setOptionalArgument("<gray>({argument})</gray>");
+		helpMessages.setArgumentFormat(argumentFormat);
+
+		commands.setHelp(helpMessages);
+
+		// Configure custom argument names
+		commands.setArguments(Map.of(
+				"page", "page"
+		));
+
 		messages.setCommands(commands);
 
 		// Configure fallback behavior

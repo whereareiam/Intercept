@@ -26,9 +26,9 @@ public abstract class CommandManagerProvider implements Provider<CommandManager<
 		commandManager = switch (PlatformType.getType()) {
 			case BUKKIT, SPIGOT -> createLegacyCommandManager();
 			case FOLIA, PAPER -> {
-				if (Constants.SERVER_VERSION.isAtLeast(Version.V_1_20_5) && (settings.get().getCommands().isUseBrigadier() || Constants.SERVER_VERSION.isAtLeast(Version.V_1_20_5))) {
+				if (Constants.SERVER_VERSION.isAtLeast(Version.V_1_20_5) && settings.get().getCommands().isUseBrigadier())
 					yield createPaperCommandManager();
-				}
+
 				yield createLegacyCommandManager();
 			}
 			case VELOCITY -> createVelocityCommandManager();

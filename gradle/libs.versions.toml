@@ -12,7 +12,7 @@ guice = "7.0.0"
 configura = "dev-a76adc6"
 attache = "dev-5fad19f"
 keystone = "dev-ec8fccf"
-commandant = "dev-2c5115d"
+commandant = "dev-bee3bfe"
 junit = "6.0.0"
 mockito = "5.20.0"
 

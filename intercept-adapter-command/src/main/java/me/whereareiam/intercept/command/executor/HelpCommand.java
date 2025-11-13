@@ -4,22 +4,47 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.commandant.Command;
+import me.whereareiam.commandant.CommandRegistrar;
+import me.whereareiam.commandant.Help;
+import me.whereareiam.commandant.Pagination;
+import me.whereareiam.commandant.builder.HelpBuilder;
 import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.model.config.Commands;
+import me.whereareiam.intercept.model.config.Messages;
+import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.keystone.model.Actor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Singleton
 public class HelpCommand implements Command<Actor> {
 	private static final String COMMAND_NAME = "help";
 	private final Provider<Commands> commandsProvider;
+	private final Provider<Settings> settingsProvider;
+	private final Provider<Messages> messagesProvider;
+	private final Provider<CommandRegistrar<Actor>> commandRegistrarProvider;
+	private final MiniMessage miniMessage;
+
+	private HelpBuilder<Actor> helpBuilder;
 
 	@Inject
-	public HelpCommand(@NotNull Provider<Commands> commandsProvider) {
+	public HelpCommand(
+			@NotNull Provider<Commands> commandsProvider,
+			@NotNull Provider<Settings> settingsProvider,
+			@NotNull Provider<Messages> messagesProvider,
+			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider
+	) {
 		this.commandsProvider = commandsProvider;
+		this.settingsProvider = settingsProvider;
+		this.messagesProvider = messagesProvider;
+		this.commandRegistrarProvider = commandRegistrarProvider;
+		this.miniMessage = MiniMessage.miniMessage();
 	}
 
 	@Override
@@ -43,5 +68,52 @@ public class HelpCommand implements Command<Actor> {
 
 	private void handleCommand(@NotNull CommandContext<Actor> context) {
 		Actor sender = context.sender();
+
+		// Get page argument (default to 1 if not provided)
+		int page = context.getOrDefault("page", 1);
+		if (page < 1) page = 1;
+
+		// Get help message
+		String helpMessage = getHelpBuilder().build(getFilteredCommands(sender), page);
+
+		// Send formatted message
+		sender.sendMessage(miniMessage.deserialize(helpMessage));
+	}
+
+	/**
+	 * Gets the help builder, creating it lazily on first use.
+	 *
+	 * @return The help builder instance
+	 */
+	@NotNull
+	private HelpBuilder<Actor> getHelpBuilder() {
+		if (helpBuilder == null) {
+			Messages messages = messagesProvider.get();
+			Settings settings = settingsProvider.get();
+
+			helpBuilder = Help.create(
+					messages.getCommands().getHelp(),
+					messages.getCommands().getArguments(),
+					Pagination.create(messages.getCommands().getPagination()),
+					settings.getCommands().getCommandsPerPage()
+			);
+		}
+		return helpBuilder;
+	}
+
+	/**
+	 * Gets all commands filtered by sender's permissions.
+	 *
+	 * @param sender The command sender
+	 * @return Collection of commands the sender has permission to see
+	 */
+	@NotNull
+	private Collection<org.incendo.cloud.Command<Actor>> getFilteredCommands(@NotNull Actor sender) {
+		CommandManager<Actor> commandManager = commandRegistrarProvider.get().getCommandManager();
+
+		return commandManager.commands()
+				.stream()
+				.filter(command -> commandManager.hasPermission(sender, command.commandPermission().permissionString()))
+				.collect(Collectors.toList());
 	}
 }
