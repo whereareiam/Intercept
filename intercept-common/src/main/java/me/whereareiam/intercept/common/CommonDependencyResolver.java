@@ -59,6 +59,45 @@ public abstract class CommonDependencyResolver implements DependencyResolver {
 								.relocatedPattern("me.whereareiam.intercept.library.snakeyaml")
 								.build()
 				).build());
+
+		addDependency(Library.builder()
+				.groupId("me.whereareiam")
+				.artifactId("keystone")
+				.version(Constants.Dependency.KEYSTONE)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		addDependency(Library.builder()
+				.groupId("me.whereareiam")
+				.artifactId("commandant")
+				.version(Constants.Dependency.COMMANDANT)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		// Cloud libraries
+		addDependency(Library.builder()
+				.groupId("org{}incendo")
+				.artifactId("cloud-core")
+				.version(Constants.Dependency.CLOUD_CORE)
+				.build());
+
+		addDependency(Library.builder()
+				.groupId("org{}incendo")
+				.artifactId("cloud-processors-cooldown")
+				.version(Constants.Dependency.CLOUD_COOLDOWN)
+				.build());
+
+		addDependency(Library.builder()
+				.groupId("org{}incendo")
+				.artifactId("cloud-annotations")
+				.version(Constants.Dependency.CLOUD_CORE)
+				.build());
+
+		addDependency(Library.builder()
+				.groupId("org{}incendo")
+				.artifactId("cloud-minecraft-extras")
+				.version(Constants.Dependency.CLOUD_MINECRAFT_EXTRAS)
+				.build());
 	}
 
 	@Override

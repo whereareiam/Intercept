@@ -3,6 +3,7 @@ package me.whereareiam.intercept.platform.paper.inject;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import lombok.Getter;
+import me.whereareiam.intercept.command.CommandConfiguration;
 import me.whereareiam.intercept.common.CommonConfiguration;
 import me.whereareiam.intercept.platform.common.PlatformConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -17,7 +18,8 @@ public class PaperInjector {
 		this.injector = Guice.createInjector(
 				new PaperInjectorConfiguration(plugin),
 				new PlatformConfiguration(),
-				new CommonConfiguration(dataPath)
+				new CommonConfiguration(dataPath),
+				new CommandConfiguration()
 		);
 	}
 }

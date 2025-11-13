@@ -20,6 +20,7 @@ import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
+import me.whereareiam.intercept.common.provider.config.CommandsProvider;
 import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
 import me.whereareiam.intercept.common.provider.config.MessagesProvider;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
@@ -33,6 +34,7 @@ import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
+import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
@@ -66,6 +68,8 @@ public class CommonConfiguration extends AbstractModule {
 		bind(Settings.class).toProvider(SettingsProvider.class);
 		bind(MessagesProvider.class).asEagerSingleton();
 		bind(Messages.class).toProvider(MessagesProvider.class);
+		bind(CommandsProvider.class).asEagerSingleton();
+		bind(Commands.class).toProvider(CommandsProvider.class);
 		bind(InterceptionProvider.class);
 		bind(Interception.class).toProvider(InterceptionProvider.class);
 

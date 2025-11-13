@@ -11,8 +11,16 @@ lombok = "1.18.42"
 guice = "7.0.0"
 configura = "dev-a76adc6"
 attache = "dev-5fad19f"
+keystone = "dev-ec8fccf"
+commandant = "dev-2c5115d"
 junit = "6.0.0"
 mockito = "5.20.0"
+
+# cloud
+cloud-core = "2.0.0"
+cloud-paper = "2.0.0-beta.13"
+cloud-cooldown = "1.0.0-rc.1"
+cloud-minecraft-extras = "2.0.0-beta.13"
 
 # platform api versions
 velocity = "3.4.0-SNAPSHOT"
@@ -34,6 +42,12 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 # general
 guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
+keystone = { group = "me.whereareiam", name = "keystone", version.ref = "keystone" }
+commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
+
+# attache
+attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }
+attache-common = { group = "me.whereareiam", name = "attache-common", version.ref = "attache" }
 
 # testing
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
@@ -41,9 +55,11 @@ junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 mockito-junit = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
 
-# attache
-attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }
-attache-common = { group = "me.whereareiam", name = "attache-common", version.ref = "attache" }
+# cloud
+cloud-core = { group = "org.incendo", name = "cloud-core", version.ref = "cloud-core" }
+cloud-cooldowns = { group = "org.incendo", name = "cloud-processors-cooldown", version.ref = "cloud-cooldown" }
+cloud-paper = { group = "org.incendo", name = "cloud-paper", version.ref = "cloud-paper" }
+cloud-minecraft-extras = { group = "org.incendo", name = "cloud-minecraft-extras", version.ref = "cloud-minecraft-extras" }
 
 # platform api
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
@@ -66,7 +82,7 @@ adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bu
 
 adventure = ["adventure", "adventure-minimessage", "adventure-legacy", "adventure-plain", "adventure-gson"]
 bukkit = ["spigot", "adventure-platform-bukkit"]
-paper = ["paper"]
+paper = ["paper", "cloud-core", "cloud-paper"]
 velocity = ["velocity", "packetevents-velocity"]
 
 [plugins]

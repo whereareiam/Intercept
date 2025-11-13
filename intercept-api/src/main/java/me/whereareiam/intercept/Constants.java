@@ -11,8 +11,13 @@ public final class Constants {
 	public static final class Dependency {
 		public static final String GUICE = BuildConfig.GUICE;
 		public static final String CONFIGURA = BuildConfig.CONFIGURA;
+		public static final String KEYSTONE = BuildConfig.KEYSTONE;
+		public static final String COMMANDANT = BuildConfig.COMMANDANT;
 		public static final String ADVENTURE = BuildConfig.ADVENTURE;
 		public static final String ADVENTURE_PLATFORM_BUKKIT = BuildConfig.ADVENTURE_PLATFORM_BUKKIT;
-		public static final String PACKETEVENTS = BuildConfig.PACKETEVENTS;
+		public static final String CLOUD_CORE = BuildConfig.CLOUD_CORE;
+		public static final String CLOUD_COOLDOWN = BuildConfig.CLOUD_COOLDOWN;
+		public static final String CLOUD_PAPER = BuildConfig.CLOUD_PAPER;
+		public static final String CLOUD_MINECRAFT_EXTRAS = BuildConfig.CLOUD_MINECRAFT_EXTRAS;
 	}
 }

@@ -3,6 +3,7 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import me.whereareiam.commandant.model.ExceptionMessages;
 import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;
@@ -16,9 +17,32 @@ import java.util.Map;
 @ToString
 public class Messages {
 	/**
+	 * Global prefix for all messages
+	 */
+	private String prefix;
+
+	/**
+	 * Command-related configuration
+	 */
+	private Commands commands;
+
+	/**
 	 * Fallback formatting configuration
 	 */
 	private Fallback fallback;
+
+	/**
+	 * Configuration for command-related messages and behavior.
+	 */
+	@Getter
+	@Setter
+	@ToString
+	public static class Commands {
+		/**
+		 * Exception messages from Commandant
+		 */
+		private ExceptionMessages exceptions;
+	}
 
 	/**
 	 * Configuration for fallback behavior when translations are missing.

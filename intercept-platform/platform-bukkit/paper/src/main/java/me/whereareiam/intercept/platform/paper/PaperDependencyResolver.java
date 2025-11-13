@@ -60,5 +60,12 @@ public class PaperDependencyResolver extends CommonDependencyResolver {
 				.artifactId("adventure-platform-bukkit")
 				.version(Constants.Dependency.ADVENTURE_PLATFORM_BUKKIT)
 				.build());
+
+		addDependency(Library.builder()
+				.groupId("org{}incendo")
+				.artifactId("cloud-paper")
+				.version(Constants.Dependency.CLOUD_PAPER)
+				.resolveTransitiveDependencies(true)
+				.build());
 	}
 }

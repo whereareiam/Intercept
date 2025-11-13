@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.PlatformInteractor;
+import me.whereareiam.intercept.command.CommandService;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
 import me.whereareiam.intercept.common.messaging.MessagesService;
@@ -52,6 +53,9 @@ public class Intercept implements EventListener {
 
 		// Initialize interceptors (providers registered by platform classes)
 		injector.getInstance(InterceptorService.class).initialize();
+
+		// Initialize commands
+		injector.getInstance(CommandService.class);
 
 		injector.getInstance(WelcomeBannerPrinter.class).print();
 		injector.getInstance(UpdateScheduler.class).start();
