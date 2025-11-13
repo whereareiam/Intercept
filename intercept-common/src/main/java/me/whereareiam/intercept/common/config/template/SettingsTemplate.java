@@ -52,6 +52,13 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 
 		settings.setPerformance(performance);
 
+		// Initialize command settings
+		Settings.Commands commands = new Settings.Commands();
+		commands.setUseBrigadier(true);
+		commands.setUseAsyncCompletions(true);
+
+		settings.setCommands(commands);
+
 		return settings;
 	}
 }

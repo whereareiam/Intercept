@@ -55,6 +55,11 @@ public class Settings {
 	private Performance performance;
 
 	/**
+	 * Command configuration
+	 */
+	private Commands commands;
+
+	/**
 	 * Configuration for the plugin's updater checker.
 	 * Controls updater notifications and checking behavior.
 	 */
@@ -214,5 +219,23 @@ public class Settings {
 			 */
 			private int warnSlowPatternsMs;
 		}
+	}
+
+	/**
+	 * Command configuration for the plugin.
+	 */
+	@Getter
+	@Setter
+	@ToString
+	public static class Commands {
+		/**
+		 * Whether to use modern Brigadier-based command system (Paper 1.20.5+)
+		 */
+		private boolean useBrigadier;
+
+		/**
+		 * Whether to register asynchronous completions when available
+		 */
+		private boolean useAsyncCompletions;
 	}
 }

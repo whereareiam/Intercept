@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Integration tests for the complete message resolution pipeline.

@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.platform.paper.player;
+package me.whereareiam.intercept.platform.paper.actor.console;
 
 import lombok.Getter;
 import me.whereareiam.commandant.model.Console;
@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 
 /**
- * Paper-specific implementation of Console.
- * Wraps Bukkit ConsoleCommandSender for command execution.
+ * Abstract base class for all Paper Console implementations.
+ * Provides common functionality for wrapping Bukkit ConsoleCommandSender.
  */
 @Getter
-public class PaperInterceptConsole implements Console {
+public abstract class AbstractPaperInterceptConsole implements Console {
 	/**
 	 * The underlying Bukkit console sender
 	 */
@@ -22,11 +22,11 @@ public class PaperInterceptConsole implements Console {
 	private final ConsoleCommandSender consoleSender;
 
 	/**
-	 * Creates a new PaperInterceptConsole wrapping a console sender.
+	 * Creates a new AbstractPaperInterceptConsole wrapping a console sender.
 	 *
 	 * @param consoleSender The Bukkit console sender
 	 */
-	public PaperInterceptConsole(@NotNull ConsoleCommandSender consoleSender) {
+	protected AbstractPaperInterceptConsole(@NotNull ConsoleCommandSender consoleSender) {
 		this.consoleSender = consoleSender;
 	}
 
@@ -46,14 +46,5 @@ public class PaperInterceptConsole implements Console {
 	public Audience getAudience() {
 		return consoleSender;
 	}
-
-	/**
-	 * Gets the underlying console sender for platform-specific operations.
-	 *
-	 * @return The console sender instance
-	 */
-	@NotNull
-	public ConsoleCommandSender getConsoleSender() {
-		return consoleSender;
-	}
 }
+

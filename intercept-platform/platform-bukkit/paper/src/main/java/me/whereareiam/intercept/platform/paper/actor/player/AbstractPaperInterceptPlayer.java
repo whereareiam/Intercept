@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.platform.paper.player;
+package me.whereareiam.intercept.platform.paper.actor.player;
 
 import lombok.Getter;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
@@ -8,23 +8,23 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Paper-specific implementation of InterceptPlayer.
- * Wraps a Bukkit Player and provides direct access to platform-specific functionality.
+ * Abstract base class for all Paper InterceptPlayer implementations.
+ * Provides common functionality for wrapping Bukkit Players.
  */
 @Getter
-public class PaperInterceptPlayer extends InterceptPlayer {
+public abstract class AbstractPaperInterceptPlayer extends InterceptPlayer {
 	/**
-	 * The underlying Bukkit player instance
+	 * The underlying Bukkit actor instance
 	 */
 	@NotNull
 	private final Player bukkitPlayer;
 
 	/**
-	 * Creates a new PaperInterceptPlayer wrapping a Bukkit player.
+	 * Creates a new AbstractPaperInterceptPlayer wrapping a Bukkit actor.
 	 *
-	 * @param bukkitPlayer The Bukkit player to wrap
+	 * @param bukkitPlayer The Bukkit actor to wrap
 	 */
-	public PaperInterceptPlayer(@NotNull Player bukkitPlayer) {
+	protected AbstractPaperInterceptPlayer(@NotNull Player bukkitPlayer) {
 		super(
 				bukkitPlayer.getUniqueId(),
 				bukkitPlayer.getName(),
@@ -48,14 +48,5 @@ public class PaperInterceptPlayer extends InterceptPlayer {
 	public Audience getAudience() {
 		return bukkitPlayer;
 	}
-
-	/**
-	 * Gets the underlying Bukkit player for platform-specific operations.
-	 *
-	 * @return The Bukkit player instance
-	 */
-	@NotNull
-	public Player getBukkitPlayer() {
-		return bukkitPlayer;
-	}
 }
+
