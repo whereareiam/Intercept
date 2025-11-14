@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import me.whereareiam.commandant.Command;
 import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.model.config.Commands;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
 

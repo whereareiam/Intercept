@@ -6,7 +6,7 @@ import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.PlatformType;
 import me.whereareiam.intercept.type.Version;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.incendo.cloud.CommandManager;
 
 /**

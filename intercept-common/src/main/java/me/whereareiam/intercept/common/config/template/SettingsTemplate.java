@@ -16,6 +16,12 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		// Default locale for messages
 		settings.setLocale(Locale.US);
 
+		// Initialize serialization settings
+		Settings.Serialization serialization = new Settings.Serialization();
+		serialization.setType("MINIMESSAGE");
+		serialization.setEnableLegacyColors(false);
+		settings.setSerialization(serialization);
+
 		// Initialize updater settings
 		Settings.Updater updater = new Settings.Updater();
 		updater.setCheckForUpdates(true);

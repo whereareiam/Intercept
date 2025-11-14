@@ -12,8 +12,9 @@ import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.keystone.model.Actor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import me.whereareiam.keystone.Actor;
+import me.whereareiam.keystone.serializer.SerializerEngine;
+import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,7 @@ public class HelpCommand implements Command<Actor> {
 	private final Provider<Settings> settingsProvider;
 	private final Provider<Messages> messagesProvider;
 	private final Provider<CommandRegistrar<Actor>> commandRegistrarProvider;
-	private final MiniMessage miniMessage;
+	private final Provider<SerializerEngine> serializerProvider;
 
 	private HelpBuilder<Actor> helpBuilder;
 
@@ -38,13 +39,14 @@ public class HelpCommand implements Command<Actor> {
 			@NotNull Provider<Commands> commandsProvider,
 			@NotNull Provider<Settings> settingsProvider,
 			@NotNull Provider<Messages> messagesProvider,
-			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider
+			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
+			@NotNull Provider<SerializerEngine> serializerProvider
 	) {
 		this.commandsProvider = commandsProvider;
 		this.settingsProvider = settingsProvider;
 		this.messagesProvider = messagesProvider;
 		this.commandRegistrarProvider = commandRegistrarProvider;
-		this.miniMessage = MiniMessage.miniMessage();
+		this.serializerProvider = serializerProvider;
 	}
 
 	@Override
@@ -76,8 +78,9 @@ public class HelpCommand implements Command<Actor> {
 		// Get help message
 		String helpMessage = getHelpBuilder().build(getFilteredCommands(sender), page);
 
-		// Send formatted message
-		sender.sendMessage(miniMessage.deserialize(helpMessage));
+		// Send formatted message using serializer
+		Component component = serializerProvider.get().serialize(sender, helpMessage);
+		sender.sendMessage(component);
 	}
 
 	/**

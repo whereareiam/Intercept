@@ -5,7 +5,7 @@ import me.whereareiam.intercept.platform.paper.actor.console.PaperInterceptComma
 import me.whereareiam.intercept.platform.paper.actor.console.PaperInterceptConsole;
 import me.whereareiam.intercept.platform.paper.actor.player.PaperInterceptCommandPlayer;
 import me.whereareiam.intercept.platform.paper.actor.player.PaperInterceptPlayer;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;

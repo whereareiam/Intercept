@@ -7,7 +7,7 @@ import me.whereareiam.intercept.command.CommandManagerProvider;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.platform.paper.command.mapper.CommandSenderMapper;
 import me.whereareiam.intercept.platform.paper.command.mapper.CommandSourceStackMapper;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.bukkit.plugin.Plugin;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.bukkit.CloudBukkitCapabilities;

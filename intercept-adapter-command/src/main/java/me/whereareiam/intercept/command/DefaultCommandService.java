@@ -11,7 +11,8 @@ import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.command.executor.HelpCommand;
 import me.whereareiam.intercept.command.executor.MainCommand;
 import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
+import me.whereareiam.keystone.serializer.SerializerEngine;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
  */
 @Singleton
 public class DefaultCommandService implements CommandService {
-	private final InterceptCommandMessageFormatter messageFormatter;
+	private final SerializerEngine serializer;
 	private final CommandRegistrar<Actor> registrar;
 	private final Provider<Messages> messagesProvider;
 	private final Injector injector;
@@ -36,12 +37,12 @@ public class DefaultCommandService implements CommandService {
 	@Inject
 	public DefaultCommandService(
 			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
-			@NotNull InterceptCommandMessageFormatter messageFormatter,
+			@NotNull SerializerEngine serializer,
 			@NotNull Provider<Messages> messagesProvider,
 			@NotNull Injector injector
 	) {
 		this.messagesProvider = messagesProvider;
-		this.messageFormatter = messageFormatter;
+		this.serializer = serializer;
 		this.injector = injector;
 
 		registrar = commandRegistrarProvider.get();
@@ -79,7 +80,7 @@ public class DefaultCommandService implements CommandService {
 	private void registerExceptionHandlers(@NotNull CommandRegistrar<Actor> registrar) {
 		Commandant.registerExceptionHandler(
 				messagesProvider.get().getCommands().getExceptions(),
-				messageFormatter,
+				serializer,
 				registrar.getCommandManager(),
 				Actor::getAudience
 		);

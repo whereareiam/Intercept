@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.command;
 
 import me.whereareiam.commandant.Command;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.jetbrains.annotations.NotNull;
 
 public interface CommandService {

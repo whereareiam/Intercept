@@ -3,7 +3,7 @@ package me.whereareiam.intercept.command;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import me.whereareiam.commandant.CommandRegistrar;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 
 /**
  * Guice configuration module for command adapter.

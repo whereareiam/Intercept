@@ -20,6 +20,7 @@ import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
+import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
 import me.whereareiam.intercept.common.provider.config.CommandsProvider;
 import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
 import me.whereareiam.intercept.common.provider.config.MessagesProvider;
@@ -41,6 +42,7 @@ import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
 import me.whereareiam.intercept.util.EventUtil;
+import me.whereareiam.keystone.serializer.SerializerEngine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -74,6 +76,7 @@ public class CommonConfiguration extends AbstractModule {
 		bind(Interception.class).toProvider(InterceptionProvider.class);
 
 		// Services
+		bind(SerializerEngine.class).toProvider(SerializerEngineProvider.class);
 		bind(EventManager.class).to(EventController.class);
 		bind(EventUtil.class).asEagerSingleton();
 

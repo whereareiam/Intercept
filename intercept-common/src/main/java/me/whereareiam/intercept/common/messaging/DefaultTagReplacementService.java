@@ -10,8 +10,9 @@ import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.type.ComponentType;
+import me.whereareiam.keystone.model.SerializerContent;
+import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,13 +27,17 @@ import java.util.Map;
 public class DefaultTagReplacementService implements TagReplacementService {
 	private final MessageService messageService;
 	private final Provider<Messages> messagesProvider;
-	private final MiniMessage miniMessage;
+	private final Provider<SerializerEngine> serializerProvider;
 
 	@Inject
-	public DefaultTagReplacementService(MessageService messageService, Provider<Messages> messagesProvider) {
+	public DefaultTagReplacementService(
+			MessageService messageService,
+			Provider<Messages> messagesProvider,
+			Provider<SerializerEngine> serializerProvider
+	) {
 		this.messageService = messageService;
 		this.messagesProvider = messagesProvider;
-		this.miniMessage = MiniMessage.miniMessage();
+		this.serializerProvider = serializerProvider;
 	}
 
 	@Override
@@ -116,7 +121,9 @@ public class DefaultTagReplacementService implements TagReplacementService {
 				.replace("{locale}", locale.toString())
 				.replace("{source}", source.name());
 
-		return miniMessage.deserialize(formatted);
+		return serializerProvider.get().serialize(SerializerContent.builder()
+				.message(formatted)
+				.build());
 	}
 
 	/**

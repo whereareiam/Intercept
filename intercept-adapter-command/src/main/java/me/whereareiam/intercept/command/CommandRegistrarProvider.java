@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import me.whereareiam.commandant.CommandRegistrar;
 import me.whereareiam.commandant.Commandant;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.incendo.cloud.CommandManager;
 import org.jetbrains.annotations.NotNull;
 

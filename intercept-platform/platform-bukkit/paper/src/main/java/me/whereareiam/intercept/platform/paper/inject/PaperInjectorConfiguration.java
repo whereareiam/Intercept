@@ -10,7 +10,7 @@ import me.whereareiam.intercept.platform.paper.PaperPlatformInteractor;
 import me.whereareiam.intercept.platform.paper.PaperScheduler;
 import me.whereareiam.intercept.platform.paper.command.PaperCommandManagerProvider;
 import me.whereareiam.intercept.platform.paper.listener.PaperListenerRegistrar;
-import me.whereareiam.keystone.model.Actor;
+import me.whereareiam.keystone.Actor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.incendo.cloud.CommandManager;

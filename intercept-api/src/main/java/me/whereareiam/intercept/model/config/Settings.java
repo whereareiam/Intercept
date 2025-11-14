@@ -34,10 +34,10 @@ public class Settings {
 	 */
 	private Locale locale;
 
-	@PostProcess
-	public void updateInterceptionHelper() {
-		InterceptionHelper.init(level > 2);
-	}
+	/**
+	 * Serialization configuration
+	 */
+	private Serialization serialization;
 
 	/**
 	 * Update checker configuration
@@ -58,6 +58,11 @@ public class Settings {
 	 * Command configuration
 	 */
 	private Commands commands;
+
+	@PostProcess
+	public void updateInterceptionHelper() {
+		InterceptionHelper.init(level > 2);
+	}
 
 	/**
 	 * Configuration for the plugin's updater checker.
@@ -242,5 +247,28 @@ public class Settings {
 		 * Number of commands to display per page in help command
 		 */
 		private int commandsPerPage;
+	}
+
+	/**
+	 * Serialization configuration for message formatting.
+	 * Controls how messages are serialized and formatted.
+	 */
+	@Getter
+	@Setter
+	@ToString
+	public static class Serialization {
+		/**
+		 * Serializer adapter ID/type to use.
+		 * Available options: "MINIMESSAGE", "GSON", "LEGACY_AMPERSAND", "LEGACY_SECTION", "PLAIN"
+		 * Default: "MINIMESSAGE"
+		 */
+		private String type = "MINIMESSAGE";
+
+		/**
+		 * Whether to enable legacy color code parsing (& and § codes).
+		 * When enabled, legacy codes in input will be converted to the target adapter format.
+		 * Default: false
+		 */
+		private boolean enableLegacyColors = false;
 	}
 }

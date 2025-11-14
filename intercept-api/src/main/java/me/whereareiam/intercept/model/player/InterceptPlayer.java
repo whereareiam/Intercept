@@ -2,7 +2,7 @@ package me.whereareiam.intercept.model.player;
 
 import lombok.Getter;
 import lombok.ToString;
-import me.whereareiam.keystone.model.Player;
+import me.whereareiam.keystone.Player;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
