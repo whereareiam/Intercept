@@ -56,6 +56,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		));
 		helpMessages.setCommandFormat(" <yellow>/{command}{arguments}</yellow> <dark_gray>- <white>{description}");
 		helpMessages.setNoCommands("  <red>No commands found</red>");
+		helpMessages.setCommandsPerPage(7);
 
 		// Configure argument formatting
 		HelpMessages.Format argumentFormat = new HelpMessages.Format();

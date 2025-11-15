@@ -62,7 +62,6 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		Settings.Commands commands = new Settings.Commands();
 		commands.setUseBrigadier(false);
 		commands.setUseAsyncCompletions(true);
-		commands.setCommandsPerPage(7);
 
 		settings.setCommands(commands);
 

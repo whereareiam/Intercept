@@ -11,7 +11,6 @@ import me.whereareiam.commandant.builder.HelpBuilder;
 import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.kyori.adventure.text.Component;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 public class HelpCommand implements Command<Actor> {
 	private static final String COMMAND_NAME = "help";
 	private final Provider<Commands> commandsProvider;
-	private final Provider<Settings> settingsProvider;
 	private final Provider<Messages> messagesProvider;
 	private final Provider<CommandRegistrar<Actor>> commandRegistrarProvider;
 	private final Provider<SerializerEngine> serializerProvider;
@@ -37,13 +35,11 @@ public class HelpCommand implements Command<Actor> {
 	@Inject
 	public HelpCommand(
 			@NotNull Provider<Commands> commandsProvider,
-			@NotNull Provider<Settings> settingsProvider,
 			@NotNull Provider<Messages> messagesProvider,
 			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
 			@NotNull Provider<SerializerEngine> serializerProvider
 	) {
 		this.commandsProvider = commandsProvider;
-		this.settingsProvider = settingsProvider;
 		this.messagesProvider = messagesProvider;
 		this.commandRegistrarProvider = commandRegistrarProvider;
 		this.serializerProvider = serializerProvider;
@@ -92,13 +88,11 @@ public class HelpCommand implements Command<Actor> {
 	private HelpBuilder<Actor> getHelpBuilder() {
 		if (helpBuilder == null) {
 			Messages messages = messagesProvider.get();
-			Settings settings = settingsProvider.get();
 
 			helpBuilder = Help.create(
 					messages.getCommands().getHelp(),
 					messages.getCommands().getArguments(),
-					Pagination.create(messages.getCommands().getPagination()),
-					settings.getCommands().getCommandsPerPage()
+					Pagination.create(messages.getCommands().getPagination())
 			);
 		}
 		return helpBuilder;
