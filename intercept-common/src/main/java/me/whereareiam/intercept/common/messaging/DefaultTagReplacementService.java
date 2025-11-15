@@ -3,6 +3,7 @@ package me.whereareiam.intercept.common.messaging;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.common.util.TagParser;
 import me.whereareiam.intercept.logging.Logger;
@@ -11,7 +12,6 @@ import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.keystone.model.SerializerContent;
-import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.kyori.adventure.text.Component;
 
 import java.util.HashMap;
@@ -27,17 +27,14 @@ import java.util.Map;
 public class DefaultTagReplacementService implements TagReplacementService {
 	private final MessageService messageService;
 	private final Provider<Messages> messagesProvider;
-	private final Provider<SerializerEngine> serializerProvider;
 
 	@Inject
 	public DefaultTagReplacementService(
 			MessageService messageService,
-			Provider<Messages> messagesProvider,
-			Provider<SerializerEngine> serializerProvider
+			Provider<Messages> messagesProvider
 	) {
 		this.messageService = messageService;
 		this.messagesProvider = messagesProvider;
-		this.serializerProvider = serializerProvider;
 	}
 
 	@Override
@@ -121,7 +118,7 @@ public class DefaultTagReplacementService implements TagReplacementService {
 				.replace("{locale}", locale.toString())
 				.replace("{source}", source.name());
 
-		return serializerProvider.get().serialize(SerializerContent.builder()
+		return Serializer.serialize(SerializerContent.builder()
 				.message(formatted)
 				.build());
 	}

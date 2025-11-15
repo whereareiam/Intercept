@@ -1,13 +1,11 @@
 package me.whereareiam.intercept.common;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.config.ConfiguraBootstrap;
 import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
 import me.whereareiam.intercept.common.event.EventController;
@@ -59,6 +57,8 @@ public class CommonConfiguration extends AbstractModule {
 
 	@Override
 	protected void configure() {
+		requestInjection(this);
+
 		// Configuration
 		bind(ConfigurationTypeResolver.class)
 				.to(FileSystemConfigurationTypeResolver.class)
@@ -108,6 +108,11 @@ public class CommonConfiguration extends AbstractModule {
 		}).to(ReloadableProvider.class).asEagerSingleton();
 		bind(new TypeLiteral<Set<Reloadable>>() {
 		}).annotatedWith(Names.named("reloadables")).toProvider(ReloadableProvider.class).asEagerSingleton();
+	}
+
+	@Inject
+	void initializeSerializationHelper(Provider<SerializerEngine> serializerProvider) {
+		Serializer.initialize(serializerProvider);
 	}
 
 	@Provides

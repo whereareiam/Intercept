@@ -9,10 +9,10 @@ import me.whereareiam.commandant.Help;
 import me.whereareiam.commandant.Pagination;
 import me.whereareiam.commandant.builder.HelpBuilder;
 import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
-import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
@@ -28,7 +28,6 @@ public class HelpCommand implements Command<Actor> {
 	private final Provider<Commands> commandsProvider;
 	private final Provider<Messages> messagesProvider;
 	private final Provider<CommandRegistrar<Actor>> commandRegistrarProvider;
-	private final Provider<SerializerEngine> serializerProvider;
 
 	private HelpBuilder<Actor> helpBuilder;
 
@@ -36,13 +35,11 @@ public class HelpCommand implements Command<Actor> {
 	public HelpCommand(
 			@NotNull Provider<Commands> commandsProvider,
 			@NotNull Provider<Messages> messagesProvider,
-			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
-			@NotNull Provider<SerializerEngine> serializerProvider
+			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider
 	) {
 		this.commandsProvider = commandsProvider;
 		this.messagesProvider = messagesProvider;
 		this.commandRegistrarProvider = commandRegistrarProvider;
-		this.serializerProvider = serializerProvider;
 	}
 
 	@Override
@@ -75,7 +72,7 @@ public class HelpCommand implements Command<Actor> {
 		String helpMessage = getHelpBuilder().build(getFilteredCommands(sender), page);
 
 		// Send formatted message using serializer
-		Component component = serializerProvider.get().serialize(sender, helpMessage);
+		Component component = Serializer.serialize(sender, helpMessage);
 		sender.sendMessage(component);
 	}
 
