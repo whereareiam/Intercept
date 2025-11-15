@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 @Getter
 public class CompiledRegexPattern {
 	private final Pattern pattern;
+	private final String regex;
 	private final Map<String, String> placeholders;
 	private final int priority;
 	private final String literalPrefix;
@@ -27,6 +28,7 @@ public class CompiledRegexPattern {
 	 * @param priority     priority for pattern matching (higher = checked first)
 	 */
 	public CompiledRegexPattern(String regex, Map<String, String> placeholders, int priority) {
+		this.regex = regex;
 		this.pattern = Pattern.compile(regex);
 		this.placeholders = placeholders != null ? placeholders : Map.of();
 		this.priority = priority;

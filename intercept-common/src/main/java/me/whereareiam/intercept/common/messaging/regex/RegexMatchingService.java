@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
@@ -58,12 +59,16 @@ public class RegexMatchingService implements Reloadable {
 		// Check if regex is enabled
 		if (!settings.getPerformance().getRegex().isEnabled()) return Optional.empty();
 
+		Logger.debug("[Regex] Received message to match: \"%s\"", text);
+
 		// Check cache first
 		if (settings.getPerformance().getRegex().isCacheResults()) {
 			CacheKey cacheKey = new CacheKey(text, locale.toString());
 			CachedResult cached = resultCache.get(cacheKey);
-			if (cached != null && !cached.isExpired())
+			if (cached != null && !cached.isExpired()) {
+				Logger.debug("[Regex] Cache hit for message: \"%s\"", text);
 				return Optional.ofNullable(cached.result);
+			}
 		}
 
 		// Build pattern index if not built yet
@@ -95,6 +100,8 @@ public class RegexMatchingService implements Reloadable {
 			// Literal prefix optimization
 			if (settings.getPerformance().getRegex().isUseLiteralPrefix()) {
 				if (!candidate.pattern.hasLiteralPrefix(text)) {
+					Logger.debug("[Regex] Pattern \"%s\" (key: %s) - literal prefix check failed, skipped", 
+							candidate.pattern.getRegex(), candidate.key);
 					continue; // Skip pattern if prefix doesn't match
 				}
 			}
@@ -112,12 +119,18 @@ public class RegexMatchingService implements Reloadable {
 
 			if (placeholders.isPresent()) {
 				// Match found! Resolve the message
+				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - MATCHED with placeholders: %s", 
+						candidate.pattern.getRegex(), candidate.key, placeholders.get());
 				return Optional.of(
 						messageService.resolve(candidate.key, locale, placeholders.get())
 				);
+			} else {
+				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - no match", 
+						candidate.pattern.getRegex(), candidate.key);
 			}
 		}
 
+		Logger.debug("[Regex] No patterns matched for message: \"%s\"", text);
 		return Optional.empty();
 	}
 
