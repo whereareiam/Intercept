@@ -68,6 +68,10 @@ public class DefaultMessageEntry implements MessageEntry {
 			if (text != null) return text;
 		}
 
+		// Try "default" translation key as fallback
+		text = translations.get("default");
+		if (text != null) return text;
+
 		// Return message key as fallback
 		return messageKey;
 	}
