@@ -1,8 +1,8 @@
 package me.whereareiam.intercept.common.messaging;
 
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageEntry;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class MessageRegistryTest {
 	private DefaultMessageRegistry registry;

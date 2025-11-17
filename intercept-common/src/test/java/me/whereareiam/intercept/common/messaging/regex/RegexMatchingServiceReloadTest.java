@@ -1,12 +1,12 @@
 package me.whereareiam.intercept.common.messaging.regex;
 
 import com.google.inject.Provider;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.registry.Registry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

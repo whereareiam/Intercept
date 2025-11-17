@@ -1,15 +1,16 @@
 package me.whereareiam.intercept.common.provider.config;
 
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.registry.Registry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class ConfigProviderReloadTest {
 

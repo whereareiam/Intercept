@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import me.whereareiam.configura.Config;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.messaging.cache.CacheKey;
 import me.whereareiam.intercept.common.messaging.cache.CacheLevel;
@@ -19,6 +18,7 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.registry.Registry;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

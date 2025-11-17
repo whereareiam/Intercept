@@ -2,10 +2,10 @@ package me.whereareiam.intercept.common.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.keystone.Serializers;
 import me.whereareiam.keystone.model.SerializerOptions;
 import me.whereareiam.keystone.serializer.SerializerEngine;

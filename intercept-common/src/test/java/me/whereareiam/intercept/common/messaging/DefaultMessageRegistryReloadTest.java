@@ -1,13 +1,14 @@
 package me.whereareiam.intercept.common.messaging;
 
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class DefaultMessageRegistryReloadTest {
 

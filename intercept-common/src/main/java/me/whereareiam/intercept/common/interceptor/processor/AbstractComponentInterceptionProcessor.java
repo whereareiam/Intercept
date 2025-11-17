@@ -1,10 +1,11 @@
 package me.whereareiam.intercept.common.interceptor.processor;
 
 import com.google.inject.Provider;
-import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.common.util.TagParser;
+import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.event.interception.ProcessedEvent;
 import me.whereareiam.intercept.logging.InterceptionHelper;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
@@ -15,6 +16,7 @@ import me.whereareiam.intercept.model.interception.InterceptionContext;
 import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -40,13 +42,38 @@ import java.util.Optional;
  * </ul>
  *
  * @param <T> The specific interception context type
+ * @param <E> The processed event type that extends ProcessedEvent
  */
-@RequiredArgsConstructor
-public abstract class AbstractComponentInterceptionProcessor<T extends InterceptionContext> {
+public abstract class AbstractComponentInterceptionProcessor<T extends InterceptionContext, E extends ProcessedEvent>
+		extends InterceptionProcessor<T, E> {
+
 	protected final Provider<Interception> interceptionProvider;
 	protected final Provider<Settings> settingsProvider;
 	protected final RegexMatchingService regexMatchingService;
 	protected final TagReplacementService tagReplacementService;
+
+	/**
+	 * Creates a new AbstractComponentInterceptionProcessor.
+	 *
+	 * @param interceptionProvider  Provider for interception configuration
+	 * @param settingsProvider      Provider for settings configuration
+	 * @param regexMatchingService  Service for regex pattern matching
+	 * @param tagReplacementService Service for tag replacement
+	 * @param eventManager          Manager for firing events
+	 */
+	protected AbstractComponentInterceptionProcessor(
+			@NotNull Provider<Interception> interceptionProvider,
+			@NotNull Provider<Settings> settingsProvider,
+			@NotNull RegexMatchingService regexMatchingService,
+			@NotNull TagReplacementService tagReplacementService,
+			@NotNull EventManager eventManager
+	) {
+		super(eventManager);
+		this.interceptionProvider = interceptionProvider;
+		this.settingsProvider = settingsProvider;
+		this.regexMatchingService = regexMatchingService;
+		this.tagReplacementService = tagReplacementService;
+	}
 
 	/**
 	 * Processes a component message using the common interception logic.
@@ -54,6 +81,7 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 	 * @param context The interception context containing extracted data
 	 * @return The processed message to write back, or null if no changes
 	 */
+	@Override
 	@Nullable
 	protected Component process(T context) {
 		Interception interception = interceptionProvider.get();

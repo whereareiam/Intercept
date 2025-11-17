@@ -47,9 +47,22 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 						.build())
 				.build();
 
+		// Inspect command definition (subcommand)
+		CommandDefinition inspect = CommandDefinition.builder()
+				.enabled(true)
+				.aliases(List.of("inspect", "i"))
+				.permission("")
+				.description("Toggle inspection mode to get regex patterns")
+				.usage("{command} {alias}")
+				.cooldown(CommandDefinition.Cooldown.builder()
+						.enabled(false)
+						.build())
+				.build();
+
 		commands.getCommands().put("main", main);
 		commands.getCommands().put("help", help);
 		commands.getCommands().put("reload", reload);
+		commands.getCommands().put("inspect", inspect);
 
 		return commands;
 	}

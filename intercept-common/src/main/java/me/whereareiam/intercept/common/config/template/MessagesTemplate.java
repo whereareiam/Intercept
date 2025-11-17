@@ -17,7 +17,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 	@Override
 	public Messages supply(Messages messages) {
 		// Set default prefix
-		messages.setPrefix("<gold>ɪɴᴛᴇʀᴄᴇᴘᴛ <dark_gray>| ");
+		messages.setPrefix("<aqua>ɪɴᴛᴇʀᴄᴇᴘᴛ <dark_gray>| ");
 
 		// Configure command messages
 		Messages.Commands commands = new Messages.Commands();
@@ -49,7 +49,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		HelpMessages helpMessages = new HelpMessages();
 		helpMessages.setFormat(List.of(
 				" ",
-				"<gold><bold> Intercept</bold> <white>Command help",
+				"<aqua><bold> Intercept</bold> <white>Command help",
 				" ",
 				"{commands}",
 				"{pagination}"
@@ -71,6 +71,25 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		reload.setSuccess("{prefix}<white>Configuration reloaded <green>successfully</green>!");
 		reload.setError("{prefix}<white>An <red>error occurred</red> while reloading: <gray>{error}</gray>");
 		commands.setReload(reload);
+
+		// Configure inspect command messages
+		Messages.Commands.Inspect inspect = new Messages.Commands.Inspect();
+		inspect.setEnabled("{prefix}<white>Inspection mode <green>enabled</green>. Click on chat messages to get regex patterns.");
+		inspect.setDisabled("{prefix}<white>Inspection mode <red>disabled</red>.");
+
+		Messages.Commands.Inspect.Hover hover = new Messages.Commands.Inspect.Hover();
+		hover.setFormat(List.of(
+				"",
+				"<white> Regex Pattern:</white>   ",
+				"<aqua>  {pattern}{truncated}</aqua>   ",
+				"",
+				"<green>Click to copy pattern!</green>   "
+		));
+		hover.setTruncationFormat("...");
+		hover.setMaxPatternLength(60);
+		inspect.setHover(hover);
+
+		commands.setInspect(inspect);
 
 		// Configure custom argument names
 		commands.setArguments(Map.of(

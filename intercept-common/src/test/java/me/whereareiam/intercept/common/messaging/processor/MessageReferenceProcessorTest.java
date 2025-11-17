@@ -1,8 +1,8 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

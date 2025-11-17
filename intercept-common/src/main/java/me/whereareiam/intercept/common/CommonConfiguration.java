@@ -3,7 +3,6 @@ package me.whereareiam.intercept.common;
 import com.google.inject.*;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.config.ConfiguraBootstrap;
@@ -13,11 +12,13 @@ import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultActionBarInterceptionProcessor;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
+import me.whereareiam.intercept.common.listener.InspectionModeEnhancer;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.MessagesService;
 import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
+import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
 import me.whereareiam.intercept.common.provider.config.CommandsProvider;
@@ -39,6 +40,8 @@ import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.registry.PlayerRegistry;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
 import me.whereareiam.intercept.util.EventUtil;
@@ -81,6 +84,7 @@ public class CommonConfiguration extends AbstractModule {
 		bind(SerializerEngine.class).toProvider(SerializerEngineProvider.class);
 		bind(EventManager.class).to(EventController.class);
 		bind(EventUtil.class).asEagerSingleton();
+		bind(PlayerRegistry.class).to(DefaultPlayerRegistry.class);
 
 		// Plugin
 		bind(Intercept.class).asEagerSingleton();
@@ -97,7 +101,6 @@ public class CommonConfiguration extends AbstractModule {
 		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
 		bind(ActionBarInterceptionProcessor.class).to(DefaultActionBarInterceptionProcessor.class).asEagerSingleton();
 		bind(InterceptorService.class).asEagerSingleton();
-
 		// Updater
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))
 				.to(ModrinthProvider.class);
@@ -105,6 +108,9 @@ public class CommonConfiguration extends AbstractModule {
 				.to(GitHubProvider.class);
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.SPIGOT.toString()))
 				.to(SpigotMCProvider.class);
+
+		// Listeners
+		bind(InspectionModeEnhancer.class).asEagerSingleton();
 
 		// Other
 		bind(new TypeLiteral<Registry<Reloadable>>() {

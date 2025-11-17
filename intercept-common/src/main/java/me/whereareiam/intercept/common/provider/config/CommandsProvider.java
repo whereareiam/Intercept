@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import me.whereareiam.configura.Config;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.CommandsTemplate;
 import me.whereareiam.intercept.model.config.Commands;
+import me.whereareiam.intercept.registry.Registry;
 
 import java.nio.file.Path;
 

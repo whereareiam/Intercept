@@ -3,6 +3,8 @@ package me.whereareiam.intercept.common.interceptor.processor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.event.interception.chat.ChatProcessedEvent;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
@@ -11,6 +13,7 @@ import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.interception.chat.ChatInterceptionContext;
 import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -19,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @Singleton
 public class DefaultChatInterceptionProcessor
-		extends AbstractComponentInterceptionProcessor<ChatInterceptionContext>
+		extends AbstractComponentInterceptionProcessor<ChatInterceptionContext, ChatProcessedEvent>
 		implements ChatInterceptionProcessor {
 
 	@Inject
@@ -27,15 +30,22 @@ public class DefaultChatInterceptionProcessor
 			Provider<Interception> interceptionProvider,
 			Provider<Settings> settingsProvider,
 			RegexMatchingService regexMatchingService,
-			TagReplacementService tagReplacementService
+			TagReplacementService tagReplacementService,
+			EventManager eventManager
 	) {
-		super(interceptionProvider, settingsProvider, regexMatchingService, tagReplacementService);
+		super(interceptionProvider, settingsProvider, regexMatchingService, tagReplacementService, eventManager);
 	}
 
 	@Override
 	@Nullable
 	public Component processChat(ChatInterceptionContext context) {
-		return process(context);
+		return processWithEvent(context);
+	}
+
+	@Override
+	@NotNull
+	protected ChatProcessedEvent createEvent(ChatInterceptionContext context, Component component) {
+		return new ChatProcessedEvent(context, component);
 	}
 
 	@Override

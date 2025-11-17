@@ -44,6 +44,10 @@ public interface EventManager {
 	/**
 	 * Calls an event, triggering all registered handlers for that event type.
 	 * Handlers are called in order according to their {@link EventOrder}.
+	 * <p>
+	 * Events implementing {@link me.whereareiam.intercept.event.base.SynchronousEvent}
+	 * will be processed synchronously on the current thread. All other events
+	 * will be processed asynchronously.
 	 *
 	 * @param event the event to call
 	 */

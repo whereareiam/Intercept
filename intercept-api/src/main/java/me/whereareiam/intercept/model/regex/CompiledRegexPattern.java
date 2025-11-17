@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.model.regex;
 
 import lombok.Getter;
+import me.whereareiam.intercept.util.RegexHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,7 +119,7 @@ public class CompiledRegexPattern {
 
 			if (escaped) {
 				// Add escaped character as literal
-				if (isLiteralEscape(c)) {
+				if (RegexHelper.isLiteralEscape(c)) {
 					prefix.append(c);
 				} else {
 					// Non-literal escape (e.g., \w, \d), stop here
@@ -127,7 +128,7 @@ public class CompiledRegexPattern {
 				escaped = false;
 			} else if (c == '\\') {
 				escaped = true;
-			} else if (isRegexSpecialChar(c)) {
+			} else if (RegexHelper.isSpecialRegexCharExcludingBackslash(c)) {
 				// Hit a special regex character, stop here
 				break;
 			} else {
@@ -137,25 +138,6 @@ public class CompiledRegexPattern {
 
 		String result = prefix.toString();
 		return result.length() >= 3 ? result : null; // Only use if prefix is meaningful (3+ chars)
-	}
-
-	/**
-	 * Check if character is a regex special character.
-	 */
-	private boolean isRegexSpecialChar(char c) {
-		return c == '.' || c == '*' || c == '+' || c == '?' || c == '|' ||
-				c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}' ||
-				c == '$' || c == '^';
-	}
-
-	/**
-	 * Check if escaped character represents a literal (not a special escape).
-	 */
-	private boolean isLiteralEscape(char c) {
-		// These are escaped to be literal
-		return c == '\\' || c == '.' || c == '*' || c == '+' || c == '?' || c == '|' ||
-				c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}' ||
-				c == '$' || c == '^' || c == ' ' || c == ':' || c == '\'' || c == '"';
 	}
 
 	/**

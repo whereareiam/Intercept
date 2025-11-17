@@ -1,7 +1,9 @@
 package me.whereareiam.intercept.model.player;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.keystone.Player;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +39,20 @@ public abstract class InterceptPlayer implements Player {
 	protected final Locale locale;
 
 	/**
+	 * Whether inspection mode is enabled for this player.
+	 */
+	@Setter
+	@Getter
+	private boolean inspectionMode = false;
+
+	/**
+	 * Static reference to PlayerRegistry for syncing data.
+	 * Set by the service implementation during initialization.
+	 */
+	@Setter
+	private static PlayerRegistry playerRegistry;
+
+	/**
 	 * Constructor for platform-specific implementations.
 	 *
 	 * @param uniqueId The player's UUID
@@ -51,6 +67,8 @@ public abstract class InterceptPlayer implements Player {
 		this.uniqueId = uniqueId;
 		this.username = username;
 		this.locale = locale;
+
+		if (playerRegistry != null) playerRegistry.syncPlayerData(this);
 	}
 
 	/**

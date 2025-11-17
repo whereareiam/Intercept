@@ -1,7 +1,6 @@
 package me.whereareiam.intercept.common.interceptor;
 
 import com.google.inject.Provider;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
@@ -9,6 +8,7 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ComponentType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

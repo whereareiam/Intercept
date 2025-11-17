@@ -1,4 +1,4 @@
-package me.whereareiam.intercept;
+package me.whereareiam.intercept.registry;
 
 /**
  * A generic registry interface that provides registration functionality for

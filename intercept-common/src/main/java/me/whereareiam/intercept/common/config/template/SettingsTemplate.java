@@ -2,9 +2,14 @@ package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
+import me.whereareiam.intercept.model.Event;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.type.EventPriority;
+import me.whereareiam.intercept.type.PlatformType;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 @Singleton
 public class SettingsTemplate implements TemplateProvider<Settings> {
@@ -65,6 +70,26 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 
 		settings.setCommands(commands);
 
+		configureListeners(settings);
+
 		return settings;
+	}
+
+	private void configureListeners(Settings settings) {
+		Settings.Listeners listeners = new Settings.Listeners();
+		if (PlatformType.isAtLeast(PlatformType.BUKKIT))
+			listeners.setEvents(getPrioritiesForBukkit());
+
+		settings.setListeners(listeners);
+	}
+
+	private Map<String, Event> getPrioritiesForBukkit() {
+		Map<String, Event> priorities = new HashMap<>();
+
+		Event event = Event.builder().register(true).priority(EventPriority.LOWEST).build();
+
+		priorities.put("org.bukkit.event.player.PlayerQuitEvent", event);
+
+		return priorities;
 	}
 }

@@ -3,13 +3,13 @@ package me.whereareiam.intercept.common.interceptor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;

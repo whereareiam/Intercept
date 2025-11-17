@@ -9,8 +9,10 @@ import me.whereareiam.intercept.listener.DynamicListener;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.platform.common.util.BukkitUtil;
+import me.whereareiam.intercept.platform.paper.listener.connection.PlayerQuitListener;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -34,8 +36,8 @@ public class PaperListenerRegistrar extends CommonListenerRegistrar {
 	}
 
 	@Override
-	@SuppressWarnings("UnstableApiUsage")
 	public void registerListeners() {
+		registerListener(PlayerQuitEvent.class, injector.getInstance(PlayerQuitListener.class));
 	}
 
 	@Override

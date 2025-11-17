@@ -3,7 +3,6 @@ package me.whereareiam.intercept.common.messaging.regex;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageRegistry;
@@ -11,6 +10,7 @@ import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.regex.MatchDetails;
+import me.whereareiam.intercept.registry.Registry;
 
 import java.util.Locale;
 import java.util.Optional;

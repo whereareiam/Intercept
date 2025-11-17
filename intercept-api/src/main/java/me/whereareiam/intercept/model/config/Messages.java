@@ -8,6 +8,7 @@ import me.whereareiam.commandant.model.message.HelpMessages;
 import me.whereareiam.commandant.model.message.PaginationMessages;
 import me.whereareiam.intercept.type.ComponentType;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,6 +68,11 @@ public class Messages {
 		private Reload reload;
 
 		/**
+		 * Inspect command messages
+		 */
+		private Inspect inspect;
+
+		/**
 		 * Configuration for reload command messages.
 		 */
 		@Getter
@@ -87,6 +93,64 @@ public class Messages {
 			 * - {error}: The error message
 			 */
 			private String error;
+		}
+
+		/**
+		 * Configuration for inspect command messages.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Inspect {
+			/**
+			 * Message shown when inspection mode is enabled.
+			 * Placeholders:
+			 * - {prefix}: The global message prefix
+			 */
+			private String enabled;
+
+			/**
+			 * Message shown when inspection mode is disabled.
+			 * Placeholders:
+			 * - {prefix}: The global message prefix
+			 */
+			private String disabled;
+
+			/**
+			 * Configuration for hover text shown when hovering over messages in inspection mode.
+			 */
+			private Hover hover;
+
+			/**
+			 * Configuration for hover text in inspection mode.
+			 */
+			@Getter
+			@Setter
+			@ToString
+			public static class Hover {
+				/**
+				 * Hover text format shown when hovering over messages in inspection mode.
+				 * Each string in the list represents a line of the hover text.
+				 * Placeholders:
+				 * - {pattern}: The regex pattern (may be truncated if maxPatternLength is set)
+				 * - {fullPattern}: The full regex pattern (always complete, even if truncated in display)
+				 * - {truncated}: The truncation indicator if pattern was truncated, empty string otherwise
+				 */
+				private List<String> format;
+
+				/**
+				 * Text to append when the pattern is truncated.
+				 * This value is used as the {truncated} placeholder in format.
+				 */
+				private String truncationFormat;
+
+				/**
+				 * Maximum number of characters to show in the hover text pattern.
+				 * If the pattern is longer, it will be truncated and the truncation indicator appended.
+				 * Set to 0 or negative to disable truncation.
+				 */
+				private int maxPatternLength;
+			}
 		}
 	}
 

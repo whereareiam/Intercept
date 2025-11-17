@@ -1,13 +1,13 @@
 package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Provider;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.type.message.MessageType;
 import net.kyori.adventure.text.Component;

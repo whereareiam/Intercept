@@ -2,10 +2,10 @@ package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.Registry;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.registry.Registry;
 
 import java.util.Map;
 import java.util.Set;
