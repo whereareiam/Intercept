@@ -50,6 +50,18 @@ public class DefaultMessageEntry implements MessageEntry {
 		String text = translations.get(locale);
 		if (text != null) return text;
 
+		// Try to find nearest locale with same language code (e.g., en_US -> en_GB, en_CA, en, etc.)
+		String languageCode = extractLanguageCode(locale);
+		if (languageCode != null) {
+			for (String availableLocale : translations.keySet()) {
+				String availableLanguageCode = extractLanguageCode(availableLocale);
+				if (languageCode.equals(availableLanguageCode)) {
+					text = translations.get(availableLocale);
+					if (text != null) return text;
+				}
+			}
+		}
+
 		// Try default locale
 		if (defaultLocale != null) {
 			text = translations.get(defaultLocale);
@@ -58,6 +70,21 @@ public class DefaultMessageEntry implements MessageEntry {
 
 		// Return message key as fallback
 		return messageKey;
+	}
+
+	/**
+	 * Extracts the language code from a locale string.
+	 * Handles formats like "en_US", "en", "de_DE", etc.
+	 *
+	 * @param locale the locale string (e.g., "en_US" or "en")
+	 * @return the language code (e.g., "en") or null if invalid
+	 */
+	private String extractLanguageCode(String locale) {
+		if (locale == null || locale.isEmpty())
+			return null;
+		
+		int underscoreIndex = locale.indexOf('_');
+		return underscoreIndex > 0 ? locale.substring(0, underscoreIndex) : locale;
 	}
 
 	@Override
