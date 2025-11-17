@@ -67,7 +67,7 @@ public class DefaultTagReplacementService implements TagReplacementService {
 				String resolved = messageService.resolve(tag.key(), locale, placeholders);
 
 				if (resolved != null && !resolved.equals(tag.key())) {
-					replacements.put(tag.originalTag(), Component.text(resolved));
+					replacements.put(tag.originalTag(), Serializer.serialize(resolved));
 					continue;
 				}
 

@@ -2,6 +2,7 @@ package me.whereareiam.intercept.common.interceptor.processor;
 
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
+import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.common.util.TagParser;
 import me.whereareiam.intercept.logging.InterceptionHelper;
@@ -88,6 +89,7 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 
 			if (matchDetails.isPresent()) {
 				MatchDetails details = matchDetails.get();
+				Component resolvedComponent = Serializer.serialize(details.getResolvedText());
 				Component resolved;
 
 				if (details.isReplaceMatched()) {
@@ -96,11 +98,11 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 							message,
 							details.getMatchStart(),
 							details.getMatchEnd(),
-							details.getResolvedText()
+							resolvedComponent
 					);
 				} else {
 					// Replace entire message (backward compatibility)
-					resolved = ComponentHelper.replaceEntireText(details.getResolvedText());
+					resolved = ComponentHelper.replaceEntireText(resolvedComponent);
 				}
 
 				return InterceptionHelper.modify(resolved);

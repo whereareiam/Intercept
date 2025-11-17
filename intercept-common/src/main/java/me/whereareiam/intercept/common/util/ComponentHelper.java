@@ -27,15 +27,14 @@ public final class ComponentHelper {
 	}
 
 	/**
-	 * Replace the entire text content of a component with new text.
-	 * This creates a new text component, discarding original formatting.
-	 * Use this when you want to completely replace the message.
+	 * Replace the entire text content of a component with a new Component.
+	 * Use this when you want to completely replace the message with a formatted component.
 	 *
-	 * @param newText the new text to use
-	 * @return a new text component with the new text
+	 * @param newComponent the new component to use
+	 * @return the new component
 	 */
-	public static Component replaceEntireText(String newText) {
-		return Component.text(newText);
+	public static Component replaceEntireText(Component newComponent) {
+		return newComponent;
 	}
 
 	/**
@@ -259,6 +258,20 @@ public final class ComponentHelper {
 	 * @return a new component with the specified range replaced
 	 */
 	public static Component replaceTextRange(Component component, int startIndex, int endIndex, String replacement) {
+		return replaceTextRange(component, startIndex, endIndex, Component.text(replacement));
+	}
+
+	/**
+	 * Replace a substring range in a component with a new Component, preserving formatting of non-replaced parts.
+	 * The replacement component will be inserted with its formatting preserved.
+	 *
+	 * @param component   the component to modify
+	 * @param startIndex  start index (inclusive) of the range to replace in plain text
+	 * @param endIndex    end index (exclusive) of the range to replace in plain text
+	 * @param replacement the replacement component (with formatting applied)
+	 * @return a new component with the specified range replaced
+	 */
+	public static Component replaceTextRange(Component component, int startIndex, int endIndex, Component replacement) {
 		if (startIndex < 0 || endIndex < startIndex)
 			throw new IllegalArgumentException("Invalid range: start=" + startIndex + ", end=" + endIndex);
 
@@ -271,7 +284,7 @@ public final class ComponentHelper {
 	 * @param component   the component to process
 	 * @param startIndex  start index in plain text
 	 * @param endIndex    end index in plain text
-	 * @param replacement replacement text
+	 * @param replacement replacement component
 	 * @param currentPos  current position in plain text (for tracking)
 	 * @return modified component
 	 */
@@ -279,7 +292,7 @@ public final class ComponentHelper {
 			Component component,
 			int startIndex,
 			int endIndex,
-			String replacement,
+			Component replacement,
 			int currentPos
 	) {
 		if (component instanceof TextComponent textComponent)
@@ -298,7 +311,7 @@ public final class ComponentHelper {
 			TextComponent textComponent,
 			int startIndex,
 			int endIndex,
-			String replacement,
+			Component replacement,
 			int currentPos
 	) {
 		String content = textComponent.content();
@@ -333,8 +346,8 @@ public final class ComponentHelper {
 			result.append(Component.text(before).style(textComponent.style()));
 		}
 
-		// Replacement
-		result.append(Component.text(replacement));
+		// Replacement component (with formatting preserved)
+		result.append(replacement);
 
 		// After range
 		int afterStart = Math.min(contentLength, endIndex - currentPos);
@@ -360,7 +373,7 @@ public final class ComponentHelper {
 			TranslatableComponent translatable,
 			int startIndex,
 			int endIndex,
-			String replacement,
+			Component replacement,
 			int currentPos
 	) {
 		String serialized = PLAIN_SERIALIZER.serialize(translatable);
@@ -395,7 +408,7 @@ public final class ComponentHelper {
 			Component component,
 			int startIndex,
 			int endIndex,
-			String replacement,
+			Component replacement,
 			int currentPos
 	) {
 		List<Component> children = component.children();
