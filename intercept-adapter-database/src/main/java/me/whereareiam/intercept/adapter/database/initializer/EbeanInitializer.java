@@ -32,6 +32,9 @@ public class EbeanInitializer {
 			config.setDefaultServer(true);
 			config.setName("intercept");
 
+			// Scan for entity classes in the entity package
+			config.addPackage("me.whereareiam.intercept.adapter.database.entity");
+
 			// Set table prefix if configured
 			String tablePrefix = databaseConfig.getTablePrefix();
 			if (tablePrefix != null && !tablePrefix.isEmpty()) {
