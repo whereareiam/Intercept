@@ -17,6 +17,7 @@ import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.MessagesService;
+import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
 import me.whereareiam.intercept.common.provider.config.CommandsProvider;
@@ -32,6 +33,7 @@ import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProce
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Interception;
@@ -88,6 +90,7 @@ public class CommonConfiguration extends AbstractModule {
 		bind(MessageService.class).to(DefaultMessageService.class);
 		bind(MessagesService.class).asEagerSingleton();
 		bind(TagReplacementService.class).to(DefaultTagReplacementService.class);
+		bind(RegexMatchingService.class).to(DefaultRegexMatchingService.class);
 
 		// Interceptors
 		bind(InterceptorRegistry.class).asEagerSingleton();

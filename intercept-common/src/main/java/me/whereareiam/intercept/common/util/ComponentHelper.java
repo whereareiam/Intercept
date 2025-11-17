@@ -1,7 +1,9 @@
 package me.whereareiam.intercept.common.util;
 
-import net.kyori.adventure.text.*;
-import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public final class ComponentHelper {
 	}
 
 	/**
-	 * Replace text with Component values.
+	 * Replace text with Component values using Adventure's built-in replacement API.
 	 * When text matches, replaces it with the new Component preserving structure.
 	 *
 	 * @param component    the component to process
@@ -48,203 +50,27 @@ public final class ComponentHelper {
 	public static Component replaceTextWithComponents(Component component, Map<String, Component> replacements) {
 		if (component == null) return null;
 		if (replacements == null || replacements.isEmpty()) return component;
-		return traverseAndReplaceWithComponents(component, replacements);
-	}
-
-	/* ------------------------------------------------------------------------
-	 * Text -> Component replacement (by content)
-	 * --------------------------------------------------------------------- */
-
-	/**
-	 * Recursively traverse and replace text nodes with Components.
-	 */
-	private static Component traverseAndReplaceWithComponents(
-			Component component, Map<String, Component> replacements
-	) {
-		if (component instanceof TextComponent textComponent)
-			return processTextComponent(textComponent, replacements);
-
-		if (component instanceof TranslatableComponent translatable)
-			return processTranslatableComponent(translatable, replacements);
-
-		return processGenericComponent(component, replacements);
-	}
-
-	/**
-	 * Process a TextComponent for replacements.
-	 */
-	private static Component processTextComponent(
-			TextComponent textComponent, Map<String, Component> replacements
-	) {
-		String content = textComponent.content();
-
-		// Exact match - replace entire component
-		if (replacements.containsKey(content))
-			return replaceExactMatch(textComponent, replacements.get(content), replacements);
-
-		// Partial match - find the LEFTMOST match to process in order
-		String earliestTarget = null;
-		Component earliestReplacement = null;
-		int earliestIndex = -1;
-
+		
+		// Use Adventure's replaceText API - chain multiple replacements
+		Component result = component;
 		for (Map.Entry<String, Component> entry : replacements.entrySet()) {
-			int index = content.indexOf(entry.getKey());
-			if (index == -1) continue;
-			if (earliestIndex == -1 || index < earliestIndex) {
-				earliestIndex = index;
-				earliestTarget = entry.getKey();
-				earliestReplacement = entry.getValue();
-			}
+			final String literal = entry.getKey();
+			final Component replacement = entry.getValue();
+			
+			result = result.replaceText(config -> config
+				.matchLiteral(literal)
+				.replacement(replacement)
+			);
 		}
-
-		if (earliestTarget != null)
-			return splitAndReplaceWithComponents(textComponent, earliestTarget, earliestReplacement, replacements);
-
-		return rebuildTextWithChildren(textComponent, replacements);
-	}
-
-	/**
-	 * Replace exact match and preserve style & children.
-	 */
-	private static Component replaceExactMatch(
-			TextComponent original, Component replacement, Map<String, Component> replacements
-	) {
-		Component styled = replacement.style(original.style());
-		return replaceChildren(styled, original.children(), replacements);
-	}
-
-	/**
-	 * Rebuild TextComponent with unchanged content and processed children.
-	 */
-	private static Component rebuildTextWithChildren(
-			TextComponent textComponent, Map<String, Component> replacements
-	) {
-		TextComponent.Builder builder = Component.text()
-				.content(textComponent.content())
-				.style(textComponent.style());
-
-		for (Component child : textComponent.children())
-			builder.append(traverseAndReplaceWithComponents(child, replacements));
-
-		return builder.build();
-	}
-
-	/**
-	 * Process a TranslatableComponent for replacements.
-	 */
-	private static Component processTranslatableComponent(
-			TranslatableComponent translatable, Map<String, Component> replacements
-	) {
-		List<ComponentLike> processedArgs = processTranslationArguments(translatable.arguments(), replacements);
-
-		TranslatableComponent.Builder builder = Component.translatable()
-				.key(translatable.key())
-				.style(translatable.style());
-
-		if (!processedArgs.isEmpty())
-			builder.arguments(processedArgs);
-
-		for (Component child : translatable.children())
-			builder.append(traverseAndReplaceWithComponents(child, replacements));
-
-		return builder.build();
-	}
-
-	/**
-	 * Process translation arguments recursively.
-	 */
-	private static List<ComponentLike> processTranslationArguments(
-			List<TranslationArgument> arguments, Map<String, Component> replacements
-	) {
-		List<ComponentLike> processed = new ArrayList<>();
-
-		for (TranslationArgument arg : arguments) {
-			Object value = arg.value();
-
-			if (value instanceof Component argComponent) {
-				processed.add(traverseAndReplaceWithComponents(argComponent, replacements));
-				continue;
-			}
-
-			if (value instanceof ComponentLike like)
-				processed.add(like);
-		}
-
-		return processed;
-	}
-
-	/**
-	 * Process generic components by traversing their children.
-	 */
-	private static Component processGenericComponent(Component component, Map<String, Component> replacements) {
-		List<Component> children = component.children();
-		if (children.isEmpty()) return component;
-
-		return replaceChildren(component, children, replacements);
-	}
-
-	/**
-	 * Split text at target position and insert replacement Component.
-	 */
-	private static Component splitAndReplaceWithComponents(
-			TextComponent original,
-			String target,
-			Component replacement,
-			Map<String, Component> allReplacements
-	) {
-		String content = original.content();
-		int index = content.indexOf(target);
-		if (index == -1) return original;
-
-		Component result = Component.empty().style(original.style());
-
-		// Add prefix text (before match)
-		if (index > 0)
-			result = result.append(createStyledText(content.substring(0, index), original.style()));
-
-		// Add replacement component
-		result = result.append(replacement);
-
-		// Add suffix text (after match) - recursively check for more replacements
-		if (index + target.length() < content.length()) {
-			String after = content.substring(index + target.length());
-			Component afterComponent = createStyledText(after, original.style());
-			result = result.append(traverseAndReplaceWithComponents(afterComponent, allReplacements));
-		}
-
-		// Append processed children
-		for (Component child : original.children())
-			result = result.append(traverseAndReplaceWithComponents(child, allReplacements));
-
+		
 		return result;
-	}
-
-	/**
-	 * Create a text component with the given style.
-	 */
-	private static Component createStyledText(String text, Style style) {
-		return Component.text(text).style(style);
-	}
-
-	/**
-	 * Helper: rebuild a component with the same content but new, processed children.
-	 */
-	private static Component replaceChildren(
-			Component parent,
-			List<Component> originalChildren,
-			Map<String, Component> replacements
-	) {
-		if (originalChildren.isEmpty()) return parent;
-
-		List<ComponentLike> newChildren = new ArrayList<>(originalChildren.size());
-		for (Component child : originalChildren)
-			newChildren.add(traverseAndReplaceWithComponents(child, replacements));
-
-		return parent.children(newChildren);
 	}
 
 	/* ------------------------------------------------------------------------
 	 * Range-based text replacement (by plain-text index)
+	 * 
+	 * Note: Adventure doesn't provide range-based replacement by index,
+	 * so we keep this custom implementation for that specific use case.
 	 * --------------------------------------------------------------------- */
 
 	/**
