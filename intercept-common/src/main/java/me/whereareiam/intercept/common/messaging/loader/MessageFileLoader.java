@@ -96,7 +96,8 @@ public class MessageFileLoader {
 				CompiledRegexPattern compiledPattern = new CompiledRegexPattern(
 						patternData.getPattern(),
 						patternData.getPlaceholders(),
-						patternData.getPriority()
+						patternData.getPriority(),
+						patternData.isReplaceMatched()
 				);
 				compiled.add(compiledPattern);
 			} catch (Exception e) {

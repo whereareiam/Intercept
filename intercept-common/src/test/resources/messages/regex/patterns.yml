@@ -49,3 +49,11 @@ items:
         placeholders:
           word: "$1"
         priority: 5
+
+  partial-replace:
+    translations:
+      en_US: "test test"
+    regex:
+      - pattern: "or incomplete command"
+        replaceMatched: true
+        priority: 10

@@ -13,35 +13,38 @@ import java.util.regex.Pattern;
  * Optimized for performance with literal prefix extraction and caching.
  */
 @Getter
-public class CompiledRegexPattern {
+	public class CompiledRegexPattern {
 	private final Pattern pattern;
 	private final String regex;
 	private final Map<String, String> placeholders;
 	private final int priority;
 	private final String literalPrefix;
+	private final boolean replaceMatched;
 
 	/**
 	 * Create a compiled regex pattern.
 	 *
-	 * @param regex        the regex pattern string
-	 * @param placeholders map of placeholder names to capture group references (e.g., "$1", "$2")
-	 * @param priority     priority for pattern matching (higher = checked first)
+	 * @param regex              the regex pattern string
+	 * @param placeholders       map of placeholder names to capture group references (e.g., "$1", "$2")
+	 * @param priority           priority for pattern matching (higher = checked first)
+	 * @param replaceMatched whether only the matched substring should be replaced
 	 */
-	public CompiledRegexPattern(String regex, Map<String, String> placeholders, int priority) {
+	public CompiledRegexPattern(String regex, Map<String, String> placeholders, int priority, boolean replaceMatched) {
 		this.regex = regex;
 		this.pattern = Pattern.compile(regex);
 		this.placeholders = placeholders != null ? placeholders : Map.of();
 		this.priority = priority;
 		this.literalPrefix = extractLiteralPrefix(regex);
+		this.replaceMatched = replaceMatched;
 	}
 
 	/**
 	 * Try to match text against this pattern and extract placeholders.
 	 *
 	 * @param text the text to match
-	 * @return map of placeholder names to extracted values, or empty if no match
+	 * @return match result that includes placeholder values and match bounds, or empty if no match
 	 */
-	public Optional<Map<String, Object>> match(String text) {
+	public Optional<MatchResult> match(String text) {
 		// Fast path: check literal prefix first
 		if (!hasLiteralPrefix(text)) return Optional.empty();
 
@@ -66,7 +69,7 @@ public class CompiledRegexPattern {
 			}
 		}
 
-		return Optional.of(result);
+		return Optional.of(new MatchResult(result, matcher.start(), matcher.end(), matcher.group()));
 	}
 
 	/**
@@ -153,5 +156,16 @@ public class CompiledRegexPattern {
 		return c == '\\' || c == '.' || c == '*' || c == '+' || c == '?' || c == '|' ||
 				c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}' ||
 				c == '$' || c == '^' || c == ' ' || c == ':' || c == '\'' || c == '"';
+	}
+
+	/**
+	 * Result of a successful regex match.
+	 *
+	 * @param placeholders map of placeholder names to extracted values
+	 * @param start        start index (inclusive) of the match
+	 * @param end          end index (exclusive) of the match
+	 * @param matchedText  the exact substring that matched the pattern
+	 */
+	public record MatchResult(Map<String, Object> placeholders, int start, int end, String matchedText) {
 	}
 }

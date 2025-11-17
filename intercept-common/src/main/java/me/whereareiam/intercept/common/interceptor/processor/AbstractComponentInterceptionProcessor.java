@@ -83,11 +83,25 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 
 		// Step 2: Try regex matching (fallback method)
 		if (componentConfig.isRegex() && isRegexEnabled()) {
-			Optional<String> regexMatch = regexMatchingService.match(plainText, context.getLocale());
+			Optional<RegexMatchingService.MatchDetails> matchDetails = regexMatchingService.matchWithDetails(plainText, context.getLocale());
 
-			if (regexMatch.isPresent()) {
-				// Regex matched! Replace the entire message with resolved text
-				Component resolved = ComponentHelper.replaceEntireText(regexMatch.get());
+			if (matchDetails.isPresent()) {
+				RegexMatchingService.MatchDetails details = matchDetails.get();
+				Component resolved;
+				
+				if (details.replaceMatched()) {
+					// Replace only the matched part, preserving formatting
+					resolved = ComponentHelper.replaceTextRange(
+							message,
+							details.matchStart(),
+							details.matchEnd(),
+							details.resolvedText()
+					);
+				} else {
+					// Replace entire message (backward compatibility)
+					resolved = ComponentHelper.replaceEntireText(details.resolvedText());
+				}
+				
 				return InterceptionHelper.modify(resolved);
 			}
 		}

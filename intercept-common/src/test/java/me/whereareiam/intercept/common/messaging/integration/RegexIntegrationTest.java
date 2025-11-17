@@ -1,7 +1,10 @@
 package me.whereareiam.intercept.common.messaging.integration;
 
+import com.google.inject.Provider;
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.type.Format;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
@@ -10,26 +13,32 @@ import me.whereareiam.intercept.common.messaging.loader.MessageFileLoader;
 import me.whereareiam.intercept.common.messaging.loader.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.common.messaging.regex.RegexMatchingService;
+import me.whereareiam.intercept.common.util.ComponentHelper;
+import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.config.Settings;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import com.google.inject.Provider;
-import me.whereareiam.intercept.Registry;
-import me.whereareiam.intercept.Reloadable;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Integration test for regex matching system.
@@ -38,6 +47,13 @@ import static org.mockito.Mockito.*;
 class RegexIntegrationTest {
 	private DefaultMessageRegistry registry;
 	private RegexMatchingService regexService;
+
+	@BeforeAll
+	static void initLogger() {
+		// Initialize Logger with a mock to prevent NPEs
+		LoggingHelper mockLogger = mock(LoggingHelper.class);
+		Logger.init(mockLogger);
+	}
 
 	@BeforeEach
 	void setUp() throws URISyntaxException {
@@ -166,5 +182,79 @@ class RegexIntegrationTest {
 
 		assertTrue(result.isPresent());
 		assertEquals("Keine Berechtigung: worldedit.region", result.get());
+	}
+
+	@Test
+	void shouldOnlyReplaceMatchedSegmentWhenConfigured() {
+		String text = "Unknown or incomplete command, see below for error h<--[HERE]";
+		Optional<String> result = regexService.match(text, Locale.US);
+
+		assertTrue(result.isPresent());
+		assertEquals("Unknown test test, see below for error h<--[HERE]", result.get());
+	}
+
+	@Test
+	void shouldPreserveFormattingWhenReplacingMatchedPart() {
+		// Create a component with formatting: red "Unknown", yellow "or incomplete command", green rest
+		Component original = Component.text()
+				.append(Component.text("Unknown ", NamedTextColor.RED, TextDecoration.BOLD))
+				.append(Component.text("or incomplete command", NamedTextColor.YELLOW))
+				.append(Component.text(", see below for error h<--[HERE]", NamedTextColor.GREEN))
+				.build();
+
+		// Extract plain text for matching
+		String plainText = PlainTextComponentSerializer.plainText().serialize(original);
+		assertEquals("Unknown or incomplete command, see below for error h<--[HERE]", plainText);
+
+		// Match against the regex pattern to get details
+		Optional<RegexMatchingService.MatchDetails> matchDetails = regexService.matchWithDetails(plainText, Locale.US);
+		assertTrue(matchDetails.isPresent());
+
+		RegexMatchingService.MatchDetails details = matchDetails.get();
+		assertTrue(details.replaceMatched());
+		assertEquals("test test", details.resolvedText());
+
+		// Find the match position - "or incomplete command" starts at index 8
+		int matchStart = plainText.indexOf("or incomplete command");
+		int matchEnd = matchStart + "or incomplete command".length();
+		assertEquals(matchStart, details.matchStart());
+		assertEquals(matchEnd, details.matchEnd());
+
+		// Replace only the matched part, preserving formatting
+		Component result = ComponentHelper.replaceTextRange(original, matchStart, matchEnd, details.resolvedText());
+
+		// Verify the plain text is correct
+		String resultText = PlainTextComponentSerializer.plainText().serialize(result);
+		assertEquals("Unknown test test, see below for error h<--[HERE]", resultText);
+
+		// Extract components to verify structure
+		List<Component> children = new ArrayList<>();
+		extractComponents(result, children);
+
+		// Should have at least 3 parts: "Unknown ", "test test", and ", see below..."
+		assertTrue(children.size() >= 2, "Result should have multiple components");
+
+		// Check first component (should be "Unknown " with red and bold)
+		Component first = children.get(0);
+		if (first instanceof TextComponent textComp)
+			assertTrue(textComp.content().startsWith("Unknown"), "First part should start with 'Unknown'");
+
+		// Verify the replacement text is present
+		String fullResult = PlainTextComponentSerializer.plainText().serialize(result);
+		assertTrue(fullResult.contains("test test"), "Result should contain replacement text");
+		assertTrue(fullResult.contains("Unknown"), "Result should contain 'Unknown'");
+		assertTrue(fullResult.contains(", see below"), "Result should contain rest of message");
+	}
+
+	/**
+	 * Helper to extract all text components from a component tree.
+	 */
+	private void extractComponents(Component component, List<Component> result) {
+		if (component instanceof TextComponent textComp)
+			if (!textComp.content().isEmpty())
+				result.add(component);
+
+		for (Component child : component.children())
+			extractComponents(child, result);
 	}
 }

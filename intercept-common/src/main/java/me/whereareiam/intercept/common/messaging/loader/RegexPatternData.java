@@ -28,4 +28,11 @@ public class RegexPatternData {
 	 * Default is 0.
 	 */
 	private int priority = 0;
+
+	/**
+	 * When true, only the matched portion of the intercepted text should be replaced
+	 * with the resolved message. When false (default), the whole intercepted message
+	 * will be replaced.
+	 */
+	private boolean replaceMatched = false;
 }

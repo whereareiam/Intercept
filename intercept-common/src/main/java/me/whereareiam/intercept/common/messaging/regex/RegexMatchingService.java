@@ -92,6 +92,28 @@ public class RegexMatchingService implements Reloadable {
 	}
 
 	/**
+	 * Try to match text against all registered regex patterns and return match details.
+	 * This method returns detailed information needed for component replacement with formatting preservation.
+	 *
+	 * @param text   the text to match
+	 * @param locale the locale for message resolution
+	 * @return match details including resolved text and match positions, or empty if no match
+	 */
+	public Optional<MatchDetails> matchWithDetails(String text, Locale locale) {
+		Settings settings = settingsProvider.get();
+		// Check if regex is enabled
+		if (!settings.getPerformance().getRegex().isEnabled()) return Optional.empty();
+
+		Logger.debug("[Regex] Received message to match: \"%s\"", text);
+
+		// Build pattern index if not built yet
+		if (patternIndex == null) buildPatternIndex();
+
+		// Try to match patterns
+		return tryMatchPatternsWithDetails(text, locale);
+	}
+
+	/**
 	 * Try to match text against all patterns in the index.
 	 */
 	private Optional<String> tryMatchPatterns(String text, Locale locale) {
@@ -100,7 +122,7 @@ public class RegexMatchingService implements Reloadable {
 			// Literal prefix optimization
 			if (settings.getPerformance().getRegex().isUseLiteralPrefix()) {
 				if (!candidate.pattern.hasLiteralPrefix(text)) {
-					Logger.debug("[Regex] Pattern \"%s\" (key: %s) - literal prefix check failed, skipped", 
+					Logger.debug("[Regex] Pattern \"%s\" (key: %s) - literal prefix check failed, skipped",
 							candidate.pattern.getRegex(), candidate.key);
 					continue; // Skip pattern if prefix doesn't match
 				}
@@ -108,7 +130,7 @@ public class RegexMatchingService implements Reloadable {
 
 			// Try to match
 			long startTime = System.nanoTime();
-			Optional<Map<String, Object>> placeholders = candidate.pattern.match(text);
+			Optional<CompiledRegexPattern.MatchResult> matchResult = candidate.pattern.match(text);
 			long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
 
 			// Warn about slow patterns
@@ -117,17 +139,72 @@ public class RegexMatchingService implements Reloadable {
 						candidate.key + "': took " + elapsedMs + "ms");
 			}
 
-			if (placeholders.isPresent()) {
+			if (matchResult.isPresent()) {
+				CompiledRegexPattern.MatchResult result = matchResult.get();
+				Map<String, Object> placeholders = result.placeholders();
 				// Match found! Resolve the message
-				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - MATCHED with placeholders: %s", 
-						candidate.pattern.getRegex(), candidate.key, placeholders.get());
-				return Optional.of(
-						messageService.resolve(candidate.key, locale, placeholders.get())
-				);
-			} else {
-				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - no match", 
-						candidate.pattern.getRegex(), candidate.key);
+				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - MATCHED with placeholders: %s",
+						candidate.pattern.getRegex(), candidate.key, placeholders);
+
+				String resolved = messageService.resolve(candidate.key, locale, placeholders);
+
+				String finalText = resolved;
+				if (candidate.pattern.isReplaceMatched())
+					finalText = text.substring(0, result.start()) +
+							resolved +
+							text.substring(result.end());
+
+				return Optional.of(finalText);
 			}
+
+			Logger.debug("[Regex] Pattern \"%s\" (key: %s) - no match",
+					candidate.pattern.getRegex(), candidate.key);
+		}
+
+		Logger.debug("[Regex] No patterns matched for message: \"%s\"", text);
+		return Optional.empty();
+	}
+
+	/**
+	 * Try to match text against all patterns in the index and return match details.
+	 */
+	private Optional<MatchDetails> tryMatchPatternsWithDetails(String text, Locale locale) {
+		Settings settings = settingsProvider.get();
+		for (PatternMatch candidate : patternIndex) {
+			// Literal prefix optimization
+			if (settings.getPerformance().getRegex().isUseLiteralPrefix()) {
+				if (!candidate.pattern.hasLiteralPrefix(text)) {
+					Logger.debug("[Regex] Pattern \"%s\" (key: %s) - literal prefix check failed, skipped",
+							candidate.pattern.getRegex(), candidate.key);
+					continue; // Skip pattern if prefix doesn't match
+				}
+			}
+
+			// Try to match
+			long startTime = System.nanoTime();
+			Optional<CompiledRegexPattern.MatchResult> matchResult = candidate.pattern.match(text);
+			long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
+
+			// Warn about slow patterns
+			if (elapsedMs > settings.getPerformance().getRegex().getWarnSlowPatternsMs())
+				Logger.warn("Slow regex pattern detected for key '" +
+						candidate.key + "': took " + elapsedMs + "ms");
+
+			if (matchResult.isPresent()) {
+				CompiledRegexPattern.MatchResult result = matchResult.get();
+				Map<String, Object> placeholders = result.placeholders();
+				// Match found! Resolve the message
+				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - MATCHED with placeholders: %s",
+						candidate.pattern.getRegex(), candidate.key, placeholders);
+
+				String resolved = messageService.resolve(candidate.key, locale, placeholders);
+				boolean replaceMatched = candidate.pattern.isReplaceMatched();
+
+				return Optional.of(new MatchDetails(resolved, result.start(), result.end(), replaceMatched));
+			}
+
+			Logger.debug("[Regex] Pattern \"%s\" (key: %s) - no match",
+					candidate.pattern.getRegex(), candidate.key);
 		}
 
 		Logger.debug("[Regex] No patterns matched for message: \"%s\"", text);
@@ -174,6 +251,17 @@ public class RegexMatchingService implements Reloadable {
 	public void reload() {
 		patternIndex = null;
 		resultCache.clear();
+	}
+
+	/**
+	 * Result of a regex match with component replacement details.
+	 *
+	 * @param resolvedText   the resolved message text
+	 * @param matchStart     start index of the match in the original text (if replaceMatched is true)
+	 * @param matchEnd       end index of the match in the original text (if replaceMatched is true)
+	 * @param replaceMatched whether only the matched part should be replaced
+	 */
+	public record MatchDetails(String resolvedText, int matchStart, int matchEnd, boolean replaceMatched) {
 	}
 
 	/**
