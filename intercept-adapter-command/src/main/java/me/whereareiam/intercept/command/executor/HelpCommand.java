@@ -9,6 +9,8 @@ import me.whereareiam.commandant.Help;
 import me.whereareiam.commandant.Pagination;
 import me.whereareiam.commandant.builder.HelpBuilder;
 import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.intercept.Registry;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
@@ -23,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Singleton
-public class HelpCommand implements Command<Actor> {
+public class HelpCommand implements Command<Actor>, Reloadable {
 	private static final String COMMAND_NAME = "help";
 	private final Provider<Commands> commandsProvider;
 	private final Provider<Messages> messagesProvider;
@@ -35,11 +37,13 @@ public class HelpCommand implements Command<Actor> {
 	public HelpCommand(
 			@NotNull Provider<Commands> commandsProvider,
 			@NotNull Provider<Messages> messagesProvider,
-			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider
+			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
+			@NotNull Registry<Reloadable> reloadableRegistry
 	) {
 		this.commandsProvider = commandsProvider;
 		this.messagesProvider = messagesProvider;
 		this.commandRegistrarProvider = commandRegistrarProvider;
+		reloadableRegistry.register(this);
 	}
 
 	@Override
@@ -109,5 +113,10 @@ public class HelpCommand implements Command<Actor> {
 				.stream()
 				.filter(command -> commandManager.hasPermission(sender, command.commandPermission().permissionString()))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void reload() {
+		helpBuilder = null;
 	}
 }
