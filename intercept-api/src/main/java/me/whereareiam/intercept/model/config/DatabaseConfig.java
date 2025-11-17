@@ -6,13 +6,13 @@ import lombok.ToString;
 import me.whereareiam.intercept.type.DatabaseType;
 
 /**
- * Database configuration for player data storage.
+ * DatabaseConfig configuration for player data storage.
  * Supports PostgreSQL and MariaDB databases.
  */
 @Getter
 @Setter
 @ToString
-public class Database {
+public class DatabaseConfig {
 	/**
 	 * Whether database support is enabled.
 	 * When disabled, database dependencies will not be loaded.
@@ -21,32 +21,32 @@ public class Database {
 	private boolean enabled;
 
 	/**
-	 * Database type to use.
+	 * DatabaseConfig type to use.
 	 */
 	private DatabaseType type;
 
 	/**
-	 * Database server hostname or IP address.
+	 * DatabaseConfig server hostname or IP address.
 	 */
 	private String host;
 
 	/**
-	 * Database server port.
+	 * DatabaseConfig server port.
 	 */
 	private int port;
 
 	/**
-	 * Database name to connect to.
+	 * DatabaseConfig name to connect to.
 	 */
 	private String database;
 
 	/**
-	 * Database username for authentication.
+	 * DatabaseConfig username for authentication.
 	 */
 	private String username;
 
 	/**
-	 * Database password for authentication.
+	 * DatabaseConfig password for authentication.
 	 */
 	private String password;
 

@@ -2,14 +2,14 @@ package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
-import me.whereareiam.intercept.model.config.Database;
+import me.whereareiam.intercept.model.config.DatabaseConfig;
 import me.whereareiam.intercept.type.DatabaseType;
 
 @Singleton
-public class DatabaseTemplate implements TemplateProvider<Database> {
+public class DatabaseTemplate implements TemplateProvider<DatabaseConfig> {
 	@Override
-	public Database supply(Database config) {
-		// Database disabled by default
+	public DatabaseConfig supply(DatabaseConfig config) {
+		// DatabaseConfig disabled by default
 		config.setEnabled(false);
 
 		// Default to PostgreSQL
@@ -20,11 +20,10 @@ public class DatabaseTemplate implements TemplateProvider<Database> {
 		config.setUsername("intercept");
 		config.setPassword("");
 
-		// Default table prefix (empty = no prefix)
-		config.setTablePrefix("");
+		config.setTablePrefix("intercept_");
 
 		// Initialize HikariCP settings with recommended defaults
-		Database.Hikari hikari = new Database.Hikari();
+		DatabaseConfig.Hikari hikari = new DatabaseConfig.Hikari();
 		hikari.setPoolName("Intercept");
 		hikari.setMaximumPoolSize(10);
 		hikari.setMinimumIdle(2);

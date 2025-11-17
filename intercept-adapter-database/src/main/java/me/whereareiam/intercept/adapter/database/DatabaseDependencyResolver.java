@@ -5,8 +5,7 @@ import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.attache.model.Library;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.DependencyResolver;
-import me.whereareiam.intercept.model.config.Database;
-import me.whereareiam.intercept.type.DatabaseType;
+import me.whereareiam.intercept.model.config.DatabaseConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DatabaseDependencyResolver implements DependencyResolver {
 	private final LibraryManager libraryManager;
-	private final Database databaseConfig;
+	private final DatabaseConfig databaseConfig;
 	private final List<Library> libraries = new ArrayList<>();
 
 	@Override
@@ -51,9 +50,16 @@ public class DatabaseDependencyResolver implements DependencyResolver {
 				.resolveTransitiveDependencies(true)
 				.build());
 
-		// Database driver - only load the selected type
-		DatabaseType dbType = databaseConfig.getType() != null ? databaseConfig.getType() : DatabaseType.POSTGRES;
-		switch (dbType) {
+		// HikariCP connection pool
+		addDependency(Library.builder()
+				.groupId("com{}zaxxer")
+				.artifactId("HikariCP")
+				.version(Constants.Dependency.HIKARICP)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		// DatabaseConfig driver - only load the selected type
+		switch (databaseConfig.getType()) {
 			case POSTGRES:
 				addDependency(Library.builder()
 						.groupId("org{}postgresql")

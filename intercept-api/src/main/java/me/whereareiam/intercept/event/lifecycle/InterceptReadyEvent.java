@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.event.lifecycle;
 
-import me.whereareiam.intercept.event.base.Event;
+import me.whereareiam.intercept.event.base.SynchronousEvent;
 
 /**
  * Event called when the Intercept plugin is fully ready.
@@ -13,6 +13,6 @@ import me.whereareiam.intercept.event.base.Event;
  * This event is useful for modules or components that need to perform
  * actions after the plugin is enabled but before the complete startup.
  */
-public class InterceptReadyEvent implements Event {
+public class InterceptReadyEvent implements SynchronousEvent {
 }
 

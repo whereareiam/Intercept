@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.event.lifecycle;
 
-import me.whereareiam.intercept.event.base.Event;
+import me.whereareiam.intercept.event.base.SynchronousEvent;
 
 /**
  * Event called when the Intercept plugin finishes bootstrapping.
@@ -14,6 +14,6 @@ import me.whereareiam.intercept.event.base.Event;
  * This event is useful for modules or components that need to perform
  * initialization tasks that depend on the core infrastructure being ready.
  */
-public class InterceptBootstrappedEvent implements Event {
+public class InterceptBootstrappedEvent implements SynchronousEvent {
 }
 
