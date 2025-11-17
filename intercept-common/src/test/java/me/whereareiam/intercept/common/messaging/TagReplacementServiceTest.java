@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Provider;
+import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.messaging.MessageService;
@@ -10,6 +11,9 @@ import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.keystone.Serializers;
+import me.whereareiam.keystone.model.SerializerOptions;
+import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -33,6 +37,16 @@ class TagReplacementServiceTest {
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		messages = new MessagesTemplate().supply(new Messages());
 		MessageService messageService = new DefaultMessageService(registry, settings);
+
+		// Initialize Serializer for tests
+		SerializerOptions options = SerializerOptions.builder()
+				.defaultAdapter("MINIMESSAGE")
+				.prefixSupplier(messages::getPrefix)
+				.enableLegacyColors(false)
+				.enablePlayerNamePlaceholder(true)
+				.build();
+		SerializerEngine engine = Serializers.createEngine(options);
+		Serializer.initialize(() -> engine);
 
 		Provider<Messages> messagesProvider = () -> messages;
 		tagService = new DefaultTagReplacementService(messageService, messagesProvider);
