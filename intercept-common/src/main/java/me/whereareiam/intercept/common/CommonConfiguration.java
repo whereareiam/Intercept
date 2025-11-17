@@ -12,6 +12,7 @@ import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultActionBarInterceptionProcessor;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
+import me.whereareiam.intercept.common.interceptor.processor.DefaultKickInterceptionProcessor;
 import me.whereareiam.intercept.common.listener.InspectionModeEnhancer;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
@@ -32,6 +33,7 @@ import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
+import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
@@ -100,6 +102,7 @@ public class CommonConfiguration extends AbstractModule {
 		bind(InterceptorRegistry.class).asEagerSingleton();
 		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
 		bind(ActionBarInterceptionProcessor.class).to(DefaultActionBarInterceptionProcessor.class).asEagerSingleton();
+		bind(KickInterceptionProcessor.class).to(DefaultKickInterceptionProcessor.class).asEagerSingleton();
 		bind(InterceptorService.class).asEagerSingleton();
 		// Updater
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))

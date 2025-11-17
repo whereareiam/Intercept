@@ -27,6 +27,12 @@ public enum ComponentType {
 	ACTION_BAR,
 
 	/**
+	 * Kick/disconnect messages sent to players when they are kicked from the server.
+	 * The reason component in disconnect packets is intercepted and translated.
+	 */
+	KICK,
+
+	/**
 	 * Unknown or unspecified source.
 	 * Used when the component type is not known or when processing messages outside interception context.
 	 */

@@ -6,8 +6,10 @@ import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
+import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.actionbar.PacketEventsActionBarInterceptionProcessor;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.chat.PacketEventsChatInterceptionProcessor;
+import me.whereareiam.intercept.platform.common.interceptor.packetevents.kick.PacketEventsKickInterceptionProcessor;
 import me.whereareiam.intercept.type.ComponentType;
 import org.bukkit.Bukkit;
 
@@ -28,6 +30,7 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 
 	private final ChatInterceptionProcessor chatInterceptionProcessor;
 	private final ActionBarInterceptionProcessor actionBarInterceptionProcessor;
+	private final KickInterceptionProcessor kickInterceptionProcessor;
 
 	private PacketEventsPacketRouter router;
 
@@ -50,7 +53,7 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 
 	@Override
 	public Set<ComponentType> getSupportedComponents() {
-		return EnumSet.of(ComponentType.CHAT, ComponentType.ACTION_BAR);
+		return EnumSet.of(ComponentType.CHAT, ComponentType.ACTION_BAR, ComponentType.KICK);
 	}
 
 	@Override
@@ -63,6 +66,7 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 		Interceptor interceptor = switch (type) {
 			case CHAT -> new PacketEventsChatInterceptionProcessor(chatInterceptionProcessor);
 			case ACTION_BAR -> new PacketEventsActionBarInterceptionProcessor(actionBarInterceptionProcessor);
+			case KICK -> new PacketEventsKickInterceptionProcessor(kickInterceptionProcessor);
 			case UNKNOWN -> throw new IllegalArgumentException("Cannot create interceptor for UNKNOWN component type");
 		};
 
@@ -72,4 +76,3 @@ public class PacketEventsInterceptorProvider implements InterceptorProvider {
 		return interceptor;
 	}
 }
-

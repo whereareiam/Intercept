@@ -9,7 +9,6 @@ import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.base.IntercepticEvent;
 import me.whereareiam.intercept.event.interception.ProcessedEvent;
-import me.whereareiam.intercept.event.interception.actionbar.ActionBarProcessedEvent;
 import me.whereareiam.intercept.event.interception.chat.ChatProcessedEvent;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.interception.InterceptionContext;
@@ -49,11 +48,6 @@ public class InspectionModeEnhancer implements EventListener {
 
 	@IntercepticEvent
 	public void onChatProcessed(ChatProcessedEvent event) {
-		enhanceIfInspectionModeEnabled(event);
-	}
-
-	@IntercepticEvent
-	public void onActionBarProcessed(ActionBarProcessedEvent event) {
 		enhanceIfInspectionModeEnabled(event);
 	}
 

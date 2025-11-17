@@ -29,6 +29,13 @@ public class InterceptionConfigTemplate implements TemplateProvider<Interception
 		actionBar.setRegex(false);
 		components.put(ComponentType.ACTION_BAR, actionBar);
 
+		// Setup kick component interception
+		InterceptedComponent kick = new InterceptedComponent();
+		kick.setEnabled(true);
+		kick.setTag("<lang>");
+		kick.setRegex(false);
+		components.put(ComponentType.KICK, kick);
+
 		config.setComponents(components);
 
 		return config;
