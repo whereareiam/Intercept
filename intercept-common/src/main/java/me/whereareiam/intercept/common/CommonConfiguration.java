@@ -22,10 +22,7 @@ import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingServi
 import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
-import me.whereareiam.intercept.common.provider.config.CommandsProvider;
-import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
-import me.whereareiam.intercept.common.provider.config.MessagesProvider;
-import me.whereareiam.intercept.common.provider.config.SettingsProvider;
+import me.whereareiam.intercept.common.provider.config.*;
 import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
 import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
@@ -38,10 +35,7 @@ import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
-import me.whereareiam.intercept.model.config.Commands;
-import me.whereareiam.intercept.model.config.Interception;
-import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.config.*;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ProviderType;
@@ -75,6 +69,8 @@ public class CommonConfiguration extends AbstractModule {
 		// Configs
 		bind(SettingsProvider.class).asEagerSingleton();
 		bind(Settings.class).toProvider(SettingsProvider.class);
+		bind(DatabaseProvider.class).asEagerSingleton();
+		bind(Database.class).toProvider(DatabaseProvider.class);
 		bind(MessagesProvider.class).asEagerSingleton();
 		bind(Messages.class).toProvider(MessagesProvider.class);
 		bind(CommandsProvider.class).asEagerSingleton();

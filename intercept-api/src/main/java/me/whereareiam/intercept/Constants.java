@@ -19,5 +19,10 @@ public final class Constants {
 		public static final String CLOUD_COOLDOWN = BuildConfig.CLOUD_COOLDOWN;
 		public static final String CLOUD_PAPER = BuildConfig.CLOUD_PAPER;
 		public static final String CLOUD_MINECRAFT_EXTRAS = BuildConfig.CLOUD_MINECRAFT_EXTRAS;
+
+		// Database
+		public static final String EBEAN = BuildConfig.EBEAN;
+		public static final String POSTGRESQL = BuildConfig.POSTGRESQL;
+		public static final String MARIADB = BuildConfig.MARIADB;
 	}
 }
