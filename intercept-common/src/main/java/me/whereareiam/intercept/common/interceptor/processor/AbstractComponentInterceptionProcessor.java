@@ -2,15 +2,16 @@ package me.whereareiam.intercept.common.interceptor.processor;
 
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.common.messaging.regex.RegexMatchingService;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.common.util.TagParser;
 import me.whereareiam.intercept.logging.InterceptionHelper;
+import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.interception.InterceptionContext;
+import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.type.ComponentType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
@@ -83,25 +84,25 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 
 		// Step 2: Try regex matching (fallback method)
 		if (componentConfig.isRegex() && isRegexEnabled()) {
-			Optional<RegexMatchingService.MatchDetails> matchDetails = regexMatchingService.matchWithDetails(plainText, context.getLocale());
+			Optional<MatchDetails> matchDetails = regexMatchingService.matchWithDetails(plainText, context.getLocale());
 
 			if (matchDetails.isPresent()) {
-				RegexMatchingService.MatchDetails details = matchDetails.get();
+				MatchDetails details = matchDetails.get();
 				Component resolved;
-				
-				if (details.replaceMatched()) {
+
+				if (details.isReplaceMatched()) {
 					// Replace only the matched part, preserving formatting
 					resolved = ComponentHelper.replaceTextRange(
 							message,
-							details.matchStart(),
-							details.matchEnd(),
-							details.resolvedText()
+							details.getMatchStart(),
+							details.getMatchEnd(),
+							details.getResolvedText()
 					);
 				} else {
 					// Replace entire message (backward compatibility)
-					resolved = ComponentHelper.replaceEntireText(details.resolvedText());
+					resolved = ComponentHelper.replaceEntireText(details.getResolvedText());
 				}
-				
+
 				return InterceptionHelper.modify(resolved);
 			}
 		}

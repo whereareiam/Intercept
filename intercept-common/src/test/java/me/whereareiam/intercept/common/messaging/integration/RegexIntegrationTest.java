@@ -12,14 +12,16 @@ import me.whereareiam.intercept.common.messaging.loader.MessageFileData;
 import me.whereareiam.intercept.common.messaging.loader.MessageFileLoader;
 import me.whereareiam.intercept.common.messaging.loader.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
-import me.whereareiam.intercept.common.messaging.regex.RegexMatchingService;
+import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageService;
-import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.model.regex.MatchDetails;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -77,7 +79,7 @@ class RegexIntegrationTest {
 
 		// Create regex matching service with Provider
 		Provider<Settings> settingsProvider = () -> settings;
-		regexService = new RegexMatchingService(registry, messageService, settingsProvider, mockRegistry);
+		regexService = new DefaultRegexMatchingService(registry, messageService, settingsProvider, mockRegistry);
 	}
 
 	private void loadTestMessages() throws URISyntaxException {
@@ -207,21 +209,21 @@ class RegexIntegrationTest {
 		assertEquals("Unknown or incomplete command, see below for error h<--[HERE]", plainText);
 
 		// Match against the regex pattern to get details
-		Optional<RegexMatchingService.MatchDetails> matchDetails = regexService.matchWithDetails(plainText, Locale.US);
+		Optional<MatchDetails> matchDetails = regexService.matchWithDetails(plainText, Locale.US);
 		assertTrue(matchDetails.isPresent());
 
-		RegexMatchingService.MatchDetails details = matchDetails.get();
-		assertTrue(details.replaceMatched());
-		assertEquals("test test", details.resolvedText());
+		MatchDetails details = matchDetails.get();
+		assertTrue(details.isReplaceMatched());
+		assertEquals("test test", details.getResolvedText());
 
 		// Find the match position - "or incomplete command" starts at index 8
 		int matchStart = plainText.indexOf("or incomplete command");
 		int matchEnd = matchStart + "or incomplete command".length();
-		assertEquals(matchStart, details.matchStart());
-		assertEquals(matchEnd, details.matchEnd());
+		assertEquals(matchStart, details.getMatchStart());
+		assertEquals(matchEnd, details.getMatchEnd());
 
 		// Replace only the matched part, preserving formatting
-		Component result = ComponentHelper.replaceTextRange(original, matchStart, matchEnd, details.resolvedText());
+		Component result = ComponentHelper.replaceTextRange(original, matchStart, matchEnd, details.getResolvedText());
 
 		// Verify the plain text is correct
 		String resultText = PlainTextComponentSerializer.plainText().serialize(result);

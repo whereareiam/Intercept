@@ -25,7 +25,7 @@ class RegexMatchingServiceReloadTest {
 	private MessageService messageService;
 	private Provider<Settings> settingsProvider;
 	private Registry<Reloadable> reloadableRegistry;
-	private RegexMatchingService regexMatchingService;
+	private DefaultRegexMatchingService regexMatchingService;
 
 	@BeforeEach
 	void setUp() {
@@ -37,7 +37,7 @@ class RegexMatchingServiceReloadTest {
 		Settings mockSettings = createMockSettings();
 		when(settingsProvider.get()).thenReturn(mockSettings);
 
-		regexMatchingService = new RegexMatchingService(
+		regexMatchingService = new DefaultRegexMatchingService(
 				registry,
 				messageService,
 				settingsProvider,
@@ -77,7 +77,7 @@ class RegexMatchingServiceReloadTest {
 		when(settingsProvider.get()).thenReturn(settings);
 
 		// Create new service with caching enabled
-		RegexMatchingService serviceWithCache = new RegexMatchingService(
+		DefaultRegexMatchingService serviceWithCache = new DefaultRegexMatchingService(
 				registry,
 				messageService,
 				settingsProvider,
@@ -129,7 +129,7 @@ class RegexMatchingServiceReloadTest {
 		when(settings.getPerformance().getRegex().isEnabled()).thenReturn(false);
 		when(settingsProvider.get()).thenReturn(settings);
 
-		RegexMatchingService disabledService = new RegexMatchingService(
+		DefaultRegexMatchingService disabledService = new DefaultRegexMatchingService(
 				registry,
 				messageService,
 				settingsProvider,

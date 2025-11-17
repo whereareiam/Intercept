@@ -4,7 +4,7 @@ import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.ArrayList;

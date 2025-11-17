@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.messaging.regex;
+package me.whereareiam.intercept.model.regex;
 
 import lombok.Getter;
 
@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * Optimized for performance with literal prefix extraction and caching.
  */
 @Getter
-	public class CompiledRegexPattern {
+public class CompiledRegexPattern {
 	private final Pattern pattern;
 	private final String regex;
 	private final Map<String, String> placeholders;
@@ -24,9 +24,9 @@ import java.util.regex.Pattern;
 	/**
 	 * Create a compiled regex pattern.
 	 *
-	 * @param regex              the regex pattern string
-	 * @param placeholders       map of placeholder names to capture group references (e.g., "$1", "$2")
-	 * @param priority           priority for pattern matching (higher = checked first)
+	 * @param regex          the regex pattern string
+	 * @param placeholders   map of placeholder names to capture group references (e.g., "$1", "$2")
+	 * @param priority       priority for pattern matching (higher = checked first)
 	 * @param replaceMatched whether only the matched substring should be replaced
 	 */
 	public CompiledRegexPattern(String regex, Map<String, String> placeholders, int priority, boolean replaceMatched) {

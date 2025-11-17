@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.common.messaging.regex;
 
-import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

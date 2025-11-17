@@ -2,7 +2,7 @@ package me.whereareiam.intercept.common.messaging;
 
 import lombok.Getter;
 import me.whereareiam.intercept.messaging.MessageEntry;
-import me.whereareiam.intercept.messaging.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
