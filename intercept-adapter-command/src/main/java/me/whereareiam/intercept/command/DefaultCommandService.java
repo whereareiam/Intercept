@@ -10,6 +10,7 @@ import me.whereareiam.commandant.Commandant;
 import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.command.executor.HelpCommand;
 import me.whereareiam.intercept.command.executor.MainCommand;
+import me.whereareiam.intercept.command.executor.ReloadCommand;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.serializer.SerializerEngine;
@@ -31,7 +32,8 @@ public class DefaultCommandService implements CommandService {
 
 	@SuppressWarnings("unchecked")
 	private final Class<Command<Actor>>[] commands = new Class[]{
-			HelpCommand.class
+			HelpCommand.class,
+			ReloadCommand.class
 	};
 
 	@Inject

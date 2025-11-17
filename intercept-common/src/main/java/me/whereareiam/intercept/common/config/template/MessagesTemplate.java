@@ -66,6 +66,12 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		commands.setHelp(helpMessages);
 
+		// Configure reload command messages
+		Messages.Commands.Reload reload = new Messages.Commands.Reload();
+		reload.setSuccess("{prefix}<white>Configuration reloaded <green>successfully</green>!");
+		reload.setError("{prefix}<white>An <red>error occurred</red> while reloading: <gray>{error}</gray>");
+		commands.setReload(reload);
+
 		// Configure custom argument names
 		commands.setArguments(Map.of(
 				"page", "page"

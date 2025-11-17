@@ -35,8 +35,21 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 						.build())
 				.build();
 
+		// Reload command definition (subcommand)
+		CommandDefinition reload = CommandDefinition.builder()
+				.enabled(true)
+				.aliases(List.of("reload", "r"))
+				.permission("")
+				.description("Reload all configuration and resources")
+				.usage("{command} {alias}")
+				.cooldown(CommandDefinition.Cooldown.builder()
+						.enabled(false)
+						.build())
+				.build();
+
 		commands.getCommands().put("main", main);
 		commands.getCommands().put("help", help);
+		commands.getCommands().put("reload", reload);
 
 		return commands;
 	}

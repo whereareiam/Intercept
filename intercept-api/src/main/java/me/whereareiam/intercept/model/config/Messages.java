@@ -54,13 +54,40 @@ public class Messages {
 		 * Help command formatting configuration from Commandant
 		 */
 		private HelpMessages help;
-
 		/**
 		 * Custom argument display names (project-specific)
 		 * Key: argument name (e.g., "page")
 		 * Value: display name (e.g., "page number")
 		 */
 		private Map<String, String> arguments;
+
+		/**
+		 * Reload command messages
+		 */
+		private Reload reload;
+
+		/**
+		 * Configuration for reload command messages.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Reload {
+			/**
+			 * Success message when reload completes successfully.
+			 * Placeholders:
+			 * - {prefix}: The global message prefix
+			 */
+			private String success;
+
+			/**
+			 * Error message when reload fails.
+			 * Placeholders:
+			 * - {prefix}: The global message prefix
+			 * - {error}: The error message
+			 */
+			private String error;
+		}
 	}
 
 	/**
