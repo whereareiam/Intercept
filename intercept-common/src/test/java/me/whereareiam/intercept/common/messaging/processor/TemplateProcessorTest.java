@@ -22,9 +22,9 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldApplyTemplateWithSingleParameter() {
-		registry.register("error-format", new DefaultMessageEntry(MessageType.TEMPLATE, "✗ <p:message>"));
+		registry.register("error.format", new DefaultMessageEntry(MessageType.TEMPLATE, "✗ <p:message>"));
 
-		String text = "<tpl:error-format message='Something went wrong'>";
+		String text = "<tpl:error.format message='Something went wrong'>";
 		String result = processor.process(text, "en_US");
 		assertEquals("✗ Something went wrong", result); // Parameters are applied during template expansion
 	}

@@ -81,8 +81,8 @@ class FileLoadingIntegrationTest {
 		loadFile(messagesRoot.resolve("common/styles.yml"));
 
 		assertTrue(registry.exists("common.styles.prefix"));
-		assertTrue(registry.exists("common.styles.error-format"));
-		assertTrue(registry.exists("common.styles.error-box"));
+		assertTrue(registry.exists("common.styles.error.format"));
+		assertTrue(registry.exists("common.styles.error.box"));
 	}
 
 	@Test
@@ -91,10 +91,10 @@ class FileLoadingIntegrationTest {
 		loadFile(messagesRoot.resolve("common/styles.yml"));
 		loadFile(messagesRoot.resolve("errors/permissions.yml"));
 
-		assertTrue(registry.exists("errors.permissions.no-permission"));
+		assertTrue(registry.exists("errors.permissions.no.permission"));
 
-		String enText = registry.get("errors.permissions.no-permission").getText("en_US");
-		String deText = registry.get("errors.permissions.no-permission").getText("de_DE");
+		String enText = registry.get("errors.permissions.no.permission").getText("en_US");
+		String deText = registry.get("errors.permissions.no.permission").getText("de_DE");
 
 		assertNotNull(enText);
 		assertNotNull(deText);
@@ -107,7 +107,7 @@ class FileLoadingIntegrationTest {
 		loadAllFiles();
 
 		String result = service.resolve(
-				"errors.permissions.no-permission",
+				"errors.permissions.no.permission",
 				Locale.US,
 				Map.of("permission", "intercept.admin")
 		);
@@ -122,7 +122,7 @@ class FileLoadingIntegrationTest {
 		loadAllFiles();
 
 		String result = service.resolve(
-				"errors.permissions.rank-required",
+				"errors.permissions.rank.required",
 				Locale.US,
 				Map.of("rank", "ADMIN")
 		);
@@ -152,7 +152,7 @@ class FileLoadingIntegrationTest {
 		loadAllFiles();
 
 		String result = service.resolve(
-				"errors.permissions.no-permission",
+				"errors.permissions.no.permission",
 				Locale.GERMANY,
 				Map.of("permission", "intercept.admin")
 		);

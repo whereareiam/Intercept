@@ -360,6 +360,45 @@ class TagReplacementServiceTest {
 		assertNotNull(result);
 	}
 
+	@Test
+	void shouldNormalizeHyphensToDotsOnRegistration() {
+		// Register with hyphen - should be normalized to dots
+		registry.register("player-joined", new DefaultMessageEntry(MessageType.MESSAGE, "<p:name> joined the game!"));
+		// Reference with dot notation (normalized format)
+		Component input = Component.text("<lang key=\"player.joined\" name=\"Steve\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+
+		String plainText = extractPlainText(result);
+		assertEquals("Steve joined the game!", plainText);
+	}
+
+	@Test
+	void shouldWorkWithDotNotationDirectly() {
+		// Register with dots directly - should work without normalization
+		registry.register("player.joined", new DefaultMessageEntry(MessageType.MESSAGE, "Player joined"));
+		// Reference with same dot notation
+		Component input = Component.text("<lang key=\"player.joined\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+
+		String plainText = extractPlainText(result);
+		assertEquals("Player joined", plainText);
+	}
+
+	@Test
+	void shouldHandleMultipleDotsInKey() {
+		// Register key with hyphens
+		registry.register("error-permission-denied", new DefaultMessageEntry(MessageType.MESSAGE, "Permission denied"));
+		// Reference it with dots
+		Component input = Component.text("<lang key=\"error.permission.denied\">");
+
+		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+
+		String plainText = extractPlainText(result);
+		assertEquals("Permission denied", plainText);
+	}
+
 	// Helper method to extract plain text from component
 	private String extractPlainText(Component component) {
 		return PlainTextComponentSerializer.plainText().serialize(component);

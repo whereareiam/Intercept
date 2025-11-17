@@ -55,8 +55,8 @@ class DefaultMessageServiceTest {
 
 	@Test
 	void shouldResolveMessageWithTemplate() {
-		registry.register("error-fmt", new DefaultMessageEntry(MessageType.TEMPLATE, "ERROR: <p:msg>"));
-		registry.register("error", new DefaultMessageEntry(MessageType.MESSAGE, "<tpl:error-fmt msg='Failed'>"));
+		registry.register("error.fmt", new DefaultMessageEntry(MessageType.TEMPLATE, "ERROR: <p:msg>"));
+		registry.register("error", new DefaultMessageEntry(MessageType.MESSAGE, "<tpl:error.fmt msg='Failed'>"));
 
 		String result = service.resolve("error", Locale.US);
 		assertEquals("ERROR: Failed", result);
@@ -76,10 +76,10 @@ class DefaultMessageServiceTest {
 		// Setup
 		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[<p:app>]"));
 		registry.register("color", new DefaultMessageEntry(MessageType.TEMPLATE, "<red>"));
-		registry.register("error-fmt", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("error.fmt", new DefaultMessageEntry(MessageType.TEMPLATE,
 				"<m:color>ERROR: <p:message>"));
 		registry.register("error", new DefaultMessageEntry(MessageType.MESSAGE,
-				"<tpl:prefix app='System'> <tpl:error-fmt message='<p:details>'>"));
+				"<tpl:prefix app='System'> <tpl:error.fmt message='<p:details>'>"));
 
 		String result = service.resolve("error", Locale.US, Map.of("details", "Connection lost"));
 		assertEquals("[System] <red>ERROR: Connection lost", result);

@@ -103,7 +103,7 @@ class RegexIntegrationTest {
 
 	@Test
 	void shouldLoadRegexPatternsFromYAML() {
-		MessageEntry entry = registry.get("regex.patterns.permission-error");
+		MessageEntry entry = registry.get("regex.patterns.permission.error");
 		assertNotNull(entry);
 		assertTrue(entry.hasRegexPatterns());
 		assertEquals(2, entry.getRegexPatterns().size());

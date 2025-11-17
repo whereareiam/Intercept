@@ -41,25 +41,25 @@ class MessageResolutionIntegrationTest {
 		// Setup style templates
 		registry.register("styles.prefix", new DefaultMessageEntry(MessageType.TEMPLATE,
 				"<m:colors.primary>[Intercept]<reset>"));
-		registry.register("styles.player-name", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("styles.player.name", new DefaultMessageEntry(MessageType.TEMPLATE,
 				"<m:colors.primary><p:name><reset>"));
-		registry.register("styles.error-format", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("styles.error.format", new DefaultMessageEntry(MessageType.TEMPLATE,
 				"<m:colors.error>✗ <p:message>"));
 
 		// Setup messages
-		registry.register("errors.no-permission", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("errors.no.permission", new DefaultMessageEntry(MessageType.MESSAGE,
 				Map.of(
-						"en_US", "<m:styles.prefix> <tpl:styles.error-format message='You lack permission: <p:permission>'>",
-						"de_DE", "<m:styles.prefix> <tpl:styles.error-format message='Keine Berechtigung: <p:permission>'>"
+						"en_US", "<m:styles.prefix> <tpl:styles.error.format message='You lack permission: <p:permission>'>",
+						"de_DE", "<m:styles.prefix> <tpl:styles.error.format message='Keine Berechtigung: <p:permission>'>"
 				)));
 
 		// Resolve in English
-		String enResult = service.resolve("errors.no-permission", Locale.US,
+		String enResult = service.resolve("errors.no.permission", Locale.US,
 				Map.of("permission", "intercept.admin"));
 		assertEquals("<#5DADE2>[Intercept]<reset> <red>✗ You lack permission: intercept.admin", enResult);
 
 		// Resolve in German
-		String deResult = service.resolve("errors.no-permission", Locale.GERMANY,
+		String deResult = service.resolve("errors.no.permission", Locale.GERMANY,
 				Map.of("permission", "intercept.admin"));
 		assertEquals("<#5DADE2>[Intercept]<reset> <red>✗ Keine Berechtigung: intercept.admin", deResult);
 	}
@@ -67,24 +67,24 @@ class MessageResolutionIntegrationTest {
 	@Test
 	void shouldResolveComplexConditionalMessage() {
 		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[Server]"));
-		registry.register("player-status", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("player.status", new DefaultMessageEntry(MessageType.MESSAGE,
 				"<m:prefix> Player <p:player> is <if online==true><green>online<else><red>offline</if><if online==true> on server <p:server></if>"));
 
 		// Online player
-		String onlineResult = service.resolve("player-status", Locale.US,
+		String onlineResult = service.resolve("player.status", Locale.US,
 				Map.of("player", "Steve", "online", true, "server", "lobby"));
 		assertEquals("[Server] Player Steve is <green>online on server lobby", onlineResult);
 
 		// Offline player
-		String offlineResult = service.resolve("player-status", Locale.US,
+		String offlineResult = service.resolve("player.status", Locale.US,
 				Map.of("player", "Alex", "online", false));
 		assertEquals("[Server] Player Alex is <red>offline", offlineResult);
 	}
 
 	@Test
 	void shouldResolveNestedTemplates() {
-		registry.register("base-color", new DefaultMessageEntry(MessageType.TEMPLATE, "<yellow>"));
-		registry.register("wrapper", new DefaultMessageEntry(MessageType.TEMPLATE, "[<m:base-color><p:content>]"));
+		registry.register("base.color", new DefaultMessageEntry(MessageType.TEMPLATE, "<yellow>"));
+		registry.register("wrapper", new DefaultMessageEntry(MessageType.TEMPLATE, "[<m:base.color><p:content>]"));
 		registry.register("message", new DefaultMessageEntry(MessageType.MESSAGE,
 				"<tpl:wrapper content='Important'>"));
 
@@ -112,14 +112,14 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldHandleEmptyConditionals() {
-		registry.register("vip-welcome", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("vip.welcome", new DefaultMessageEntry(MessageType.MESSAGE,
 				"<if vip==true><gold>[VIP] </if>Welcome, <p:name>!"));
 
-		String vipResult = service.resolve("vip-welcome", Locale.US,
+		String vipResult = service.resolve("vip.welcome", Locale.US,
 				Map.of("vip", true, "name", "Steve"));
 		assertEquals("<gold>[VIP] Welcome, Steve!", vipResult);
 
-		String normalResult = service.resolve("vip-welcome", Locale.US,
+		String normalResult = service.resolve("vip.welcome", Locale.US,
 				Map.of("vip", false, "name", "Alex"));
 		assertEquals("Welcome, Alex!", normalResult);
 	}
@@ -158,13 +158,13 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldResolveNumericConditions() {
-		registry.register("health-status", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("health.status", new DefaultMessageEntry(MessageType.MESSAGE,
 				"Health: <if health>50><green>Good<else><red>Low</if> (<p:health>/100)"));
 
-		String goodHealth = service.resolve("health-status", Locale.US, Map.of("health", 75));
+		String goodHealth = service.resolve("health.status", Locale.US, Map.of("health", 75));
 		assertEquals("Health: <green>Good (75/100)", goodHealth);
 
-		String lowHealth = service.resolve("health-status", Locale.US, Map.of("health", 25));
+		String lowHealth = service.resolve("health.status", Locale.US, Map.of("health", 25));
 		assertEquals("Health: <red>Low (25/100)", lowHealth);
 	}
 }
