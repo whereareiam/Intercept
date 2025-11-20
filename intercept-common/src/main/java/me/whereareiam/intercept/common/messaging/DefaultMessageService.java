@@ -69,10 +69,9 @@ public class DefaultMessageService implements MessageService {
 		if (entry == null) return key;
 
 		// Get text for locale with fallback
-		String localeString = locale.toString();
-		String defaultLocale = settings.getPerformance() != null ? settings.getLocale().toString() : null;
+		Locale defaultLocale = settings.getPerformance() != null ? settings.getLocale() : null;
 		String text = entry.hasTranslations()
-				? entry.getText(localeString, defaultLocale, key)
+				? entry.getText(locale, defaultLocale, key)
 				: entry.getText();
 
 		// Check cache if enabled
@@ -81,12 +80,12 @@ public class DefaultMessageService implements MessageService {
 
 			// For static and semi-static, check cache
 			if (level != CacheLevel.DYNAMIC) {
-				CacheKey cacheKey = new CacheKey(key, localeString, placeholders);
+				CacheKey cacheKey = new CacheKey(key, locale, placeholders);
 				String cached = cache.get(cacheKey, level);
 				if (cached != null) return cached;
 
 				// Not in cache, resolve and cache it
-				String resolved = processMessage(text, localeString, placeholders);
+				String resolved = processMessage(text, locale, placeholders);
 				cache.put(cacheKey, resolved, level);
 
 				return resolved;
@@ -94,10 +93,10 @@ public class DefaultMessageService implements MessageService {
 		}
 
 		// Dynamic or cache disabled - process without caching
-		return processMessage(text, localeString, placeholders);
+		return processMessage(text, locale, placeholders);
 	}
 
-	private String processMessage(String text, String locale, Map<String, Object> placeholders) {
+	private String processMessage(String text, Locale locale, Map<String, Object> placeholders) {
 		// Processing pipeline (order matters!)
 		// 1. Templates (expand templates)
 		text = templateProcessor.process(text, locale);
@@ -125,7 +124,7 @@ public class DefaultMessageService implements MessageService {
 	}
 
 	@Override
-	public Set<String> getAvailableLocales(String key) {
+	public Set<Locale> getAvailableLocales(String key) {
 		MessageEntry entry = registry.get(key);
 		return entry != null ? entry.getLocales() : Set.of();
 	}

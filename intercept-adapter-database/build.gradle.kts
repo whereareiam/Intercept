@@ -2,9 +2,10 @@ dependencies {
     "compileOnly"(project(":intercept-api"))
     "testImplementation"(project(":intercept-api"))
 
-    // Ebean ORM
-    "compileOnly"(libs.ebean.core)
-    "compileOnly"(libs.ebean.api)
+    // OrmLite ORM - use implementation so classes can be accessed during build
+    // OrmLite runtime libraries are still loaded via LibraryManager at runtime
+    "implementation"(libs.ormlite.core)
+    "implementation"(libs.ormlite.jdbc)
 
     // Connection pooling
     "compileOnly"(libs.hikaricp)

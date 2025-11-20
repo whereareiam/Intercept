@@ -69,8 +69,8 @@ public class CommonConfiguration extends AbstractModule {
 		// Configs
 		bind(SettingsProvider.class).asEagerSingleton();
 		bind(Settings.class).toProvider(SettingsProvider.class);
-		bind(DatabaseProvider.class).asEagerSingleton();
-		bind(DatabaseConfig.class).toProvider(DatabaseProvider.class);
+		bind(PersistenceProvider.class).asEagerSingleton();
+		bind(Persistence.class).toProvider(PersistenceProvider.class);
 		bind(MessagesProvider.class).asEagerSingleton();
 		bind(Messages.class).toProvider(MessagesProvider.class);
 		bind(CommandsProvider.class).asEagerSingleton();

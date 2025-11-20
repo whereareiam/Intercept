@@ -4,6 +4,7 @@ import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -26,7 +27,7 @@ public interface MessageEntry {
 	 * @param messageKey    the message key (returned if no translation found)
 	 * @return the text, or the message key if not found
 	 */
-	String getText(String locale, String defaultLocale, String messageKey);
+	String getText(Locale locale, Locale defaultLocale, String messageKey);
 
 	/**
 	 * Get text for a specific locale.
@@ -34,7 +35,7 @@ public interface MessageEntry {
 	 * @param locale the locale
 	 * @return the text, or null if not available
 	 */
-	String getText(String locale);
+	String getText(Locale locale);
 
 	/**
 	 * Get text without locale (for single-language messages).
@@ -46,9 +47,9 @@ public interface MessageEntry {
 	/**
 	 * Get all available locales for this entry.
 	 *
-	 * @return set of locale codes
+	 * @return set of locales
 	 */
-	Set<String> getLocales();
+	Set<Locale> getLocales();
 
 	/**
 	 * Check if this entry has translations.

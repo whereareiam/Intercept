@@ -2,28 +2,26 @@ package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
-import me.whereareiam.intercept.model.config.DatabaseConfig;
-import me.whereareiam.intercept.type.DatabaseType;
+import me.whereareiam.intercept.model.config.Persistence;
+import me.whereareiam.intercept.type.PersistenceType;
 
 @Singleton
-public class DatabaseTemplate implements TemplateProvider<DatabaseConfig> {
+public class PersistenceTemplate implements TemplateProvider<Persistence> {
 	@Override
-	public DatabaseConfig supply(DatabaseConfig config) {
-		// DatabaseConfig disabled by default
+	public Persistence supply(Persistence config) {
+		// Persistence disabled by default
 		config.setEnabled(false);
 
 		// Default to PostgreSQL
-		config.setType(DatabaseType.POSTGRES);
+		config.setType(PersistenceType.POSTGRES);
 		config.setHost("localhost");
 		config.setPort(5432); // Default PostgreSQL port
 		config.setDatabase("intercept");
 		config.setUsername("intercept");
 		config.setPassword("");
 
-		config.setTablePrefix("intercept_");
-
 		// Initialize HikariCP settings with recommended defaults
-		DatabaseConfig.Hikari hikari = new DatabaseConfig.Hikari();
+		Persistence.Hikari hikari = new Persistence.Hikari();
 		hikari.setPoolName("Intercept");
 		hikari.setMaximumPoolSize(10);
 		hikari.setMinimumIdle(2);

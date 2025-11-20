@@ -5,6 +5,7 @@ import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +32,7 @@ public class TemplateProcessor {
 	 * @param locale the locale for multi-language entries
 	 * @return text with templates applied
 	 */
-	public String process(String text, String locale) {
+	public String process(String text, Locale locale) {
 		if (text == null || text.isEmpty()) return text;
 
 		if (!text.contains(MessageTags.TEMPLATE_TAG))

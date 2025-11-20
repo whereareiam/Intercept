@@ -3,16 +3,16 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.intercept.type.DatabaseType;
+import me.whereareiam.intercept.type.PersistenceType;
 
 /**
- * DatabaseConfig configuration for player data storage.
+ * Persistence configuration for player data storage.
  * Supports PostgreSQL and MariaDB databases.
  */
 @Getter
 @Setter
 @ToString
-public class DatabaseConfig {
+public class Persistence {
 	/**
 	 * Whether database support is enabled.
 	 * When disabled, database dependencies will not be loaded.
@@ -21,40 +21,34 @@ public class DatabaseConfig {
 	private boolean enabled;
 
 	/**
-	 * DatabaseConfig type to use.
+	 * Persistence type to use.
 	 */
-	private DatabaseType type;
+	private PersistenceType type;
 
 	/**
-	 * DatabaseConfig server hostname or IP address.
+	 * Persistence server hostname or IP address.
 	 */
 	private String host;
 
 	/**
-	 * DatabaseConfig server port.
+	 * Persistence server port.
 	 */
 	private int port;
 
 	/**
-	 * DatabaseConfig name to connect to.
+	 * Persistence name to connect to.
 	 */
 	private String database;
 
 	/**
-	 * DatabaseConfig username for authentication.
+	 * Persistence username for authentication.
 	 */
 	private String username;
 
 	/**
-	 * DatabaseConfig password for authentication.
+	 * Persistence password for authentication.
 	 */
 	private String password;
-
-	/**
-	 * Table prefix for Ebean tables.
-	 * All tables created by Ebean will have this prefix.
-	 */
-	private String tablePrefix;
 
 	/**
 	 * HikariCP connection pool configuration.

@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.util;
+package me.whereareiam.intercept.util;
 
 import java.util.Locale;
 

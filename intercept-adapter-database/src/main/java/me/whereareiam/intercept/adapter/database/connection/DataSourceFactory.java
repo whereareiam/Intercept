@@ -1,42 +1,41 @@
-package me.whereareiam.intercept.adapter.database.initializer;
+package me.whereareiam.intercept.adapter.database.connection;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.model.config.DatabaseConfig;
-import me.whereareiam.intercept.type.DatabaseType;
+import me.whereareiam.intercept.model.config.Persistence;
+import me.whereareiam.intercept.type.PersistenceType;
 
 import javax.sql.DataSource;
 import java.net.ConnectException;
 import java.sql.SQLException;
 
 /**
- * Initializes HikariCP connection pool.
- * This class is only loaded after database dependencies are available.
+ * Factory for creating HikariCP DataSource instances.
  */
-public class HikariInitializer {
-
+public final class DataSourceFactory {
 	/**
-	 * Initializes HikariCP DataSource with the given configuration.
+	 * Creates a HikariCP DataSource with the given configuration.
 	 *
-	 * @param databaseConfig the database configuration
+	 * @param persistence the database configuration
 	 * @return the initialized DataSource
 	 */
-	public static DataSource initialize(DatabaseConfig databaseConfig) {
-		DatabaseType type = databaseConfig.getType() != null ? databaseConfig.getType() : DatabaseType.POSTGRES;
-		DatabaseConfig.Hikari hikariConfig = databaseConfig.getHikari();
+	public static DataSource create(Persistence persistence) {
+		PersistenceType type = persistence.getType() != null ? persistence.getType() : PersistenceType.POSTGRES;
+		Persistence.Hikari hikariConfig = persistence.getHikari();
 
 		// Build JDBC URL based on database type
-		String jdbcUrl = buildJdbcUrl(type, databaseConfig);
+		String jdbcUrl = JdbcUrlFactory.create(persistence);
 		Logger.info("Connecting to database at %s", maskJdbcUrl(jdbcUrl));
 
 		try {
 			// Configure HikariCP DataSource
 			HikariConfig hikariConfigObj = new HikariConfig();
 			hikariConfigObj.setJdbcUrl(jdbcUrl);
-			hikariConfigObj.setUsername(databaseConfig.getUsername());
-			hikariConfigObj.setPassword(databaseConfig.getPassword());
+			hikariConfigObj.setDriverClassName(getDriverClassName(type));
+			hikariConfigObj.setUsername(persistence.getUsername());
+			hikariConfigObj.setPassword(persistence.getPassword());
 
 			// Apply HikariCP pool settings from config
 			hikariConfigObj.setPoolName(hikariConfig.getPoolName());
@@ -49,21 +48,14 @@ public class HikariInitializer {
 			// Disable fail-fast to allow plugin to start even if database is unavailable
 			hikariConfigObj.setInitializationFailTimeout(-1);
 
-			// Create HikariCP DataSource
-			HikariDataSource dataSource = new HikariDataSource(hikariConfigObj);
-
-			Logger.info("Database connection pool created (max: %d, min idle: %d)",
-					hikariConfig.getMaximumPoolSize(),
-					hikariConfig.getMinimumIdle());
-
-			return dataSource;
+			return new HikariDataSource(hikariConfigObj);
 		} catch (Exception e) {
-			handleInitializationError(e, databaseConfig);
+			handleInitializationError(e, persistence);
 			throw new RuntimeException("Failed to initialize HikariCP", e);
 		}
 	}
 
-	private static void handleInitializationError(Exception e, DatabaseConfig databaseConfig) {
+	private static void handleInitializationError(Exception e, Persistence persistence) {
 		Throwable cause = e.getCause();
 		String errorMessage = e.getMessage();
 
@@ -82,7 +74,7 @@ public class HikariInitializer {
 		if (isConnectionError) {
 			Logger.severe("Failed to connect to database server. Please ensure:");
 			Logger.severe("  - Database server is running");
-			Logger.severe("  - Host and port are correct (%s:%d)", databaseConfig.getHost(), databaseConfig.getPort());
+			Logger.severe("  - Host and port are correct (%s:%d)", persistence.getHost(), persistence.getPort());
 			Logger.severe("  - Database server is accepting connections");
 			Logger.severe("Database features will be disabled until connection is established.");
 			return;
@@ -93,36 +85,15 @@ public class HikariInitializer {
 			Logger.severe("Caused by: %s", cause.getMessage());
 	}
 
-	private static String buildJdbcUrl(DatabaseType type, DatabaseConfig databaseConfig) {
-		String host = databaseConfig.getHost() + ":" + databaseConfig.getPort();
-		String database = databaseConfig.getDatabase();
-
-		return switch (type) {
-			case POSTGRES -> String.format("jdbc:postgresql://%s/%s", host, database);
-			case MARIADB -> String.format("jdbc:mariadb://%s/%s", host, database);
-		};
-	}
-
 	private static String maskJdbcUrl(String jdbcUrl) {
 		return jdbcUrl.replaceAll("password=[^;&]+", "password=***");
 	}
 
-	/**
-	 * Shuts down the HikariCP DataSource.
-	 *
-	 * @param dataSource the DataSource to close
-	 */
-	public static void shutdown(DataSource dataSource) {
-		if (dataSource == null) return;
-
-		try {
-			if (dataSource instanceof HikariDataSource hikariDataSource) {
-				hikariDataSource.close();
-				Logger.info("Database connection pool closed");
-			}
-		} catch (Exception e) {
-			Logger.warn("Error closing connection pool: %s", e.getMessage());
-		}
+	private static String getDriverClassName(PersistenceType type) {
+		return switch (type) {
+			case POSTGRES -> "org.postgresql.Driver";
+			case MARIADB -> "org.mariadb.jdbc.Driver";
+		};
 	}
 }
 

@@ -51,7 +51,7 @@ public interface MessageService {
 	 * @param key the message key
 	 * @return set of available locale codes
 	 */
-	Set<String> getAvailableLocales(String key);
+	Set<Locale> getAvailableLocales(String key);
 }
 
 

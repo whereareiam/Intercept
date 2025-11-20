@@ -6,6 +6,7 @@ import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ import java.util.Set;
 public class DefaultMessageEntry implements MessageEntry {
 	private final MessageType type;
 	private final String singleText; // For single-language messages/templates
-	private final Map<String, String> translations; // For multi-language messages
+	private final Map<Locale, String> translations; // For multi-language messages
 	private final List<CompiledRegexPattern> regexPatterns; // Regex patterns for this message
 
 	public DefaultMessageEntry(MessageType type, String text) {
@@ -30,11 +31,11 @@ public class DefaultMessageEntry implements MessageEntry {
 		this.regexPatterns = regexPatterns != null ? regexPatterns : List.of();
 	}
 
-	public DefaultMessageEntry(MessageType type, Map<String, String> translations) {
+	public DefaultMessageEntry(MessageType type, Map<Locale, String> translations) {
 		this(type, translations, null);
 	}
 
-	public DefaultMessageEntry(MessageType type, Map<String, String> translations, List<CompiledRegexPattern> regexPatterns) {
+	public DefaultMessageEntry(MessageType type, Map<Locale, String> translations, List<CompiledRegexPattern> regexPatterns) {
 		this.type = type;
 		this.singleText = null;
 		this.translations = translations;
@@ -42,7 +43,7 @@ public class DefaultMessageEntry implements MessageEntry {
 	}
 
 	@Override
-	public String getText(String locale, String defaultLocale, String messageKey) {
+	public String getText(Locale locale, Locale defaultLocale, String messageKey) {
 		if (singleText != null) return singleText;
 		if (translations == null) return messageKey;
 
@@ -51,13 +52,14 @@ public class DefaultMessageEntry implements MessageEntry {
 		if (text != null) return text;
 
 		// Try to find nearest locale with same language code (e.g., en_US -> en_GB, en_CA, en, etc.)
-		String languageCode = extractLanguageCode(locale);
-		if (languageCode != null) {
-			for (String availableLocale : translations.keySet()) {
-				String availableLanguageCode = extractLanguageCode(availableLocale);
-				if (languageCode.equals(availableLanguageCode)) {
-					text = translations.get(availableLocale);
-					if (text != null) return text;
+		if (locale != null) {
+			String languageCode = locale.getLanguage();
+			if (!languageCode.isEmpty()) {
+				for (Locale availableLocale : translations.keySet()) {
+					if (availableLocale != null && languageCode.equals(availableLocale.getLanguage())) {
+						text = translations.get(availableLocale);
+						if (text != null) return text;
+					}
 				}
 			}
 		}
@@ -68,31 +70,21 @@ public class DefaultMessageEntry implements MessageEntry {
 			if (text != null) return text;
 		}
 
-		// Try "default" translation key as fallback
-		text = translations.get("default");
-		if (text != null) return text;
+		// Try to find a locale with language "default" as fallback (special case)
+		// This handles the case where files use "default" as a locale string
+		for (Locale availableLocale : translations.keySet()) {
+			if (availableLocale != null && "default".equals(availableLocale.getLanguage())) {
+				text = translations.get(availableLocale);
+				if (text != null) return text;
+			}
+		}
 
 		// Return message key as fallback
 		return messageKey;
 	}
 
-	/**
-	 * Extracts the language code from a locale string.
-	 * Handles formats like "en_US", "en", "de_DE", etc.
-	 *
-	 * @param locale the locale string (e.g., "en_US" or "en")
-	 * @return the language code (e.g., "en") or null if invalid
-	 */
-	private String extractLanguageCode(String locale) {
-		if (locale == null || locale.isEmpty())
-			return null;
-		
-		int underscoreIndex = locale.indexOf('_');
-		return underscoreIndex > 0 ? locale.substring(0, underscoreIndex) : locale;
-	}
-
 	@Override
-	public String getText(String locale) {
+	public String getText(Locale locale) {
 		if (singleText != null) return singleText;
 		if (translations == null) return null;
 
@@ -105,7 +97,7 @@ public class DefaultMessageEntry implements MessageEntry {
 	}
 
 	@Override
-	public Set<String> getLocales() {
+	public Set<Locale> getLocales() {
 		return translations != null ? translations.keySet() : Set.of();
 	}
 

@@ -5,24 +5,24 @@ import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.attache.model.Library;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.DependencyResolver;
-import me.whereareiam.intercept.model.config.DatabaseConfig;
+import me.whereareiam.intercept.model.config.Persistence;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Dependency resolver for database-related libraries.
- * Conditionally loads Ebean and database drivers based on database configuration.
+ * Conditionally loads OrmLite and database drivers based on database configuration.
  */
 @RequiredArgsConstructor
 public class DatabaseDependencyResolver implements DependencyResolver {
 	private final LibraryManager libraryManager;
-	private final DatabaseConfig databaseConfig;
+	private final Persistence persistence;
 	private final List<Library> libraries = new ArrayList<>();
 
 	@Override
 	public void resolveDependencies() {
-		if (!databaseConfig.isEnabled())
+		if (!persistence.isEnabled())
 			return;
 
 		libraryManager.addMavenCentral();
@@ -32,21 +32,23 @@ public class DatabaseDependencyResolver implements DependencyResolver {
 
 	@Override
 	public void loadLibraries() {
-		if (!databaseConfig.isEnabled())
+		if (!persistence.isEnabled())
 			return;
 
-		// Ebean ORM dependencies
+		// OrmLite ORM dependencies
+		// OrmLite core library
 		addDependency(Library.builder()
-				.groupId("io{}ebean")
-				.artifactId("ebean-core")
-				.version(Constants.Dependency.EBEAN)
+				.groupId("com{}j256{}ormlite")
+				.artifactId("ormlite-core")
+				.version(Constants.Dependency.ORMLITE)
 				.resolveTransitiveDependencies(true)
 				.build());
 
+		// OrmLite JDBC library
 		addDependency(Library.builder()
-				.groupId("io{}ebean")
-				.artifactId("ebean-api")
-				.version(Constants.Dependency.EBEAN)
+				.groupId("com{}j256{}ormlite")
+				.artifactId("ormlite-jdbc")
+				.version(Constants.Dependency.ORMLITE)
 				.resolveTransitiveDependencies(true)
 				.build());
 
@@ -58,9 +60,11 @@ public class DatabaseDependencyResolver implements DependencyResolver {
 				.resolveTransitiveDependencies(true)
 				.build());
 
-		// DatabaseConfig driver - only load the selected type
-		switch (databaseConfig.getType()) {
+		// Database drivers - only load the selected type
+		// OrmLite supports PostgreSQL and MariaDB/MySQL natively, no platform provider needed
+		switch (persistence.getType()) {
 			case POSTGRES:
+				// PostgreSQL JDBC driver
 				addDependency(Library.builder()
 						.groupId("org{}postgresql")
 						.artifactId("postgresql")
@@ -69,6 +73,7 @@ public class DatabaseDependencyResolver implements DependencyResolver {
 						.build());
 				break;
 			case MARIADB:
+				// MariaDB JDBC driver
 				addDependency(Library.builder()
 						.groupId("org{}mariadb{}jdbc")
 						.artifactId("mariadb-java-client")

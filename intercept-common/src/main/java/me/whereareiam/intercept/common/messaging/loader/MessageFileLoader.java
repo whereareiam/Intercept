@@ -6,11 +6,9 @@ import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.intercept.util.LocaleUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Loads message files into the MessageRegistry.
@@ -63,9 +61,10 @@ public class MessageFileLoader {
 		// Convert text/translations
 		if (entryData.getTranslations() != null && !entryData.getTranslations().isEmpty()) {
 			// Multi-language message
-			Map<String, String> processedTranslations = new HashMap<>();
+			Map<Locale, String> processedTranslations = new HashMap<>();
 			for (Map.Entry<String, Object> trans : entryData.getTranslations().entrySet()) {
-				String locale = trans.getKey();
+				String localeString = trans.getKey();
+				Locale locale = parseLocale(localeString);
 				String text = textProcessor.process(trans.getValue());
 				processedTranslations.put(locale, text);
 			}
@@ -121,5 +120,23 @@ public class MessageFileLoader {
 
 		// Default to message
 		return MessageType.MESSAGE;
+	}
+
+	/**
+	 * Parse a locale string from file format to Locale object.
+	 * Handles formats like "en_US", "de_DE", "en", "default", etc.
+	 *
+	 * @param localeString the locale string from file (e.g., "en_US" or "default")
+	 * @return Locale object, or special Locale for "default" case
+	 */
+	private Locale parseLocale(String localeString) {
+		if (localeString == null || localeString.isEmpty())
+			return Locale.getDefault();
+
+		// Handle special "default" case
+		if ("default".equals(localeString))
+			return new Locale.Builder().setLanguage("default").build();
+
+		return LocaleUtil.parseLocale(localeString);
 	}
 }

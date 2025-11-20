@@ -138,7 +138,7 @@ public class MessagesService implements Reloadable {
 
 			// Get text for classification
 			String text = messageEntry.hasTranslations()
-					? messageEntry.getText(settings.getLocale().toString())
+					? messageEntry.getText(settings.getLocale())
 					: messageEntry.getText();
 
 			if (text == null) continue;
@@ -148,11 +148,10 @@ public class MessagesService implements Reloadable {
 			if (level == CacheLevel.STATIC) {
 				// Pre-render for all available locales
 				if (messageEntry.hasTranslations()) {
-					for (String localeString : messageEntry.getLocales()) {
-						Locale locale = Locale.forLanguageTag(localeString.replace('_', '-'));
+					for (Locale locale : messageEntry.getLocales()) {
 						String resolved = messageService.resolve(key, locale, Map.of());
 						if (resolved != null) {
-							cache.put(new CacheKey(key, localeString, Map.of()), resolved, CacheLevel.STATIC);
+							cache.put(new CacheKey(key, locale, Map.of()), resolved, CacheLevel.STATIC);
 							preRendered++;
 						}
 					}
@@ -161,7 +160,7 @@ public class MessagesService implements Reloadable {
 
 				String resolved = messageService.resolve(key, settings.getLocale(), Map.of());
 				if (resolved != null) {
-					cache.put(new CacheKey(key, settings.getLocale().toString(), Map.of()), resolved, CacheLevel.STATIC);
+					cache.put(new CacheKey(key, settings.getLocale(), Map.of()), resolved, CacheLevel.STATIC);
 					preRendered++;
 				}
 			}

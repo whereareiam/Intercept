@@ -104,7 +104,7 @@ public class DependencyGraph {
 
 		// For multi-language, just analyze one (dependencies are the same)
 		if (entry.hasTranslations() && !entry.getLocales().isEmpty()) {
-			String locale = entry.getLocales().iterator().next();
+			Locale locale = entry.getLocales().iterator().next();
 			return entry.getText(locale);
 		}
 

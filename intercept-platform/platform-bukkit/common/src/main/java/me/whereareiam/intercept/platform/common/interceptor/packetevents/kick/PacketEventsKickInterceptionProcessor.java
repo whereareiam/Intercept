@@ -5,11 +5,11 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDisconnect;
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.common.util.LocaleUtil;
 import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.kick.KickInterceptor;
 import me.whereareiam.intercept.model.interception.kick.KickInterceptionContext;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.PacketProcessor;
+import me.whereareiam.intercept.util.LocaleUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 

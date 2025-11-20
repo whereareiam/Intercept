@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.messaging.cache;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -10,7 +11,7 @@ import java.util.TreeMap;
  */
 public record CacheKey(
 		String messageKey,
-		String locale,
+		Locale locale,
 		Map<String, Object> staticPlaceholders
 ) {
 	public CacheKey {
