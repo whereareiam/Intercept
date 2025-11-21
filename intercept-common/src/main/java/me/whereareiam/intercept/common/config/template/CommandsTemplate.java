@@ -59,10 +59,36 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 						.build())
 				.build();
 
+		// Upload translations command definition (subcommand)
+		CommandDefinition uploadTranslations = CommandDefinition.builder()
+				.enabled(true)
+				.aliases(List.of("database upload", "database u"))
+				.permission("")
+				.description("Upload translations to the database")
+				.usage("{command} {alias}")
+				.cooldown(CommandDefinition.Cooldown.builder()
+						.enabled(false)
+						.build())
+				.build();
+
+		// Download translations command definition (subcommand)
+		CommandDefinition downloadTranslations = CommandDefinition.builder()
+				.enabled(true)
+				.aliases(List.of("database download", "database d"))
+				.permission("")
+				.description("Download translations from the database")
+				.usage("{command} {alias}")
+				.cooldown(CommandDefinition.Cooldown.builder()
+						.enabled(false)
+						.build())
+				.build();
+
 		commands.getCommands().put("main", main);
 		commands.getCommands().put("help", help);
 		commands.getCommands().put("reload", reload);
 		commands.getCommands().put("inspect", inspect);
+		commands.getCommands().put("database-upload", uploadTranslations);
+		commands.getCommands().put("database-download", downloadTranslations);
 
 		return commands;
 	}

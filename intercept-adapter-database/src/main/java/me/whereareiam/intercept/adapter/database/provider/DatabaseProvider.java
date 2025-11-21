@@ -9,7 +9,7 @@ import lombok.Setter;
 /**
  * Provider for the OrmLite ConnectionSource instance.
  * Implements Guice's Provider interface for lazy initialization.
- * The connection source is set by the initializer after dependencies are loaded.
+ * The initializer sets the connection source after dependencies are loaded.
  */
 @Getter
 @Setter
@@ -19,7 +19,7 @@ public class DatabaseProvider implements Provider<ConnectionSource> {
 
 	/**
 	 * Gets the ConnectionSource instance.
-	 * This method is called by Guice when ConnectionSource is injected.
+	 * Guice calls this method when ConnectionSource is injected.
 	 *
 	 * @return the ConnectionSource instance, or null if not initialized
 	 * @throws IllegalStateException if ConnectionSource is not yet initialized

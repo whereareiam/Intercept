@@ -8,10 +8,7 @@ import me.whereareiam.commandant.Command;
 import me.whereareiam.commandant.CommandRegistrar;
 import me.whereareiam.commandant.Commandant;
 import me.whereareiam.commandant.model.CommandDefinition;
-import me.whereareiam.intercept.command.executor.HelpCommand;
-import me.whereareiam.intercept.command.executor.InspectCommand;
-import me.whereareiam.intercept.command.executor.MainCommand;
-import me.whereareiam.intercept.command.executor.ReloadCommand;
+import me.whereareiam.intercept.command.executor.*;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.serializer.SerializerEngine;
@@ -35,7 +32,9 @@ public class DefaultCommandService implements CommandService {
 	private final Class<Command<Actor>>[] commands = new Class[]{
 			HelpCommand.class,
 			ReloadCommand.class,
-			InspectCommand.class
+			InspectCommand.class,
+			UploadDatabaseCommand.class,
+			DownloadDatabaseCommand.class
 	};
 
 	@Inject
