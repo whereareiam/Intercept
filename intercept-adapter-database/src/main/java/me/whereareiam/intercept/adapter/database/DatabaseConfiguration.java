@@ -7,6 +7,8 @@ import me.whereareiam.intercept.adapter.database.message.DefaultMessagePersisten
 import me.whereareiam.intercept.adapter.database.provider.JdbiProvider;
 import me.whereareiam.intercept.adapter.database.repository.MessageEntryRepository;
 import me.whereareiam.intercept.adapter.database.repository.MessageFileRepository;
+import me.whereareiam.intercept.adapter.database.repository.MessageRegexPatternRepository;
+import me.whereareiam.intercept.adapter.database.repository.MessageRegexPlaceholderRepository;
 import me.whereareiam.intercept.adapter.database.repository.MessageTranslationRepository;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.database.MessagePersistenceService;
@@ -40,5 +42,17 @@ public class DatabaseConfiguration extends AbstractModule {
 	@Singleton
 	public MessageTranslationRepository provideMessageTranslationRepository(Jdbi jdbi) {
 		return jdbi.onDemand(MessageTranslationRepository.class);
+	}
+
+	@Provides
+	@Singleton
+	public MessageRegexPatternRepository provideMessageRegexPatternRepository(Jdbi jdbi) {
+		return jdbi.onDemand(MessageRegexPatternRepository.class);
+	}
+
+	@Provides
+	@Singleton
+	public MessageRegexPlaceholderRepository provideMessageRegexPlaceholderRepository(Jdbi jdbi) {
+		return jdbi.onDemand(MessageRegexPlaceholderRepository.class);
 	}
 }

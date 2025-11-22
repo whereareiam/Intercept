@@ -5,17 +5,17 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
-import me.whereareiam.intercept.adapter.database.repository.MessageEntryRepository;
-import me.whereareiam.intercept.adapter.database.repository.MessageFileRepository;
-import me.whereareiam.intercept.adapter.database.repository.MessageTranslationRepository;
+import me.whereareiam.intercept.adapter.database.repository.*;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageSnapshot;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import org.jdbi.v3.core.Jdbi;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -29,6 +29,8 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 	private final MessageFileRepository fileRepository;
 	private final MessageEntryRepository entryRepository;
 	private final MessageTranslationRepository translationRepository;
+	private final MessageRegexPatternRepository patternRepository;
+	private final MessageRegexPlaceholderRepository placeholderRepository;
 	private final Jdbi jdbi;
 
 	@Override
@@ -44,6 +46,8 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 		}
 
 		jdbi.useTransaction(handle -> {
+			placeholderRepository.deleteAll();
+			patternRepository.deleteAll();
 			translationRepository.deleteAll();
 			entryRepository.deleteAll();
 			fileRepository.deleteAll();
@@ -87,6 +91,7 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 					.build());
 
 			processTranslations(entryEntity, messageEntry);
+			processRegexPatterns(entryEntity, messageEntry);
 		}
 	}
 
@@ -139,6 +144,52 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 		String text = messageEntry.getText();
 		if (text == null) return;
 		translationRepository.insert(entryEntity.getId(), null, text);
+	}
+
+	/**
+	 * Creates regex patterns and placeholders for an entry.
+	 * Note: All patterns and placeholders are already deleted at the start of upload, so we only need to create new ones.
+	 *
+	 * @param entryEntity  the entry entity
+	 * @param messageEntry the message entry with regex patterns
+	 */
+	private void processRegexPatterns(MessageEntryEntity entryEntity, MessageEntry messageEntry) {
+		if (!messageEntry.hasRegexPatterns()) return;
+
+		List<CompiledRegexPattern> patterns = messageEntry.getRegexPatterns();
+		if (patterns == null || patterns.isEmpty()) return;
+
+		int sortOrder = 0;
+		for (CompiledRegexPattern compiledPattern : patterns) {
+			long patternId = patternRepository.insert(
+					entryEntity.getId(),
+					compiledPattern.getRegex(),
+					compiledPattern.getPriority(),
+					compiledPattern.isReplaceMatched(),
+					sortOrder++
+			);
+
+			processPlaceholders(patternId, compiledPattern);
+		}
+	}
+
+	/**
+	 * Creates placeholders for a regex pattern.
+	 *
+	 * @param patternId       the pattern entity ID
+	 * @param compiledPattern the compiled regex pattern with placeholders
+	 */
+	private void processPlaceholders(long patternId, CompiledRegexPattern compiledPattern) {
+		Map<String, String> placeholders = compiledPattern.getPlaceholders();
+		if (placeholders == null || placeholders.isEmpty()) return;
+
+		for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+			String placeholderName = entry.getKey();
+			String captureGroup = entry.getValue();
+			if (placeholderName == null || captureGroup == null) continue;
+
+			placeholderRepository.insert(patternId, placeholderName, captureGroup);
+		}
 	}
 }
 
