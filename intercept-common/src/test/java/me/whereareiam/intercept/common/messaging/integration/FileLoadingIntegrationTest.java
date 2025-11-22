@@ -93,8 +93,8 @@ class FileLoadingIntegrationTest {
 
 		assertTrue(registry.exists("errors.permissions.no.permission"));
 
-		String enText = registry.get("errors.permissions.no.permission").getText("en_US");
-		String deText = registry.get("errors.permissions.no.permission").getText("de_DE");
+		String enText = registry.get("errors.permissions.no.permission").getText(Locale.US);
+		String deText = registry.get("errors.permissions.no.permission").getText(Locale.GERMANY);
 
 		assertNotNull(enText);
 		assertNotNull(deText);

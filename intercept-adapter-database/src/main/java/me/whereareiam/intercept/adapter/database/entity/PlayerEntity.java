@@ -2,7 +2,6 @@ package me.whereareiam.intercept.adapter.database.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 import me.whereareiam.intercept.type.PersistenceType;
 
@@ -28,18 +27,13 @@ public class PlayerEntity implements SchemaProvider {
 	private boolean inspectionMode;
 
 	@Override
-	public String getTableName() {
-		return Constants.Database.Tables.PLAYERS;
-	}
-
-	@Override
 	public String getCreateTableStatement(PersistenceType persistenceType) {
 		return """
-				CREATE TABLE IF NOT EXISTS %s (
+				CREATE TABLE IF NOT EXISTS intercept_players (
 					unique_id CHAR(36) PRIMARY KEY,
 					inspection_mode BOOLEAN NOT NULL DEFAULT FALSE
 				)
-				""".formatted(getTableName());
+				""";
 	}
 }
 

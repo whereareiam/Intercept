@@ -15,6 +15,7 @@ keystone = "dev-697f401"
 commandant = "dev-57224b9"
 junit = "6.0.0"
 mockito = "5.20.0"
+testcontainers = "1.20.0"
 
 # cloud
 cloud-core = "2.0.0"
@@ -60,6 +61,9 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 mockito-junit = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
+testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+testcontainers-mariadb = { group = "org.testcontainers", name = "mariadb", version.ref = "testcontainers" }
 
 # cloud
 cloud-core = { group = "org.incendo", name = "cloud-core", version.ref = "cloud-core" }
@@ -93,6 +97,8 @@ mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.re
 
 [bundles]
 
+testing = ["junit-jupiter", "mockito-core", "mockito-junit", "testcontainers-junit"]
+database = ["jdbi-core", "jdbi-sqlobject", "hikaricp", "postgresql", "mariadb"]
 adventure = ["adventure", "adventure-minimessage", "adventure-legacy", "adventure-plain", "adventure-gson"]
 bukkit = ["spigot", "adventure-platform-bukkit"]
 paper = ["paper", "cloud-core", "cloud-paper"]

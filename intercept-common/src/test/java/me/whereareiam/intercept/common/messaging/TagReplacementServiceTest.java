@@ -233,8 +233,8 @@ class TagReplacementServiceTest {
 		DefaultMessageEntry entry = new DefaultMessageEntry(
 				MessageType.MESSAGE,
 				java.util.Map.of(
-						"en_US", "Welcome!",
-						"fr_FR", "Bienvenue!"
+						Locale.US, "Welcome!",
+						Locale.FRANCE, "Bienvenue!"
 				)
 		);
 		registry.register("welcome", entry);

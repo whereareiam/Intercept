@@ -88,7 +88,7 @@ class DefaultMessageServiceTest {
 	@Test
 	void shouldResolveMultiLocaleMessage() {
 		registry.register("welcome", new DefaultMessageEntry(MessageType.MESSAGE,
-				Map.of("en_US", "Welcome!", "de_DE", "Willkommen!")));
+				Map.of(Locale.US, "Welcome!", Locale.GERMAN, "Willkommen!")));
 
 		String enResult = service.resolve("welcome", Locale.US);
 		assertEquals("Welcome!", enResult);
@@ -114,13 +114,13 @@ class DefaultMessageServiceTest {
 	@Test
 	void shouldGetAvailableLocales() {
 		registry.register("msg", new DefaultMessageEntry(MessageType.MESSAGE,
-				Map.of("en_US", "Hello", "de_DE", "Hallo", "fr_FR", "Bonjour")));
+				Map.of(Locale.US, "Hello", Locale.GERMAN, "Hallo", Locale.FRANCE, "Bonjour")));
 
 		var locales = service.getAvailableLocales("msg");
 		assertEquals(3, locales.size());
-		assertTrue(locales.contains("en_US"));
-		assertTrue(locales.contains("de_DE"));
-		assertTrue(locales.contains("fr_FR"));
+		assertTrue(locales.contains(Locale.US));
+		assertTrue(locales.contains(Locale.GERMAN));
+		assertTrue(locales.contains(Locale.FRANCE));
 	}
 
 	@Test

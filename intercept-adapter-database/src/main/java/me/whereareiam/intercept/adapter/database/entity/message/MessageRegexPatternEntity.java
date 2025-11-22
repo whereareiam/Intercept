@@ -2,7 +2,6 @@ package me.whereareiam.intercept.adapter.database.entity.message;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 import me.whereareiam.intercept.type.PersistenceType;
 
@@ -56,15 +55,10 @@ public class MessageRegexPatternEntity implements SchemaProvider {
 	private List<MessageRegexPlaceholderEntity> placeholders;
 
 	@Override
-	public String getTableName() {
-		return Constants.Database.Tables.MESSAGE_REGEX_PATTERNS;
-	}
-
-	@Override
 	public String getCreateTableStatement(PersistenceType persistenceType) {
 		String idType = getAutoIncrementPrimaryKey(persistenceType);
 		return """
-				CREATE TABLE IF NOT EXISTS %s (
+				CREATE TABLE IF NOT EXISTS intercept_message_regex_patterns (
 					id %s,
 					entry_id BIGINT NOT NULL,
 					pattern TEXT NOT NULL,
@@ -73,10 +67,10 @@ public class MessageRegexPatternEntity implements SchemaProvider {
 					sort_order INT NOT NULL,
 					CONSTRAINT fk_regex_patterns_entry
 						FOREIGN KEY (entry_id)
-						REFERENCES %s (id)
+						REFERENCES intercept_message_entries (id)
 						ON DELETE CASCADE
 				)
-				""".formatted(getTableName(), idType, Constants.Database.Tables.MESSAGE_ENTRIES);
+				""".formatted(idType);
 	}
 
 	private String getAutoIncrementPrimaryKey(PersistenceType type) {

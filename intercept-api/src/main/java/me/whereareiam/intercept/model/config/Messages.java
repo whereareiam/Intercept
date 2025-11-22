@@ -73,6 +73,11 @@ public class Messages {
 		private Inspect inspect;
 
 		/**
+		 * Database command messages
+		 */
+		private Database database;
+
+		/**
 		 * Configuration for reload command messages.
 		 */
 		@Getter
@@ -150,6 +155,73 @@ public class Messages {
 				 * Set to 0 or negative to disable truncation.
 				 */
 				private int maxPatternLength;
+			}
+		}
+
+		/**
+		 * Configuration for database command messages.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Database {
+			/**
+			 * Upload command messages
+			 */
+			private Upload upload;
+
+			/**
+			 * Download command messages
+			 */
+			private Download download;
+
+			/**
+			 * Configuration for database upload command messages.
+			 */
+			@Getter
+			@Setter
+			@ToString
+			public static class Upload {
+				/**
+				 * Message shown when there are no messages to upload.
+				 * Placeholders:
+				 * - {prefix}: The global message prefix
+				 */
+				private String noMessages;
+
+				/**
+				 * Message shown when starting the upload process.
+				 * Placeholders:
+				 * - {prefix}: The global message prefix
+				 * - {entries}: The number of entries being uploaded
+				 * - {files}: The number of files being uploaded
+				 */
+				private String uploading;
+
+				/**
+				 * Success message when upload completes successfully.
+				 * Placeholders:
+				 * - {prefix}: The global message prefix
+				 * - {entries}: The number of entries uploaded
+				 */
+				private String success;
+
+				/**
+				 * Error message when upload fails.
+				 * Placeholders:
+				 * - {prefix}: The global message prefix
+				 * - {error}: The error message
+				 */
+				private String error;
+			}
+
+			/**
+			 * Configuration for database download command messages.
+			 */
+			@Getter
+			@Setter
+			@ToString
+			public static class Download {
 			}
 		}
 	}

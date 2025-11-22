@@ -3,26 +3,18 @@ package me.whereareiam.intercept.common.messaging;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.messaging.cache.CacheKey;
 import me.whereareiam.intercept.common.messaging.cache.CacheLevel;
 import me.whereareiam.intercept.common.messaging.cache.CacheStrategy;
 import me.whereareiam.intercept.common.messaging.cache.MessageCache;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileData;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileLoader;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileScanner;
-import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.Registry;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -32,10 +24,8 @@ import java.util.Map;
  */
 @Singleton
 public class MessagesService implements Reloadable {
-	private final Path messagesPath;
+	private final MessageDataService messageDataService;
 	private final DefaultMessageRegistry registry;
-	private final MessageFileScanner scanner;
-	private final MessageFileLoader loader;
 	private final Provider<Settings> settingsProvider;
 	private final MessageService messageService;
 	private final DependencyGraph dependencyGraph;
@@ -43,20 +33,16 @@ public class MessagesService implements Reloadable {
 
 	@Inject
 	public MessagesService(
-			@Named("messagesPath") Path messagesPath,
+			MessageDataService messageDataService,
 			DefaultMessageRegistry registry,
 			Provider<Settings> settingsProvider,
 			MessageService messageService,
 			Registry<Reloadable> reloadableRegistry
 	) {
-		this.messagesPath = messagesPath;
+		this.messageDataService = messageDataService;
 		this.registry = registry;
 		this.settingsProvider = settingsProvider;
 		this.messageService = messageService;
-		this.scanner = new MessageFileScanner(Config.getDefaultReader().getFormat());
-
-		TextProcessor textProcessor = new TextProcessor();
-		this.loader = new MessageFileLoader(textProcessor, registry);
 
 		this.dependencyGraph = new DependencyGraph();
 		this.cacheStrategy = new CacheStrategy();
@@ -68,24 +54,8 @@ public class MessagesService implements Reloadable {
 	 * Initialize the messages system by loading all message files.
 	 */
 	public void initialize() {
-		if (!Files.exists(messagesPath)) {
-			Logger.warn("Messages directory does not exist: %s", messagesPath);
-			return;
-		}
-
-		// Scan for all message files
-		List<Path> files = scanner.scanDirectory(messagesPath);
-		Logger.debug("Found %d message files", files.size());
-
-		// Load each file
-		for (Path file : files) {
-			try {
-				loadFile(file);
-			} catch (Exception e) {
-				Logger.severe("Failed to load message file %s: %s", file, e.getMessage());
-				e.printStackTrace();
-			}
-		}
+		// Use MessageDataService to load all files
+		messageDataService.initialize();
 
 		// Post-loading optimizations
 		Settings settings = settingsProvider.get();
@@ -168,20 +138,9 @@ public class MessagesService implements Reloadable {
 		Logger.debug("Pre-rendered %d static messages", preRendered);
 	}
 
-	private void loadFile(Path file) {
-		String keyPrefix = scanner.buildKeyPrefix(messagesPath, file);
-		Logger.debug("Loading file: %s with key prefix: %s", file.getFileName(), keyPrefix);
-
-		// Read file data with Configura - Jackson handles MessageType enum aliases automatically
-		MessageFileData data = Config.load(file, MessageFileData.class);
-
-		// Load into registry
-		loader.loadFromData(keyPrefix, data);
-	}
-
 	@Override
 	public void reload() {
-		registry.reload();
+		messageDataService.reload();
 		initialize();
 	}
 }

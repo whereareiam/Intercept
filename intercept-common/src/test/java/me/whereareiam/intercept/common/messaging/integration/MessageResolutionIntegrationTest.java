@@ -49,8 +49,8 @@ class MessageResolutionIntegrationTest {
 		// Setup messages
 		registry.register("errors.no.permission", new DefaultMessageEntry(MessageType.MESSAGE,
 				Map.of(
-						"en_US", "<m:styles.prefix> <tpl:styles.error.format message='You lack permission: <p:permission>'>",
-						"de_DE", "<m:styles.prefix> <tpl:styles.error.format message='Keine Berechtigung: <p:permission>'>"
+						Locale.US, "<m:styles.prefix> <tpl:styles.error.format message='You lack permission: <p:permission>'>",
+						Locale.GERMAN, "<m:styles.prefix> <tpl:styles.error.format message='Keine Berechtigung: <p:permission>'>"
 				)));
 
 		// Resolve in English

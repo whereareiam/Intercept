@@ -91,6 +91,19 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		commands.setInspect(inspect);
 
+		// Configure database command messages
+		Messages.Commands.Database database = new Messages.Commands.Database();
+
+		// Configure database upload command messages
+		Messages.Commands.Database.Upload upload = new Messages.Commands.Database.Upload();
+		upload.setNoMessages("{prefix}<white>No messages to upload.");
+		upload.setUploading("{prefix}<white>Uploading <yellow>{entries}</yellow> entries from <yellow>{files}</yellow> files...");
+		upload.setSuccess("{prefix}<white>Successfully uploaded <green>{entries}</green> message entries to the database.");
+		upload.setError("{prefix}<white>An <red>error occurred</red> while uploading: <gray>{error}</gray>");
+		database.setUpload(upload);
+
+		commands.setDatabase(database);
+
 		// Configure custom argument names
 		commands.setArguments(Map.of(
 				"page", "page"

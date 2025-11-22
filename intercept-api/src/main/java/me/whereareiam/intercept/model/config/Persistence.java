@@ -3,8 +3,6 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.configura.annotation.PostProcess;
-import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.type.PersistenceType;
 
 /**
@@ -58,23 +56,6 @@ public class Persistence {
 	private Hikari hikari;
 
 	/**
-	 * Table names configuration.
-	 * Allows customizing table names for each entity.
-	 */
-	private Tables tables;
-
-	@PostProcess
-	public void updateDatabaseConstants() {
-		Constants.Database.TYPE = type;
-		Constants.Database.Tables.PLAYERS = tables.players;
-		Constants.Database.Tables.MESSAGE_FILES = tables.messageFiles;
-		Constants.Database.Tables.MESSAGE_ENTRIES = tables.messageEntries;
-		Constants.Database.Tables.MESSAGE_TRANSLATIONS = tables.messageTranslations;
-		Constants.Database.Tables.MESSAGE_REGEX_PATTERNS = tables.messageRegexPatterns;
-		Constants.Database.Tables.MESSAGE_REGEX_PLACEHOLDERS = tables.messageRegexPlaceholders;
-	}
-
-	/**
 	 * HikariCP connection pool configuration.
 	 * Provides recommended settings for connection pooling.
 	 */
@@ -111,44 +92,5 @@ public class Persistence {
 		 * Maximum lifetime (in milliseconds) of a connection in the pool.
 		 */
 		private long maxLifetime;
-	}
-
-	/**
-	 * Table names configuration for database entities.
-	 * Allows customizing table names for each entity type.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Tables {
-		/**
-		 * Table name for player entities.
-		 */
-		private String players;
-
-		/**
-		 * Table name for message file entities.
-		 */
-		private String messageFiles;
-
-		/**
-		 * Table name for message entry entities.
-		 */
-		private String messageEntries;
-
-		/**
-		 * Table name for message translation entities.
-		 */
-		private String messageTranslations;
-
-		/**
-		 * Table name for message regex pattern entities.
-		 */
-		private String messageRegexPatterns;
-
-		/**
-		 * Table name for message regex placeholder entities.
-		 */
-		private String messageRegexPlaceholders;
 	}
 }

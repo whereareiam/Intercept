@@ -14,6 +14,7 @@ import me.whereareiam.intercept.common.interceptor.processor.DefaultActionBarInt
 import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
 import me.whereareiam.intercept.common.interceptor.processor.DefaultKickInterceptionProcessor;
 import me.whereareiam.intercept.common.listener.InspectionModeEnhancer;
+import me.whereareiam.intercept.common.messaging.DefaultMessageDataService;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
@@ -31,6 +32,7 @@ import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
+import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
@@ -89,6 +91,7 @@ public class CommonConfiguration extends AbstractModule {
 
 		// Messages system
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
+		bind(MessageDataService.class).to(DefaultMessageDataService.class);
 		bind(MessageService.class).to(DefaultMessageService.class);
 		bind(MessagesService.class).asEagerSingleton();
 		bind(TagReplacementService.class).to(DefaultTagReplacementService.class);

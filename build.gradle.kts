@@ -35,14 +35,12 @@ subprojects {
         "compileOnly"(rootProject.libs.guice)
 
         // test
-        "testImplementation"(rootProject.libs.bundles.adventure)
         "testImplementation"(rootProject.libs.configura)
         "testImplementation"(rootProject.libs.commandant)
         "testImplementation"(rootProject.libs.keystone)
         "testImplementation"(rootProject.libs.guice)
-        "testImplementation"(rootProject.libs.junit.jupiter)
-        "testImplementation"(rootProject.libs.mockito.core)
-        "testImplementation"(rootProject.libs.mockito.junit)
+        "testImplementation"(rootProject.libs.bundles.adventure)
+        "testImplementation"(rootProject.libs.bundles.testing)
         "testRuntimeOnly"(rootProject.libs.junit.platform)
     }
 }

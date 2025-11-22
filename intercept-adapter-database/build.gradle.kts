@@ -1,13 +1,15 @@
 dependencies {
     "compileOnly"(project(":intercept-api"))
+    "compileOnly"(libs.bundles.database)
 
-    "compileOnly"(libs.jdbi.core)
-    "compileOnly"(libs.jdbi.sqlobject)
+    // Test dependencies
+    "testImplementation"(project(":intercept-api"))
+    "testImplementation"(libs.testcontainers.mariadb)
+    "testImplementation"(libs.testcontainers.postgres)
+    "testImplementation"(libs.bundles.database)
+    "testImplementation"(libs.bundles.testing)
+}
 
-    // Connection pooling
-    "compileOnly"(libs.hikaricp)
-
-    // Database drivers
-    "compileOnly"(libs.postgresql)
-    "compileOnly"(libs.mariadb)
+tasks.test {
+    useJUnitPlatform()
 }

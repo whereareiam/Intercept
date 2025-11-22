@@ -264,17 +264,17 @@ class MessagePerformanceTest {
 	@Test
 	void multiLocaleResolutionShouldBeFast() {
 		// Setup
+		Locale esLocale = Locale.forLanguageTag("es-ES");
 		registry.register("welcome", new DefaultMessageEntry(MessageType.MESSAGE,
 				Map.of(
-						"en_US", "Welcome!",
-						"de_DE", "Willkommen!",
-						"fr_FR", "Bienvenue!",
-						"es_ES", "¡Bienvenido!",
-						"it_IT", "Benvenuto!"
+						Locale.US, "Welcome!",
+						Locale.GERMAN, "Willkommen!",
+						Locale.FRANCE, "Bienvenue!",
+						esLocale, "¡Bienvenido!",
+						Locale.ITALY, "Benvenuto!"
 				)));
 
 		// Warm up all locales
-		Locale esLocale = Locale.forLanguageTag("es-ES");
 		for (int i = 0; i < 100; i++) {
 			service.resolve("welcome", Locale.US);
 			service.resolve("welcome", Locale.GERMANY);

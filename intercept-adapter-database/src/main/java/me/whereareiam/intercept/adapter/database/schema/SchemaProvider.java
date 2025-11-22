@@ -8,13 +8,6 @@ import me.whereareiam.intercept.type.PersistenceType;
  */
 public interface SchemaProvider {
 	/**
-	 * Gets the table name for this entity.
-	 *
-	 * @return the table name
-	 */
-	String getTableName();
-
-	/**
 	 * Gets the CREATE TABLE DDL statement for this entity.
 	 * The statement should use "CREATE TABLE IF NOT EXISTS" to be idempotent.
 	 *

@@ -1,6 +1,5 @@
 package me.whereareiam.intercept;
 
-import me.whereareiam.intercept.type.PersistenceType;
 import me.whereareiam.intercept.type.Version;
 
 public final class Constants {
@@ -26,18 +25,5 @@ public final class Constants {
 		public static final String HIKARICP = BuildConfig.HIKARICP;
 		public static final String POSTGRESQL = BuildConfig.POSTGRESQL;
 		public static final String MARIADB = BuildConfig.MARIADB;
-	}
-
-	public static final class Database {
-		public static PersistenceType TYPE;
-
-		public static final class Tables {
-			public static String PLAYERS;
-			public static String MESSAGE_FILES;
-			public static String MESSAGE_ENTRIES;
-			public static String MESSAGE_TRANSLATIONS;
-			public static String MESSAGE_REGEX_PATTERNS;
-			public static String MESSAGE_REGEX_PLACEHOLDERS;
-		}
 	}
 }

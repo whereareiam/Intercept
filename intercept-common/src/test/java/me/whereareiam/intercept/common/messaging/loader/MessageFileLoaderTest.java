@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,8 +58,8 @@ class MessageFileLoaderTest {
 		loader.loadFromData("test", fileData);
 
 		assertTrue(registry.exists("test.welcome"));
-		assertEquals("Welcome!", registry.get("test.welcome").getText("en_US"));
-		assertEquals("Willkommen!", registry.get("test.welcome").getText("de_DE"));
+		assertEquals("Welcome!", registry.get("test.welcome").getText(Locale.US));
+		assertEquals("Willkommen!", registry.get("test.welcome").getText(Locale.GERMANY));
 	}
 
 	@Test
@@ -108,8 +109,8 @@ class MessageFileLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals("Line 1\nLine 2", registry.get("test.banner").getText("en_US"));
-		assertEquals("Zeile 1\nZeile 2", registry.get("test.banner").getText("de_DE"));
+		assertEquals("Line 1\nLine 2", registry.get("test.banner").getText(Locale.US));
+		assertEquals("Zeile 1\nZeile 2", registry.get("test.banner").getText(Locale.GERMANY));
 	}
 
 	@Test
@@ -179,8 +180,8 @@ class MessageFileLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals("Hello", registry.get("test.greeting").getText("en_US"));
-		assertEquals("Hallo", registry.get("test.greeting").getText("de_DE"));
+		assertEquals("Hello", registry.get("test.greeting").getText(Locale.US));
+		assertEquals("Hallo", registry.get("test.greeting").getText(Locale.GERMANY));
 	}
 
 	@Test

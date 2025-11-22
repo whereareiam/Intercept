@@ -2,10 +2,8 @@ package me.whereareiam.intercept.adapter.database.entity.message;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 import me.whereareiam.intercept.type.PersistenceType;
-import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
 
@@ -28,45 +26,10 @@ public class MessageFileEntity implements SchemaProvider {
 	private String filePath;
 
 	/**
-	 * File-level MessageType: MESSAGE, TEMPLATE, MIXED, or NULL.
-	 * If NULL, type is auto-detected from entries.
-	 */
-	private MessageType fileType;
-
-	/**
 	 * All message entries in this file.
 	 * Cascade delete: deleting a file deletes all its entries.
 	 */
 	private List<MessageEntryEntity> entries;
-
-	/**
-	 * Get the directory path from file path.
-	 * Computed by removing the filename from filePath.
-	 *
-	 * @return directory path (e.g., "errors" from "errors/permissions.yml")
-	 */
-	public String getDirectoryPath() {
-		if (filePath == null) return "";
-		int lastSlash = filePath.lastIndexOf('/');
-		return lastSlash > 0 ? filePath.substring(0, lastSlash) : "";
-	}
-
-	/**
-	 * Get the file name without extension from file path.
-	 * Computed by removing directory and extension from filePath.
-	 *
-	 * @return file name (e.g., "permissions" from "errors/permissions.yml")
-	 */
-	public String getFileName() {
-		if (filePath == null) return "";
-
-		String path = filePath;
-		int lastSlash = path.lastIndexOf('/');
-		String fileName = lastSlash >= 0 ? path.substring(lastSlash + 1) : path;
-		int lastDot = fileName.lastIndexOf('.');
-
-		return lastDot > 0 ? fileName.substring(0, lastDot) : fileName;
-	}
 
 	/**
 	 * Get the key prefix from file path.
@@ -88,20 +51,14 @@ public class MessageFileEntity implements SchemaProvider {
 	}
 
 	@Override
-	public String getTableName() {
-		return Constants.Database.Tables.MESSAGE_FILES;
-	}
-
-	@Override
 	public String getCreateTableStatement(PersistenceType persistenceType) {
 		String idType = getAutoIncrementPrimaryKey(persistenceType);
 		return """
-				CREATE TABLE IF NOT EXISTS %s (
+				CREATE TABLE IF NOT EXISTS intercept_message_files (
 					id %s,
-					file_path VARCHAR(500) NOT NULL UNIQUE,
-					file_type VARCHAR(20)
+					file_path VARCHAR(500) NOT NULL UNIQUE
 				)
-				""".formatted(getTableName(), idType);
+				""".formatted(idType);
 	}
 
 	private String getAutoIncrementPrimaryKey(PersistenceType type) {

@@ -7,6 +7,8 @@ import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -26,7 +28,7 @@ class MessageReferenceProcessorTest {
 		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[Intercept]"));
 
 		String text = "<m:prefix> Hello!";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("[Intercept] Hello!", result);
 	}
 
@@ -36,7 +38,7 @@ class MessageReferenceProcessorTest {
 		registry.register("suffix", new DefaultMessageEntry(MessageType.TEMPLATE, "Thanks!"));
 
 		String text = "<m:prefix> Message <m:suffix>";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("[Intercept] Message Thanks!", result);
 	}
 
@@ -46,21 +48,21 @@ class MessageReferenceProcessorTest {
 		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:color>[Intercept]"));
 
 		String text = "<m:prefix> Hello!";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("<red>[Intercept] Hello!", result);
 	}
 
 	@Test
 	void shouldKeepOriginalWhenReferenceMissing() {
 		String text = "<m:missing> Hello!";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("<m:missing> Hello!", result);
 	}
 
 	@Test
 	void shouldHandleTextWithNoReferences() {
 		String text = "Just plain text";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("Just plain text", result);
 	}
 
@@ -69,7 +71,7 @@ class MessageReferenceProcessorTest {
 		registry.register("common.prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[Common]"));
 
 		String text = "<m:common.prefix> Message";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("[Common] Message", result);
 	}
 
@@ -80,7 +82,7 @@ class MessageReferenceProcessorTest {
 		registry.register("c", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>C"));
 
 		String text = "<m:c>";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		assertEquals("ABC", result);
 	}
 
@@ -90,7 +92,7 @@ class MessageReferenceProcessorTest {
 		registry.register("b", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:a>"));
 
 		String text = "<m:a>";
-		String result = processor.process(text, "en_US");
+		String result = processor.process(text, Locale.US);
 		// Should stop after max depth and keep unresolved
 		assertTrue(result.contains("<m:"));
 	}

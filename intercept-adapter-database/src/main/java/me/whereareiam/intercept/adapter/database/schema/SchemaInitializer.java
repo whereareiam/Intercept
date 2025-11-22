@@ -1,8 +1,8 @@
 package me.whereareiam.intercept.adapter.database.schema;
 
-import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.adapter.database.entity.PlayerEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.*;
+import me.whereareiam.intercept.type.PersistenceType;
 import org.jdbi.v3.core.Jdbi;
 
 /**
@@ -24,13 +24,15 @@ public final class SchemaInitializer {
 	 * Entities are self-aware and provide their own DDL statements.
 	 *
 	 * @param jdbi shared Jdbi instance
+	 * @param type the persistence type (POSTGRES or MARIADB)
 	 */
-	public static void createTables(Jdbi jdbi) {
+	public static void createTables(Jdbi jdbi, PersistenceType type) {
 		if (jdbi == null) throw new IllegalStateException("Jdbi instance must not be null");
+		if (type == null) throw new IllegalStateException("PersistenceType must not be null");
 
 		jdbi.useHandle(handle -> handle.useTransaction(transactionHandle -> {
 			for (SchemaProvider entity : ENTITIES) {
-				String ddl = entity.getCreateTableStatement(Constants.Database.TYPE);
+				String ddl = entity.getCreateTableStatement(type);
 				transactionHandle.execute(ddl);
 			}
 		}));
