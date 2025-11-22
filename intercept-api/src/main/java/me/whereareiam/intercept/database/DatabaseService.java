@@ -4,8 +4,8 @@ package me.whereareiam.intercept.database;
  * Service interface for database operations.
  * Provides access to database functionality and connection management.
  * <p>
- * For accessing ConnectionSource, inject {@code Provider<ConnectionSource>}
- * or {@code ConnectionSource} directly via Guice, using DatabaseProvider.
+ * For database access, use {@code JdbiSingleton.get()} to obtain the Jdbi instance.
+ * The singleton is set after dependencies are loaded during initialization.
  */
 public interface DatabaseService {
 	/**

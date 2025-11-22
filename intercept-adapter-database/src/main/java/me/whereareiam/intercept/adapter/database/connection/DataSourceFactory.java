@@ -3,6 +3,7 @@ package me.whereareiam.intercept.adapter.database.connection;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
+import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Persistence;
 import me.whereareiam.intercept.type.PersistenceType;
@@ -22,7 +23,7 @@ public final class DataSourceFactory {
 	 * @return the initialized DataSource
 	 */
 	public static DataSource create(Persistence persistence) {
-		PersistenceType type = persistence.getType() != null ? persistence.getType() : PersistenceType.POSTGRES;
+		PersistenceType type = Constants.Database.TYPE;
 		Persistence.Hikari hikariConfig = persistence.getHikari();
 
 		// Build JDBC URL based on database type

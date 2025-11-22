@@ -5,26 +5,21 @@ import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.attache.model.Library;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.DependencyResolver;
-import me.whereareiam.intercept.model.config.Persistence;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Dependency resolver for database-related libraries.
- * Conditionally loads OrmLite and database drivers based on database configuration.
+ * Conditionally loads Jdbi and database drivers based on database configuration.
  */
 @RequiredArgsConstructor
 public class DatabaseDependencyResolver implements DependencyResolver {
 	private final LibraryManager libraryManager;
-	private final Persistence persistence;
 	private final List<Library> libraries = new ArrayList<>();
 
 	@Override
 	public void resolveDependencies() {
-		if (!persistence.isEnabled())
-			return;
-
 		libraryManager.addMavenCentral();
 		libraries.forEach(libraryManager::loadLibrary);
 		clearDependencies();
@@ -32,23 +27,19 @@ public class DatabaseDependencyResolver implements DependencyResolver {
 
 	@Override
 	public void loadLibraries() {
-		if (!persistence.isEnabled())
-			return;
-
-		// OrmLite ORM dependencies
-		// OrmLite core library
+		// Jdbi core runtime
 		addDependency(Library.builder()
-				.groupId("com{}j256{}ormlite")
-				.artifactId("ormlite-core")
-				.version(Constants.Dependency.ORMLITE)
+				.groupId("org{}jdbi")
+				.artifactId("jdbi3-core")
+				.version(Constants.Dependency.JDBI)
 				.resolveTransitiveDependencies(true)
 				.build());
 
-		// OrmLite JDBC library
+		// Jdbi SQL Object support
 		addDependency(Library.builder()
-				.groupId("com{}j256{}ormlite")
-				.artifactId("ormlite-jdbc")
-				.version(Constants.Dependency.ORMLITE)
+				.groupId("org{}jdbi")
+				.artifactId("jdbi3-sqlobject")
+				.version(Constants.Dependency.JDBI)
 				.resolveTransitiveDependencies(true)
 				.build());
 
@@ -61,8 +52,8 @@ public class DatabaseDependencyResolver implements DependencyResolver {
 				.build());
 
 		// Database drivers - only load the selected type
-		// OrmLite supports PostgreSQL and MariaDB/MySQL natively, no platform provider needed
-		switch (persistence.getType()) {
+		// Jdbi talks to whichever JDBC driver we provide
+		switch (Constants.Database.TYPE) {
 			case POSTGRES:
 				// PostgreSQL JDBC driver
 				addDependency(Library.builder()

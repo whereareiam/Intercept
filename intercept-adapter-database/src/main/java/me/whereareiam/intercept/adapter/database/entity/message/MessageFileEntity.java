@@ -1,48 +1,43 @@
 package me.whereareiam.intercept.adapter.database.entity.message;
 
-import com.j256.ormlite.dao.ForeignCollection;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
-import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
+import me.whereareiam.intercept.type.PersistenceType;
 import me.whereareiam.intercept.type.message.MessageType;
 
+import java.util.List;
+
 /**
- * OrmLite entity representing a message file.
+ * Database entity representing a message file.
  * Stores file-level metadata for message/template files.
  */
 @Getter
 @Setter
-@DatabaseTable(tableName = "intercept_message_files")
-public class MessageFileEntity {
+public class MessageFileEntity implements SchemaProvider {
 	/**
 	 * Primary key.
 	 */
-	@DatabaseField(generatedId = true)
 	private Long id;
 
 	/**
 	 * Relative path from messages root (e.g., "errors/permissions.yml", "common/styles.yml").
 	 * Unique constraint ensures no duplicate files.
 	 */
-	@DatabaseField(canBeNull = false, unique = true, width = 500)
 	private String filePath;
 
 	/**
 	 * File-level MessageType: MESSAGE, TEMPLATE, MIXED, or NULL.
 	 * If NULL, type is auto-detected from entries.
 	 */
-	@DatabaseField(dataType = DataType.ENUM_STRING, width = 20)
 	private MessageType fileType;
 
 	/**
 	 * All message entries in this file.
 	 * Cascade delete: deleting a file deletes all its entries.
 	 */
-	@ForeignCollectionField
-	private ForeignCollection<MessageEntryEntity> entries;
+	private List<MessageEntryEntity> entries;
 
 	/**
 	 * Get the directory path from file path.
@@ -90,6 +85,30 @@ public class MessageFileEntity {
 
 		// Replace path separators with dots
 		return path.replace('\\', '.').replace('/', '.');
+	}
+
+	@Override
+	public String getTableName() {
+		return Constants.Database.Tables.MESSAGE_FILES;
+	}
+
+	@Override
+	public String getCreateTableStatement(PersistenceType persistenceType) {
+		String idType = getAutoIncrementPrimaryKey(persistenceType);
+		return """
+				CREATE TABLE IF NOT EXISTS %s (
+					id %s,
+					file_path VARCHAR(500) NOT NULL UNIQUE,
+					file_type VARCHAR(20)
+				)
+				""".formatted(getTableName(), idType);
+	}
+
+	private String getAutoIncrementPrimaryKey(PersistenceType type) {
+		return switch (type) {
+			case POSTGRES -> "BIGSERIAL PRIMARY KEY";
+			case MARIADB -> "BIGINT AUTO_INCREMENT PRIMARY KEY";
+		};
 	}
 }
 

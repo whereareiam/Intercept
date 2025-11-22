@@ -94,7 +94,6 @@ public class MessagesService implements Reloadable {
 		boolean shouldPrerender = settings.getPerformance().isPrerenderStatic() && settings.getPerformance().getCache().isEnabled();
 
 		if (shouldBuildGraph || shouldPrerender) {
-			Logger.info("Starting compilation...");
 			long startTime = System.currentTimeMillis();
 
 			if (shouldBuildGraph) buildDependencyGraph();

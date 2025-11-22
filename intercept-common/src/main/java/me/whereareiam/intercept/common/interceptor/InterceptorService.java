@@ -41,8 +41,6 @@ public class InterceptorService implements Reloadable {
 	 * Only starts interceptors for components that are enabled.
 	 */
 	public void initialize() {
-		Logger.info("Initializing interceptors...");
-
 		Interception interception = interceptionProvider.get();
 		if (interception == null || interception.getComponents() == null) {
 			Logger.warn("No interception configuration found, skipping interceptor initialization");

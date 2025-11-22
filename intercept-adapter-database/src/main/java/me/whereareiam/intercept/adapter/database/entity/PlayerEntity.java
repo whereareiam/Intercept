@@ -1,10 +1,10 @@
 package me.whereareiam.intercept.adapter.database.entity;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
+import me.whereareiam.intercept.type.PersistenceType;
 
 import java.util.UUID;
 
@@ -14,20 +14,32 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-@DatabaseTable(tableName = "intercept_players")
-public class PlayerEntity {
+public class PlayerEntity implements SchemaProvider {
 	/**
 	 * The player's unique identifier (UUID).
 	 * Used as the primary key.
 	 */
-	@DatabaseField(id = true, dataType = DataType.UUID)
 	private UUID uniqueId;
 
 	/**
 	 * Whether inspection mode is enabled for this player.
 	 * When enabled, chat messages become clickable and show regex patterns.
 	 */
-	@DatabaseField
 	private boolean inspectionMode;
+
+	@Override
+	public String getTableName() {
+		return Constants.Database.Tables.PLAYERS;
+	}
+
+	@Override
+	public String getCreateTableStatement(PersistenceType persistenceType) {
+		return """
+				CREATE TABLE IF NOT EXISTS %s (
+					unique_id CHAR(36) PRIMARY KEY,
+					inspection_mode BOOLEAN NOT NULL DEFAULT FALSE
+				)
+				""".formatted(getTableName());
+	}
 }
 

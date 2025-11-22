@@ -30,6 +30,16 @@ public class PersistenceTemplate implements TemplateProvider<Persistence> {
 		hikari.setMaxLifetime(1800000); // 30 minutes
 		config.setHikari(hikari);
 
+		// Initialize table names with default values
+		Persistence.Tables tables = new Persistence.Tables();
+		tables.setPlayers("intercept_players");
+		tables.setMessageFiles("intercept_message_files");
+		tables.setMessageEntries("intercept_message_entries");
+		tables.setMessageTranslations("intercept_message_translations");
+		tables.setMessageRegexPatterns("intercept_message_regex_patterns");
+		tables.setMessageRegexPlaceholders("intercept_message_regex_placeholders");
+		config.setTables(tables);
+
 		return config;
 	}
 }

@@ -3,10 +3,13 @@ package me.whereareiam.intercept.adapter.database;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.j256.ormlite.support.ConnectionSource;
+import com.google.inject.name.Named;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import me.whereareiam.attache.LibraryManager;
-import me.whereareiam.intercept.adapter.database.provider.DatabaseProvider;
+import me.whereareiam.intercept.adapter.database.config.LoggerConfig;
+import me.whereareiam.intercept.adapter.database.connection.DataSourceFactory;
+import me.whereareiam.intercept.adapter.database.schema.SchemaInitializer;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
@@ -16,67 +19,78 @@ import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptShutdownEvent;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Persistence;
-import me.whereareiam.intercept.model.config.Settings;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
 import javax.sql.DataSource;
 
 /**
  * Default implementation of DatabaseService.
- * Handles database lifecycle and provides access to ConnectionSource.
+ * Handles database lifecycle and provides access to Jdbi.
  */
 @Getter
 @Singleton
 public class DefaultDatabaseService implements DatabaseService, EventListener {
 	private final Persistence persistence;
-	private final Settings settings;
 	private final Provider<LibraryManager> libraryManagerProvider;
-	private final DatabaseProvider databaseProvider;
+	private final Boolean databaseReady;
 	private boolean initialized = false;
-	private ConnectionSource connectionSource;
 	private DataSource dataSource;
+	private Jdbi jdbi;
 
 	@Inject
 	public DefaultDatabaseService(
 			Persistence persistence,
-			Settings settings,
 			Provider<LibraryManager> libraryManagerProvider,
-			DatabaseProvider databaseProvider,
+			@Named("databaseReady") Boolean databaseReady,
 			EventManager eventManager
 	) {
 		this.persistence = persistence;
-		this.settings = settings;
 		this.libraryManagerProvider = libraryManagerProvider;
-		this.databaseProvider = databaseProvider;
+		this.databaseReady = databaseReady;
 
 		eventManager.register(this);
 	}
 
 	@IntercepticEvent(EventOrder.LOWEST)
 	public void onReady(InterceptReadyEvent event) {
-		if (!persistence.isEnabled()) return;
+		if (!databaseReady) return;
 		if (initialized) throw new IllegalStateException("DatabaseService has already been initialized");
 
 		try {
-			DatabaseOrchestrator.InitializationResult result = DatabaseOrchestrator.initialize(persistence, settings, libraryManagerProvider);
-			if (result != null) {
-				this.dataSource = result.getDataSource();
-				this.connectionSource = result.getConnectionSource();
-				databaseProvider.setConnectionSource(connectionSource);
-				initialized = true;
-				Logger.info("Database connection initialized successfully");
-			}
-		} catch (Exception ignored) {
-			// Error already logged by orchestrator
+			// Step 1: Create DataSource
+			this.dataSource = DataSourceFactory.create(persistence);
+
+			// Step 2: Initialize Jdbi (only loaded after dependencies are available)
+			this.jdbi = Jdbi.create(dataSource);
+			jdbi.installPlugin(new SqlObjectPlugin());
+
+			// Step 3: Configure logger
+			LoggerConfig.configure(jdbi);
+
+			// Step 4: Create database tables
+			SchemaInitializer.createTables(jdbi);
+			initialized = true;
+		} catch (Exception e) {
+			Logger.severe("Failed to initialize database: %s", e.getMessage());
+			throw new RuntimeException("Failed to initialize database", e);
 		}
 	}
 
 	@IntercepticEvent(EventOrder.LOWEST)
 	public void onShutdown(InterceptShutdownEvent event) {
-		if (!initialized || !persistence.isEnabled()) return;
+		if (!initialized || !databaseReady) return;
 
 		try {
 			Logger.info("Shutting down database connection...");
-			DatabaseOrchestrator.shutdown(connectionSource, dataSource);
+
+			if (dataSource instanceof HikariDataSource hikariDataSource) {
+				hikariDataSource.close();
+				Logger.info("Database connection pool closed");
+			}
+
+			dataSource = null;
+			jdbi = null;
 			initialized = false;
 		} catch (Exception e) {
 			Logger.warn("Error occurred while shutting down database connection: %s", e.getMessage());
@@ -85,7 +99,7 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 
 	@Override
 	public boolean isInitialized() {
-		return initialized && connectionSource != null;
+		return initialized;
 	}
 }
 

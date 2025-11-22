@@ -1,40 +1,41 @@
 package me.whereareiam.intercept.adapter.database.config;
 
-import com.j256.ormlite.logger.Level;
-import com.j256.ormlite.logger.Logger;
-import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.logging.Logger;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.SqlLogger;
+import org.jdbi.v3.core.statement.SqlStatements;
+import org.jdbi.v3.core.statement.StatementContext;
+
+import java.sql.SQLException;
 
 /**
- * Configures database logger level based on application settings.
+ * Configures Jdbi SQL logging.
  */
 public final class LoggerConfig {
 	/**
-	 * Configures logger level based on application settings.
+	 * Configures SQL logger for Jdbi.
 	 *
-	 * @param settings the application settings
+	 * @param jdbi the shared Jdbi instance
 	 */
-	public static void configure(Settings settings) {
-		Level level = mapLogLevel(settings.getLevel());
-		Logger.setGlobalLogLevel(level);
-	}
+	public static void configure(Jdbi jdbi) {
+		if (jdbi == null) return;
 
-	/**
-	 * Maps application log level to the database log level.
-	 * Application levels:
-	 * - 0: Severe only -> ERROR
-	 * - 1: Warn+ -> WARNING
-	 * - 2: Info+ -> INFO
-	 * - 4+: Debug -> DEBUG
-	 *
-	 * @param applicationLevel the application log level
-	 * @return the corresponding database log level
-	 */
-	private static Level mapLogLevel(int applicationLevel) {
-		if (applicationLevel >= 4) return Level.DEBUG;
-		if (applicationLevel == 3) return Level.INFO;
-		if (applicationLevel >= 1) return Level.WARNING;
+		jdbi.getConfig(SqlStatements.class).setSqlLogger(new SqlLogger() {
+			@Override
+			public void logBeforeExecution(StatementContext context) {
+				Logger.debug("Executing SQL: %s", context.getRenderedSql());
+			}
 
-		return Level.ERROR;
+			@Override
+			public void logAfterExecution(StatementContext context) {
+				Logger.debug("SQL completed: %s", context.getRenderedSql());
+			}
+
+			@Override
+			public void logException(StatementContext context, SQLException ex) {
+				Logger.warn("SQL error [%s]: %s", context.getRenderedSql(), ex.getMessage());
+			}
+		});
 	}
 }
 

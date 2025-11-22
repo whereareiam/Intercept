@@ -1,22 +1,21 @@
 package me.whereareiam.intercept.adapter.database.entity.message;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
+import me.whereareiam.intercept.type.PersistenceType;
 
 /**
- * OrmLite entity representing a placeholder mapping for a regex pattern.
+ * Database entity representing a placeholder mapping for a regex pattern.
  * Stores placeholder names and their corresponding capture group references.
  */
 @Getter
 @Setter
-@DatabaseTable(tableName = "intercept_message_regex_placeholders")
-public class MessageRegexPlaceholderEntity {
+public class MessageRegexPlaceholderEntity implements SchemaProvider {
 	/**
 	 * Primary key.
 	 */
-	@DatabaseField(generatedId = true)
 	private Long id;
 
 	/**
@@ -24,20 +23,47 @@ public class MessageRegexPlaceholderEntity {
 	 * Cascade delete handled at pattern level.
 	 * Unique constraint with placeholderName ensures no duplicate placeholders per pattern.
 	 */
-	@DatabaseField(foreign = true, columnName = "pattern_id", canBeNull = false, uniqueCombo = true)
 	private MessageRegexPatternEntity pattern;
 
 	/**
 	 * Placeholder name (e.g., "permission", "player", "name").
 	 * Unique constraint with pattern_id ensures no duplicate placeholders per pattern.
 	 */
-	@DatabaseField(canBeNull = false, width = 100, uniqueCombo = true)
 	private String placeholderName;
 
 	/**
 	 * Capture group reference (e.g., "$1", "$2", "$3").
 	 */
-	@DatabaseField(canBeNull = false, width = 50)
 	private String captureGroup;
+
+	@Override
+	public String getTableName() {
+		return Constants.Database.Tables.MESSAGE_REGEX_PLACEHOLDERS;
+	}
+
+	@Override
+	public String getCreateTableStatement(PersistenceType persistenceType) {
+		String idType = getAutoIncrementPrimaryKey(persistenceType);
+		return """
+				CREATE TABLE IF NOT EXISTS %s (
+					id %s,
+					pattern_id BIGINT NOT NULL,
+					placeholder_name VARCHAR(100) NOT NULL,
+					capture_group VARCHAR(50) NOT NULL,
+					CONSTRAINT fk_regex_placeholders_pattern
+						FOREIGN KEY (pattern_id)
+						REFERENCES %s (id)
+						ON DELETE CASCADE,
+					CONSTRAINT uq_regex_placeholders UNIQUE (pattern_id, placeholder_name)
+				)
+				""".formatted(getTableName(), idType, Constants.Database.Tables.MESSAGE_REGEX_PATTERNS);
+	}
+
+	private String getAutoIncrementPrimaryKey(PersistenceType type) {
+		return switch (type) {
+			case POSTGRES -> "BIGSERIAL PRIMARY KEY";
+			case MARIADB -> "BIGINT AUTO_INCREMENT PRIMARY KEY";
+		};
+	}
 }
 

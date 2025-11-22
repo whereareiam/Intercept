@@ -1,25 +1,23 @@
 package me.whereareiam.intercept.adapter.database.entity.message;
 
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
+import me.whereareiam.intercept.type.PersistenceType;
 
 import java.util.Locale;
 
 /**
- * OrmLite entity representing a translation for a message entry.
+ * Database entity representing a translation for a message entry.
  * Stores locale-specific translations for messages and templates.
  */
 @Getter
 @Setter
-@DatabaseTable(tableName = "intercept_message_translations")
-public class MessageTranslationEntity {
+public class MessageTranslationEntity implements SchemaProvider {
 	/**
 	 * Primary key.
 	 */
-	@DatabaseField(generatedId = true)
 	private Long id;
 
 	/**
@@ -27,7 +25,6 @@ public class MessageTranslationEntity {
 	 * Cascade delete handled at entry level.
 	 * Unique constraint with localeString ensures one translation per locale per entry.
 	 */
-	@DatabaseField(foreign = true, columnName = "entry_id", canBeNull = false, uniqueCombo = true)
 	private MessageEntryEntity entry;
 
 	/**
@@ -35,13 +32,11 @@ public class MessageTranslationEntity {
 	 * Stored as string since Locale doesn't have a built-in converter.
 	 * Unique constraint with entry_id ensures one translation per locale per entry.
 	 */
-	@DatabaseField(canBeNull = false, width = 20, uniqueCombo = true)
 	private String localeString;
 
 	/**
 	 * Translated text (can be multiline).
 	 */
-	@DatabaseField(canBeNull = false, dataType = DataType.LONG_STRING)
 	private String text;
 
 	/**
@@ -68,6 +63,36 @@ public class MessageTranslationEntity {
 		}
 
 		this.localeString = locale.toString();
+	}
+
+	@Override
+	public String getTableName() {
+		return Constants.Database.Tables.MESSAGE_TRANSLATIONS;
+	}
+
+	@Override
+	public String getCreateTableStatement(PersistenceType persistenceType) {
+		String idType = getAutoIncrementPrimaryKey(persistenceType);
+		return """
+				CREATE TABLE IF NOT EXISTS %s (
+					id %s,
+					entry_id BIGINT NOT NULL,
+					locale_string VARCHAR(20) NOT NULL,
+					text TEXT NOT NULL,
+					CONSTRAINT fk_message_translations_entry
+						FOREIGN KEY (entry_id)
+						REFERENCES %s (id)
+						ON DELETE CASCADE,
+					CONSTRAINT uq_message_translations_entry_locale UNIQUE (entry_id, locale_string)
+				)
+				""".formatted(getTableName(), idType, Constants.Database.Tables.MESSAGE_ENTRIES);
+	}
+
+	private String getAutoIncrementPrimaryKey(PersistenceType type) {
+		return switch (type) {
+			case POSTGRES -> "BIGSERIAL PRIMARY KEY";
+			case MARIADB -> "BIGINT AUTO_INCREMENT PRIMARY KEY";
+		};
 	}
 }
 

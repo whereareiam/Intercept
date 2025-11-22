@@ -1,11 +1,8 @@
 dependencies {
     "compileOnly"(project(":intercept-api"))
-    "testImplementation"(project(":intercept-api"))
 
-    // OrmLite ORM - use implementation so classes can be accessed during build
-    // OrmLite runtime libraries are still loaded via LibraryManager at runtime
-    "implementation"(libs.ormlite.core)
-    "implementation"(libs.ormlite.jdbc)
+    "compileOnly"(libs.jdbi.core)
+    "compileOnly"(libs.jdbi.sqlobject)
 
     // Connection pooling
     "compileOnly"(libs.hikaricp)

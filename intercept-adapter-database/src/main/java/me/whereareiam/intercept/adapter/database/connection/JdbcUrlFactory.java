@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.adapter.database.connection;
 
+import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.model.config.Persistence;
 import me.whereareiam.intercept.type.PersistenceType;
 
@@ -14,7 +15,7 @@ public final class JdbcUrlFactory {
 	 * @return the JDBC URL string
 	 */
 	public static String create(Persistence persistence) {
-		PersistenceType type = persistence.getType() != null ? persistence.getType() : PersistenceType.POSTGRES;
+		PersistenceType type = Constants.Database.TYPE;
 		String host = persistence.getHost() + ":" + persistence.getPort();
 		String database = persistence.getDatabase();
 

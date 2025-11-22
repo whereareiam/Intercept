@@ -35,7 +35,7 @@ adventure = "4.25.0"
 adventure-platform-bukkit = "4.4.1"
 
 # database
-ormlite = "6.1"
+jdbi = "3.50.0"
 hikaricp = "7.0.2"
 postgresql = "42.7.8"
 mariadb = "3.5.6"
@@ -85,8 +85,8 @@ adventure-gson = { group = "net.kyori", name = "adventure-text-serializer-gson",
 adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform-bukkit" }
 
 # database
-ormlite-core = { group = "com.j256.ormlite", name = "ormlite-core", version.ref = "ormlite" }
-ormlite-jdbc = { group = "com.j256.ormlite", name = "ormlite-jdbc", version.ref = "ormlite" }
+jdbi-core = { group = "org.jdbi", name = "jdbi3-core", version.ref = "jdbi" }
+jdbi-sqlobject = { group = "org.jdbi", name = "jdbi3-sqlobject", version.ref = "jdbi" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
