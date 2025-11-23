@@ -1,6 +1,7 @@
-package me.whereareiam.intercept.adapter.database.repository;
+package me.whereareiam.intercept.adapter.database.repository.message;
 
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
+import me.whereareiam.intercept.adapter.database.statement.DialectUpdate;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -36,8 +37,8 @@ public interface MessageFileRepository {
 	@SqlUpdate("DELETE FROM intercept_message_files WHERE id = :id")
 	void deleteById(@Bind("id") long id);
 
-	@SqlUpdate("DELETE FROM intercept_message_files")
-	void deleteAll();
+	@DialectUpdate(provider = MessageFileAdapter.TruncateAll.class)
+	void truncateAll();
 
 	@SqlQuery("SELECT COUNT(*) > 0 FROM intercept_message_files WHERE id = :id")
 	boolean existsById(@Bind("id") long id);

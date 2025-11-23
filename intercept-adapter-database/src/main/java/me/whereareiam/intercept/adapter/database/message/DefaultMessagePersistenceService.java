@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
-import me.whereareiam.intercept.adapter.database.repository.*;
+import me.whereareiam.intercept.adapter.database.repository.message.*;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageEntry;
@@ -46,11 +46,11 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 		}
 
 		jdbi.useTransaction(handle -> {
-			placeholderRepository.deleteAll();
-			patternRepository.deleteAll();
-			translationRepository.deleteAll();
-			entryRepository.deleteAll();
-			fileRepository.deleteAll();
+			placeholderRepository.truncateAll();
+			patternRepository.truncateAll();
+			translationRepository.truncateAll();
+			entryRepository.truncateAll();
+			fileRepository.truncateAll();
 
 			Map<String, MessageFileEntity> fileEntities = createFileEntities(filePaths);
 			processEntries(entries, filePaths, fileEntities);

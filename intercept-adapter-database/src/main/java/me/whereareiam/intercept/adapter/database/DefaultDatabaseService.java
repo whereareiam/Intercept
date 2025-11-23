@@ -8,6 +8,7 @@ import me.whereareiam.intercept.adapter.database.config.LoggerConfig;
 import me.whereareiam.intercept.adapter.database.connection.DataSourceFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleArgumentFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleColumnMapper;
+import me.whereareiam.intercept.adapter.database.dialect.DialectPlugin;
 import me.whereareiam.intercept.adapter.database.schema.SchemaInitializer;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.event.EventListener;
@@ -55,6 +56,7 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 
 			this.jdbi = Jdbi.create(dataSource);
 			jdbi.installPlugin(new SqlObjectPlugin());
+			jdbi.installPlugin(new DialectPlugin(persistence.getType()));
 			jdbi.registerColumnMapper(new LocaleColumnMapper());
 			jdbi.getConfig().get(Arguments.class).register(new LocaleArgumentFactory());
 

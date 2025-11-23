@@ -1,6 +1,7 @@
-package me.whereareiam.intercept.adapter.database.repository;
+package me.whereareiam.intercept.adapter.database.repository.message;
 
 import me.whereareiam.intercept.adapter.database.entity.message.MessageRegexPatternEntity;
+import me.whereareiam.intercept.adapter.database.statement.DialectUpdate;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -23,6 +24,7 @@ public interface MessageRegexPatternRepository {
 	@GetGeneratedKeys("id")
 	long insert(@Bind("entryId") long entryId, @Bind("pattern") String pattern, @Bind("priority") int priority, @Bind("replaceMatched") boolean replaceMatched, @Bind("sortOrder") int sortOrder);
 
-	@SqlUpdate("DELETE FROM intercept_message_regex_patterns")
-	void deleteAll();
+	@DialectUpdate(provider = MessageRegexPatternAdapter.TruncateAll.class)
+	void truncateAll();
 }
+

@@ -1,6 +1,7 @@
-package me.whereareiam.intercept.adapter.database.repository;
+package me.whereareiam.intercept.adapter.database.repository.message;
 
 import me.whereareiam.intercept.adapter.database.entity.message.MessageTranslationEntity;
+import me.whereareiam.intercept.adapter.database.statement.DialectUpdate;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -24,6 +25,7 @@ public interface MessageTranslationRepository {
 	@GetGeneratedKeys("id")
 	long insert(@Bind("entryId") long entryId, @Bind("locale") Locale locale, @Bind("text") String text);
 
-	@SqlUpdate("DELETE FROM intercept_message_translations")
-	void deleteAll();
+	@DialectUpdate(provider = MessageTranslationAdapter.TruncateAll.class)
+	void truncateAll();
 }
+

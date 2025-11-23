@@ -6,11 +6,11 @@ import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntit
 import me.whereareiam.intercept.adapter.database.entity.message.MessageRegexPatternEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageRegexPlaceholderEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageTranslationEntity;
-import me.whereareiam.intercept.adapter.database.repository.MessageEntryRepository;
-import me.whereareiam.intercept.adapter.database.repository.MessageFileRepository;
-import me.whereareiam.intercept.adapter.database.repository.MessageRegexPatternRepository;
-import me.whereareiam.intercept.adapter.database.repository.MessageRegexPlaceholderRepository;
-import me.whereareiam.intercept.adapter.database.repository.MessageTranslationRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPatternRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPlaceholderRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageSnapshot;

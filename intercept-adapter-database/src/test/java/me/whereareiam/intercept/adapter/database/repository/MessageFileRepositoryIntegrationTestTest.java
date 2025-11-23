@@ -2,6 +2,7 @@ package me.whereareiam.intercept.adapter.database.repository;
 
 import me.whereareiam.intercept.adapter.database.BaseTest;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
 import me.whereareiam.intercept.type.PersistenceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;

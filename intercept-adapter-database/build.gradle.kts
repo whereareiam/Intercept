@@ -1,5 +1,5 @@
 dependencies {
-    "compileOnly"(project(":intercept-api"))
+    "api"(project(":intercept-api"))
     "compileOnly"(libs.bundles.database)
 
     // Test dependencies

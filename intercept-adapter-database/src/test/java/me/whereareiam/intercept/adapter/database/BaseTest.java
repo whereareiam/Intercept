@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.whereareiam.intercept.adapter.database.converter.LocaleArgumentFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleColumnMapper;
+import me.whereareiam.intercept.adapter.database.dialect.DialectPlugin;
 import me.whereareiam.intercept.adapter.database.schema.SchemaInitializer;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
@@ -82,6 +83,10 @@ public abstract class BaseTest {
 		dataSources.add(dataSource);
 		Jdbi jdbi = Jdbi.create(dataSource);
 		jdbi.installPlugin(new SqlObjectPlugin());
+		
+		// Determine PersistenceType from JDBC URL
+		PersistenceType persistenceType = jdbcUrl.contains("postgresql") ? PersistenceType.POSTGRES : PersistenceType.MARIADB;
+		jdbi.installPlugin(new DialectPlugin(persistenceType));
 
 		// Register Locale converters
 		jdbi.registerColumnMapper(new LocaleColumnMapper());

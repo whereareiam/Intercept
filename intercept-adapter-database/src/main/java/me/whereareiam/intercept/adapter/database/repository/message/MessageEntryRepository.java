@@ -1,6 +1,7 @@
-package me.whereareiam.intercept.adapter.database.repository;
+package me.whereareiam.intercept.adapter.database.repository.message;
 
 import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
+import me.whereareiam.intercept.adapter.database.statement.DialectUpdate;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -24,8 +25,8 @@ public interface MessageEntryRepository {
 	@SqlUpdate("UPDATE intercept_message_entries SET entry_type = :entryType WHERE id = :id")
 	void update(@Bind("id") long id, @Bind("entryType") String entryType);
 
-	@SqlUpdate("DELETE FROM intercept_message_entries")
-	void deleteAll();
+	@DialectUpdate(provider = MessageEntryAdapter.TruncateAll.class)
+	void truncateAll();
 
 	/**
 	 * Convenience method to save (insert or update) an entry entity.
@@ -47,3 +48,4 @@ public interface MessageEntryRepository {
 		return entity;
 	}
 }
+
