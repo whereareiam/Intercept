@@ -13,7 +13,7 @@ allprojects {
 
 subprojects {
     repositories {
-        mavenLocal()
+        // mavenLocal()
         mavenCentral()
         maven("https://jitpack.io")
         maven("https://maven.whereareiam.me/development")
@@ -32,6 +32,7 @@ subprojects {
         "compileOnly"(rootProject.libs.configura)
         "compileOnly"(rootProject.libs.commandant)
         "compileOnly"(rootProject.libs.keystone)
+        "compileOnly"(rootProject.libs.dialectica)
         "compileOnly"(rootProject.libs.guice)
 
         // test

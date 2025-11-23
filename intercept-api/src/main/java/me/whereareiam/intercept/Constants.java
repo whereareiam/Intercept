@@ -13,6 +13,7 @@ public final class Constants {
 		public static final String CONFIGURA = BuildConfig.CONFIGURA;
 		public static final String KEYSTONE = BuildConfig.KEYSTONE;
 		public static final String COMMANDANT = BuildConfig.COMMANDANT;
+		public static final String DIALECTICA = BuildConfig.DIALECTICA;
 		public static final String ADVENTURE = BuildConfig.ADVENTURE;
 		public static final String ADVENTURE_PLATFORM_BUKKIT = BuildConfig.ADVENTURE_PLATFORM_BUKKIT;
 		public static final String CLOUD_CORE = BuildConfig.CLOUD_CORE;

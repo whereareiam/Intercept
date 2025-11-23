@@ -13,7 +13,7 @@ configura = "dev-a76adc6"
 attache = "dev-5fad19f"
 keystone = "dev-697f401"
 commandant = "dev-57224b9"
-dialectica = "dev"
+dialectica = "dev-74ce2b6"
 junit = "6.0.0"
 mockito = "5.20.0"
 testcontainers = "1.20.0"
@@ -100,7 +100,7 @@ mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.re
 [bundles]
 
 testing = ["junit-jupiter", "mockito-core", "mockito-junit", "testcontainers-junit"]
-database = ["jdbi-core", "jdbi-sqlobject", "hikaricp", "postgresql", "mariadb", "dialectica"]
+database = ["jdbi-core", "jdbi-sqlobject", "hikaricp", "postgresql", "mariadb"]
 adventure = ["adventure", "adventure-minimessage", "adventure-legacy", "adventure-plain", "adventure-gson"]
 bukkit = ["spigot", "adventure-platform-bukkit"]
 paper = ["paper", "cloud-core", "cloud-paper"]
