@@ -26,7 +26,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		ExceptionMessages exceptionMessages = new ExceptionMessages();
 		exceptionMessages.setNoPermission("{prefix}<white>You don't have \"<gray>{content}</gray>\" permission to use this command.</white>");
 		exceptionMessages.setExecutionError("{prefix}<white>An error occurred while executing the command:</white> <gray>{content}</gray>");
-		exceptionMessages.setInvalidSyntax("{prefix}<white>Invalid syntax, please use:</white> <yellow>/{content}</yellow>");
+		exceptionMessages.setInvalidSyntax("{prefix}<white>Invalid syntax, please use:</white> <gray>/{content}</gray>");
 		exceptionMessages.setInvalidSyntaxBoolean("{prefix}<white>You tried to use <gray>{content}</gray> as a boolean, but it's not a valid value, please use <green>true</green> or <red>false</red>.</white>");
 		exceptionMessages.setInvalidSyntaxNumber("{prefix}<white>You tried to use <gray>{content}</gray> as a number, but it's not a valid value, please use a valid number.</white>");
 		exceptionMessages.setInvalidSyntaxString("{prefix}<white>You tried to use <gray>{content}</gray> as a string, but it's not a valid value, please use a valid string.</white>");
@@ -97,8 +97,8 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		// Configure database upload command messages
 		Messages.Commands.Database.Upload upload = new Messages.Commands.Database.Upload();
 		upload.setNoMessages("{prefix}<white>No messages to upload.");
-		upload.setUploading("{prefix}<white>Uploading <yellow>{entries}</yellow> entries from <yellow>{files}</yellow> files...");
-		upload.setSuccess("{prefix}<white>Successfully uploaded <green>{entries}</green> message entries to the database.");
+		upload.setUploading("{prefix}<white>Uploading <green>{entries} entries</green> from <green>{files}</green> files...");
+		upload.setSuccess("{prefix}<white>Successfully uploaded <green>{entries} entries</green> to the database <gray>[{time}ms]</gray>");
 		upload.setError("{prefix}<white>An <red>error occurred</red> while uploading: <gray>{error}</gray>");
 		database.setUpload(upload);
 

@@ -91,8 +91,11 @@ public class UploadDatabaseCommand implements Command<Actor> {
 					.build());
 			sender.sendMessage(uploadComponent);
 
-			// Upload to database
+			// Upload to database and measure time
+			long startTime = System.currentTimeMillis();
 			persistenceService.uploadMessages(snapshot);
+			long endTime = System.currentTimeMillis();
+			long duration = endTime - startTime;
 
 			// Refresh messages again
 			upload = messagesProvider.get().getCommands().getDatabase().getUpload();
@@ -101,7 +104,10 @@ public class UploadDatabaseCommand implements Command<Actor> {
 					Serializer.serialize(SerializerContent.builder()
 							.receiver(sender)
 							.message(upload.getSuccess())
-							.placeholder("{entries}", String.valueOf(snapshot.getEntries().size()))
+							.placeholders(Map.of(
+									"{entries}", String.valueOf(snapshot.getEntries().size()),
+									"{time}", String.valueOf(duration)
+							))
 							.build())
 			);
 		} catch (Exception e) {
