@@ -2,8 +2,9 @@ package me.whereareiam.intercept.adapter.database.entity.message;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.dialectica.EntitySchemaProvider;
+import me.whereareiam.dialectica.annotation.Entity;
 import me.whereareiam.dialectica.type.DatabaseType;
-import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 
 /**
  * Database entity representing a placeholder mapping for a regex pattern.
@@ -11,7 +12,10 @@ import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
  */
 @Getter
 @Setter
-public class MessageRegexPlaceholderEntity implements SchemaProvider {
+@Entity(tableName = "intercept_message_regex_placeholders", version = 1, dependsOn = {
+		MessageRegexPatternEntity.class
+})
+public class MessageRegexPlaceholderEntity implements EntitySchemaProvider {
 	/**
 	 * Primary key.
 	 */
@@ -36,8 +40,8 @@ public class MessageRegexPlaceholderEntity implements SchemaProvider {
 	private String captureGroup;
 
 	@Override
-	public String getCreateTableStatement(DatabaseType DatabaseType) {
-		String idType = getAutoIncrementPrimaryKey(DatabaseType);
+	public String statement(DatabaseType databaseType) {
+		String idType = getAutoIncrementPrimaryKey(databaseType);
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_message_regex_placeholders (
 					id %s,

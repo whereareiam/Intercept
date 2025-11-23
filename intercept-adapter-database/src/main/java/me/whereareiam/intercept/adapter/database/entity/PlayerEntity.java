@@ -2,8 +2,9 @@ package me.whereareiam.intercept.adapter.database.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.dialectica.EntitySchemaProvider;
+import me.whereareiam.dialectica.annotation.Entity;
 import me.whereareiam.dialectica.type.DatabaseType;
-import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 
 import java.util.UUID;
 
@@ -13,7 +14,8 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-public class PlayerEntity implements SchemaProvider {
+@Entity(tableName = "intercept_players", version = 1)
+public class PlayerEntity implements EntitySchemaProvider {
 	/**
 	 * The player's unique identifier (UUID).
 	 * Used as the primary key.
@@ -27,7 +29,7 @@ public class PlayerEntity implements SchemaProvider {
 	private boolean inspectionMode;
 
 	@Override
-	public String getCreateTableStatement(DatabaseType DatabaseType) {
+	public String statement(DatabaseType databaseType) {
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_players (
 					unique_id CHAR(36) PRIMARY KEY,

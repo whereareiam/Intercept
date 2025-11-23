@@ -2,8 +2,9 @@ package me.whereareiam.intercept.adapter.database.entity.message;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.dialectica.EntitySchemaProvider;
+import me.whereareiam.dialectica.annotation.Entity;
 import me.whereareiam.dialectica.type.DatabaseType;
-import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 
 import java.util.Locale;
 
@@ -13,7 +14,10 @@ import java.util.Locale;
  */
 @Setter
 @Getter
-public class MessageTranslationEntity implements SchemaProvider {
+@Entity(tableName = "intercept_message_translations", version = 1, dependsOn = {
+		MessageEntryEntity.class
+})
+public class MessageTranslationEntity implements EntitySchemaProvider {
 	/**
 	 * Primary key.
 	 */
@@ -38,8 +42,8 @@ public class MessageTranslationEntity implements SchemaProvider {
 	private String text;
 
 	@Override
-	public String getCreateTableStatement(DatabaseType DatabaseType) {
-		String idType = getAutoIncrementPrimaryKey(DatabaseType);
+	public String statement(DatabaseType databaseType) {
+		String idType = getAutoIncrementPrimaryKey(databaseType);
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_message_translations (
 					id %s,

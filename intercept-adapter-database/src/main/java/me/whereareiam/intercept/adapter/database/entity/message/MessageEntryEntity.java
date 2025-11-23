@@ -1,8 +1,9 @@
 package me.whereareiam.intercept.adapter.database.entity.message;
 
 import lombok.*;
+import me.whereareiam.dialectica.EntitySchemaProvider;
+import me.whereareiam.dialectica.annotation.Entity;
 import me.whereareiam.dialectica.type.DatabaseType;
-import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
 import me.whereareiam.intercept.type.message.MessageType;
 
 import java.util.List;
@@ -16,7 +17,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageEntryEntity implements SchemaProvider {
+@Entity(tableName = "intercept_message_entries", version = 1, dependsOn = {
+		MessageFileEntity.class
+})
+public class MessageEntryEntity implements EntitySchemaProvider {
 	/**
 	 * Primary key.
 	 */
@@ -54,8 +58,8 @@ public class MessageEntryEntity implements SchemaProvider {
 	private List<MessageRegexPatternEntity> regexPatterns;
 
 	@Override
-	public String getCreateTableStatement(DatabaseType DatabaseType) {
-		String idType = getAutoIncrementPrimaryKey(DatabaseType);
+	public String statement(DatabaseType databaseType) {
+		String idType = getAutoIncrementPrimaryKey(databaseType);
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_message_entries (
 					id %s,

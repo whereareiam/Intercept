@@ -2,11 +2,14 @@ package me.whereareiam.intercept.adapter.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import me.whereareiam.dialectica.Dialectica;
 import me.whereareiam.dialectica.DialectPlugin;
+import me.whereareiam.dialectica.SchemaManager;
 import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.converter.LocaleArgumentFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleColumnMapper;
-import me.whereareiam.intercept.adapter.database.schema.SchemaInitializer;
+import me.whereareiam.intercept.adapter.database.entity.PlayerEntity;
+import me.whereareiam.intercept.adapter.database.entity.message.*;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import org.jdbi.v3.core.Jdbi;
@@ -56,9 +59,24 @@ public abstract class BaseTest {
 				mariaDbContainer.getPassword()
 		);
 
-		// Initialize schema
-		SchemaInitializer.createTables(postgresJdbi, DatabaseType.POSTGRES);
-		SchemaInitializer.createTables(mariaDbJdbi, DatabaseType.MARIADB);
+		// Initialize schema using Dialectica
+		SchemaManager postgresSchemaManager = Dialectica.schema(postgresJdbi)
+				.registerEntity(PlayerEntity.class)
+				.registerEntity(MessageFileEntity.class)
+				.registerEntity(MessageEntryEntity.class)
+				.registerEntity(MessageTranslationEntity.class)
+				.registerEntity(MessageRegexPatternEntity.class)
+				.registerEntity(MessageRegexPlaceholderEntity.class);
+		postgresSchemaManager.initialize();
+
+		SchemaManager mariaDbSchemaManager = Dialectica.schema(mariaDbJdbi)
+				.registerEntity(PlayerEntity.class)
+				.registerEntity(MessageFileEntity.class)
+				.registerEntity(MessageEntryEntity.class)
+				.registerEntity(MessageTranslationEntity.class)
+				.registerEntity(MessageRegexPatternEntity.class)
+				.registerEntity(MessageRegexPlaceholderEntity.class);
+		mariaDbSchemaManager.initialize();
 	}
 
 	@AfterAll

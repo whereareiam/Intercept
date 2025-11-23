@@ -4,12 +4,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
+import me.whereareiam.dialectica.Dialectica;
 import me.whereareiam.dialectica.DialectPlugin;
+import me.whereareiam.dialectica.SchemaManager;
 import me.whereareiam.intercept.adapter.database.config.LoggerConfig;
 import me.whereareiam.intercept.adapter.database.connection.DataSourceFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleArgumentFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleColumnMapper;
-import me.whereareiam.intercept.adapter.database.schema.SchemaInitializer;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
@@ -61,7 +62,12 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 			jdbi.getConfig().get(Arguments.class).register(new LocaleArgumentFactory());
 
 			LoggerConfig.configure(jdbi);
-			SchemaInitializer.createTables(jdbi, persistence.getType());
+
+			// Initialize schema using Dialectica with automatic package scanning
+			SchemaManager schemaManager = Dialectica.schema(jdbi)
+					.scanPackages("me.whereareiam.intercept.adapter.database.entity")
+					.setFailOnError(false);
+			schemaManager.initialize();
 
 			initialized = true;
 		} catch (Exception e) {
