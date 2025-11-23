@@ -1,9 +1,9 @@
 package me.whereareiam.intercept.adapter.database.repository;
 
+import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.BaseTest;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
-import me.whereareiam.intercept.type.PersistenceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -16,20 +16,20 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 
 	@BeforeEach
 	void setUp() {
-		postgresRepo = getJdbi(PersistenceType.POSTGRES).onDemand(MessageFileRepository.class);
-		mariaDbRepo = getJdbi(PersistenceType.MARIADB).onDemand(MessageFileRepository.class);
+		postgresRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageFileRepository.class);
+		mariaDbRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageFileRepository.class);
 
 		// Clear tables
-		getJdbi(PersistenceType.POSTGRES).useHandle(handle ->
+		getJdbi(DatabaseType.POSTGRES).useHandle(handle ->
 				handle.execute("DELETE FROM intercept_message_files"));
-		getJdbi(PersistenceType.MARIADB).useHandle(handle ->
+		getJdbi(DatabaseType.MARIADB).useHandle(handle ->
 				handle.execute("DELETE FROM intercept_message_files"));
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testInsertAndFindById(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testInsertAndFindById(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
 		entity.setFilePath("errors/permissions.yml");
@@ -45,9 +45,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testFindByFilePath(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testFindByFilePath(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
 		entity.setFilePath("common/colors.yml");
@@ -59,9 +59,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUpdate(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testUpdate(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
 		entity.setFilePath("test.yml");
@@ -76,9 +76,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testDeleteById(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testDeleteById(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
 		entity.setFilePath("test.yml");
@@ -91,9 +91,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testExistsById(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testExistsById(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
 		entity.setFilePath("test.yml");
@@ -104,9 +104,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testExistsByFilePath(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testExistsByFilePath(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
 		entity.setFilePath("test.yml");
@@ -117,9 +117,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testCount(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testCount(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		assertEquals(0, repo.count());
 
@@ -135,9 +135,9 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testFindAll(PersistenceType type) {
-		MessageFileRepository repo = type == PersistenceType.POSTGRES ? postgresRepo : mariaDbRepo;
+	@EnumSource(DatabaseType.class)
+	void testFindAll(DatabaseType type) {
+		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity1 = new MessageFileEntity();
 		entity1.setFilePath("test1.yml");

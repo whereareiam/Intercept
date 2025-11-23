@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Persistence;
-import me.whereareiam.intercept.type.PersistenceType;
+import me.whereareiam.dialectica.type.DatabaseType;
 import org.jdbi.v3.core.ConnectionException;
 
 import javax.sql.DataSource;
@@ -90,7 +90,7 @@ public final class DataSourceFactory {
 		return jdbcUrl.replaceAll("password=[^;&]+", "password=***");
 	}
 
-	private static String getDriverClassName(PersistenceType type) {
+	private static String getDriverClassName(DatabaseType type) {
 		return switch (type) {
 			case POSTGRES -> "org.postgresql.Driver";
 			case MARIADB -> "org.mariadb.jdbc.Driver";

@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.adapter.database.repository.message;
 
+import me.whereareiam.dialectica.annotation.DialectUpdate;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageTranslationEntity;
-import me.whereareiam.intercept.adapter.database.statement.DialectUpdate;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -28,4 +28,3 @@ public interface MessageTranslationRepository {
 	@DialectUpdate(provider = MessageTranslationAdapter.TruncateAll.class)
 	void truncateAll();
 }
-

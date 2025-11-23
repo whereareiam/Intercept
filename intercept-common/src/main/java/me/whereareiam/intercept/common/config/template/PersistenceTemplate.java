@@ -2,8 +2,8 @@ package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
+import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.model.config.Persistence;
-import me.whereareiam.intercept.type.PersistenceType;
 
 @Singleton
 public class PersistenceTemplate implements TemplateProvider<Persistence> {
@@ -13,7 +13,7 @@ public class PersistenceTemplate implements TemplateProvider<Persistence> {
 		config.setEnabled(false);
 
 		// Default to PostgreSQL
-		config.setType(PersistenceType.POSTGRES);
+		config.setType(DatabaseType.POSTGRES);
 		config.setHost("localhost");
 		config.setPort(5432); // Default PostgreSQL port
 		config.setDatabase("intercept");

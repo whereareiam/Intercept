@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.adapter.database.repository.message;
 
+import me.whereareiam.dialectica.annotation.DialectUpdate;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageRegexPatternEntity;
-import me.whereareiam.intercept.adapter.database.statement.DialectUpdate;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -27,4 +27,3 @@ public interface MessageRegexPatternRepository {
 	@DialectUpdate(provider = MessageRegexPatternAdapter.TruncateAll.class)
 	void truncateAll();
 }
-

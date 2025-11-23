@@ -1,20 +1,12 @@
 package me.whereareiam.intercept.adapter.database.message;
 
+import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.BaseTest;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageRegexPatternEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageRegexPlaceholderEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageTranslationEntity;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPatternRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPlaceholderRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
-import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.adapter.database.entity.message.*;
+import me.whereareiam.intercept.adapter.database.repository.message.*;
 import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageSnapshot;
-import me.whereareiam.intercept.type.PersistenceType;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,16 +36,16 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	void setUp() {
 
 		// Create repositories
-		postgresFileRepo = getJdbi(PersistenceType.POSTGRES).onDemand(MessageFileRepository.class);
-		mariaDbFileRepo = getJdbi(PersistenceType.MARIADB).onDemand(MessageFileRepository.class);
-		postgresEntryRepo = getJdbi(PersistenceType.POSTGRES).onDemand(MessageEntryRepository.class);
-		mariaDbEntryRepo = getJdbi(PersistenceType.MARIADB).onDemand(MessageEntryRepository.class);
-		postgresTranslationRepo = getJdbi(PersistenceType.POSTGRES).onDemand(MessageTranslationRepository.class);
-		mariaDbTranslationRepo = getJdbi(PersistenceType.MARIADB).onDemand(MessageTranslationRepository.class);
-		postgresPatternRepo = getJdbi(PersistenceType.POSTGRES).onDemand(MessageRegexPatternRepository.class);
-		mariaDbPatternRepo = getJdbi(PersistenceType.MARIADB).onDemand(MessageRegexPatternRepository.class);
-		postgresPlaceholderRepo = getJdbi(PersistenceType.POSTGRES).onDemand(MessageRegexPlaceholderRepository.class);
-		mariaDbPlaceholderRepo = getJdbi(PersistenceType.MARIADB).onDemand(MessageRegexPlaceholderRepository.class);
+		postgresFileRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageFileRepository.class);
+		mariaDbFileRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageFileRepository.class);
+		postgresEntryRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageEntryRepository.class);
+		mariaDbEntryRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageEntryRepository.class);
+		postgresTranslationRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageTranslationRepository.class);
+		mariaDbTranslationRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageTranslationRepository.class);
+		postgresPatternRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageRegexPatternRepository.class);
+		mariaDbPatternRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageRegexPatternRepository.class);
+		postgresPlaceholderRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageRegexPlaceholderRepository.class);
+		mariaDbPlaceholderRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageRegexPlaceholderRepository.class);
 
 		// Create services
 		postgresService = new DefaultMessagePersistenceService(
@@ -62,7 +54,7 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 				postgresTranslationRepo,
 				postgresPatternRepo,
 				postgresPlaceholderRepo,
-				getJdbi(PersistenceType.POSTGRES)
+				getJdbi(DatabaseType.POSTGRES)
 		);
 		mariaDbService = new DefaultMessagePersistenceService(
 				mariaDbFileRepo,
@@ -70,15 +62,15 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 				mariaDbTranslationRepo,
 				mariaDbPatternRepo,
 				mariaDbPlaceholderRepo,
-				getJdbi(PersistenceType.MARIADB)
+				getJdbi(DatabaseType.MARIADB)
 		);
 
 		// Clear tables
-		clearTables(PersistenceType.POSTGRES);
-		clearTables(PersistenceType.MARIADB);
+		clearTables(DatabaseType.POSTGRES);
+		clearTables(DatabaseType.MARIADB);
 	}
 
-	private void clearTables(PersistenceType type) {
+	private void clearTables(DatabaseType type) {
 		getJdbi(type).useHandle(handle -> {
 			handle.execute("DELETE FROM intercept_message_regex_placeholders");
 			handle.execute("DELETE FROM intercept_message_regex_patterns");
@@ -89,12 +81,12 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMessagesWithTranslations(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
-		MessageEntryRepository entryRepo = type == PersistenceType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
-		MessageTranslationRepository translationRepo = type == PersistenceType.POSTGRES ? postgresTranslationRepo : mariaDbTranslationRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMessagesWithTranslations(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+		MessageEntryRepository entryRepo = type == DatabaseType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
+		MessageTranslationRepository translationRepo = type == DatabaseType.POSTGRES ? postgresTranslationRepo : mariaDbTranslationRepo;
 
 		// Create snapshot with translations
 		Map<String, MessageEntry> entries = new HashMap<>();
@@ -139,12 +131,12 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMessagesWithSingleText(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
-		MessageEntryRepository entryRepo = type == PersistenceType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
-		MessageTranslationRepository translationRepo = type == PersistenceType.POSTGRES ? postgresTranslationRepo : mariaDbTranslationRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMessagesWithSingleText(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+		MessageEntryRepository entryRepo = type == DatabaseType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
+		MessageTranslationRepository translationRepo = type == DatabaseType.POSTGRES ? postgresTranslationRepo : mariaDbTranslationRepo;
 
 		// Create snapshot with single text
 		Map<String, MessageEntry> entries = new HashMap<>();
@@ -177,10 +169,10 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMultipleFiles(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMultipleFiles(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
 
 		Map<String, MessageEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
@@ -207,9 +199,9 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadEmptySnapshot(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
+	@EnumSource(DatabaseType.class)
+	void testUploadEmptySnapshot(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
 
 		MessageSnapshot snapshot = new MessageSnapshot(Map.of(), Map.of());
 
@@ -218,12 +210,12 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMessagesWithRegexPatterns(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
-		MessageEntryRepository entryRepo = type == PersistenceType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
-		MessageRegexPatternRepository patternRepo = type == PersistenceType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMessagesWithRegexPatterns(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+		MessageEntryRepository entryRepo = type == DatabaseType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
+		MessageRegexPatternRepository patternRepo = type == DatabaseType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
 
 		// Create snapshot with regex patterns
 		Map<String, MessageEntry> entries = new HashMap<>();
@@ -292,13 +284,13 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMessagesWithRegexPatternsAndPlaceholders(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
-		MessageEntryRepository entryRepo = type == PersistenceType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
-		MessageRegexPatternRepository patternRepo = type == PersistenceType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
-		MessageRegexPlaceholderRepository placeholderRepo = type == PersistenceType.POSTGRES ? postgresPlaceholderRepo : mariaDbPlaceholderRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMessagesWithRegexPatternsAndPlaceholders(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+		MessageEntryRepository entryRepo = type == DatabaseType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
+		MessageRegexPatternRepository patternRepo = type == DatabaseType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
+		MessageRegexPlaceholderRepository placeholderRepo = type == DatabaseType.POSTGRES ? postgresPlaceholderRepo : mariaDbPlaceholderRepo;
 
 		// Create snapshot with regex patterns and placeholders
 		Map<String, MessageEntry> entries = new HashMap<>();
@@ -357,13 +349,13 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMessagesWithMultiplePatternsAndPlaceholders(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
-		MessageEntryRepository entryRepo = type == PersistenceType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
-		MessageRegexPatternRepository patternRepo = type == PersistenceType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
-		MessageRegexPlaceholderRepository placeholderRepo = type == PersistenceType.POSTGRES ? postgresPlaceholderRepo : mariaDbPlaceholderRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMessagesWithMultiplePatternsAndPlaceholders(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+		MessageEntryRepository entryRepo = type == DatabaseType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
+		MessageRegexPatternRepository patternRepo = type == DatabaseType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
+		MessageRegexPlaceholderRepository placeholderRepo = type == DatabaseType.POSTGRES ? postgresPlaceholderRepo : mariaDbPlaceholderRepo;
 
 		// Create snapshot with multiple patterns
 		Map<String, MessageEntry> entries = new HashMap<>();
@@ -445,12 +437,12 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@EnumSource(PersistenceType.class)
-	void testUploadMessagesWithoutRegexPatterns(PersistenceType type) {
-		DefaultMessagePersistenceService service = type == PersistenceType.POSTGRES ? postgresService : mariaDbService;
-		MessageFileRepository fileRepo = type == PersistenceType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
-		MessageEntryRepository entryRepo = type == PersistenceType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
-		MessageRegexPatternRepository patternRepo = type == PersistenceType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
+	@EnumSource(DatabaseType.class)
+	void testUploadMessagesWithoutRegexPatterns(DatabaseType type) {
+		DefaultMessagePersistenceService service = type == DatabaseType.POSTGRES ? postgresService : mariaDbService;
+		MessageFileRepository fileRepo = type == DatabaseType.POSTGRES ? postgresFileRepo : mariaDbFileRepo;
+		MessageEntryRepository entryRepo = type == DatabaseType.POSTGRES ? postgresEntryRepo : mariaDbEntryRepo;
+		MessageRegexPatternRepository patternRepo = type == DatabaseType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
 
 		// Create snapshot without regex patterns
 		Map<String, MessageEntry> entries = new HashMap<>();
@@ -477,4 +469,3 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		assertEquals(0, patternsList.size());
 	}
 }
-

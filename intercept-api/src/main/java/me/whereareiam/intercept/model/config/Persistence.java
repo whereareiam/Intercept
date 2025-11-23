@@ -3,7 +3,7 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.intercept.type.PersistenceType;
+import me.whereareiam.dialectica.type.DatabaseType;
 
 /**
  * Persistence configuration for player data storage.
@@ -21,9 +21,9 @@ public class Persistence {
 	private boolean enabled;
 
 	/**
-	 * Persistence type to use.
+	 * Database type to use.
 	 */
-	private PersistenceType type;
+	private DatabaseType type;
 
 	/**
 	 * Persistence server hostname or IP address.

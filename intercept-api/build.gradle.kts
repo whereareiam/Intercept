@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.buildconfig)
 }
 
+dependencies {
+    "api"(libs.dialectica)
+}
+
 buildConfig {
     packageName("me.whereareiam.intercept")
 

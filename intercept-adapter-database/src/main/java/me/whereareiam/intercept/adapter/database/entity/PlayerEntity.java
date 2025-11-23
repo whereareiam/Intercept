@@ -2,8 +2,8 @@ package me.whereareiam.intercept.adapter.database.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.schema.SchemaProvider;
-import me.whereareiam.intercept.type.PersistenceType;
 
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ public class PlayerEntity implements SchemaProvider {
 	private boolean inspectionMode;
 
 	@Override
-	public String getCreateTableStatement(PersistenceType persistenceType) {
+	public String getCreateTableStatement(DatabaseType DatabaseType) {
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_players (
 					unique_id CHAR(36) PRIMARY KEY,
@@ -36,4 +36,3 @@ public class PlayerEntity implements SchemaProvider {
 				""";
 	}
 }
-

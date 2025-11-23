@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.adapter.database.schema;
 
-import me.whereareiam.intercept.type.PersistenceType;
+import me.whereareiam.dialectica.type.DatabaseType;
 
 /**
  * Interface for entities that can provide their own database schema DDL statements.
@@ -11,9 +11,8 @@ public interface SchemaProvider {
 	 * Gets the CREATE TABLE DDL statement for this entity.
 	 * The statement should use "CREATE TABLE IF NOT EXISTS" to be idempotent.
 	 *
-	 * @param persistenceType the database type (affects syntax like auto-increment)
+	 * @param databaseType the database type (affects syntax like auto-increment)
 	 * @return the DDL statement for creating the table
 	 */
-	String getCreateTableStatement(PersistenceType persistenceType);
+	String getCreateTableStatement(DatabaseType databaseType);
 }
-

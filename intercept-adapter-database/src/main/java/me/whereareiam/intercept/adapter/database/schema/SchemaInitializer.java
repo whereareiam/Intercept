@@ -2,7 +2,7 @@ package me.whereareiam.intercept.adapter.database.schema;
 
 import me.whereareiam.intercept.adapter.database.entity.PlayerEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.*;
-import me.whereareiam.intercept.type.PersistenceType;
+import me.whereareiam.dialectica.type.DatabaseType;
 import org.jdbi.v3.core.Jdbi;
 
 /**
@@ -24,11 +24,11 @@ public final class SchemaInitializer {
 	 * Entities are self-aware and provide their own DDL statements.
 	 *
 	 * @param jdbi shared Jdbi instance
-	 * @param type the persistence type (POSTGRES or MARIADB)
+	 * @param type the database type (POSTGRES or MARIADB)
 	 */
-	public static void createTables(Jdbi jdbi, PersistenceType type) {
+	public static void createTables(Jdbi jdbi, DatabaseType type) {
 		if (jdbi == null) throw new IllegalStateException("Jdbi instance must not be null");
-		if (type == null) throw new IllegalStateException("PersistenceType must not be null");
+		if (type == null) throw new IllegalStateException("DatabaseType must not be null");
 
 		jdbi.useHandle(handle -> handle.useTransaction(transactionHandle -> {
 			for (SchemaProvider entity : ENTITIES) {

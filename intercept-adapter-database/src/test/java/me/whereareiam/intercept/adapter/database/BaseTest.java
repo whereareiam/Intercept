@@ -2,13 +2,13 @@ package me.whereareiam.intercept.adapter.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import me.whereareiam.dialectica.DialectPlugin;
+import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.converter.LocaleArgumentFactory;
 import me.whereareiam.intercept.adapter.database.converter.LocaleColumnMapper;
-import me.whereareiam.intercept.adapter.database.dialect.DialectPlugin;
 import me.whereareiam.intercept.adapter.database.schema.SchemaInitializer;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.type.PersistenceType;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.Arguments;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -57,8 +57,8 @@ public abstract class BaseTest {
 		);
 
 		// Initialize schema
-		SchemaInitializer.createTables(postgresJdbi, PersistenceType.POSTGRES);
-		SchemaInitializer.createTables(mariaDbJdbi, PersistenceType.MARIADB);
+		SchemaInitializer.createTables(postgresJdbi, DatabaseType.POSTGRES);
+		SchemaInitializer.createTables(mariaDbJdbi, DatabaseType.MARIADB);
 	}
 
 	@AfterAll
@@ -83,10 +83,10 @@ public abstract class BaseTest {
 		dataSources.add(dataSource);
 		Jdbi jdbi = Jdbi.create(dataSource);
 		jdbi.installPlugin(new SqlObjectPlugin());
-		
-		// Determine PersistenceType from JDBC URL
-		PersistenceType persistenceType = jdbcUrl.contains("postgresql") ? PersistenceType.POSTGRES : PersistenceType.MARIADB;
-		jdbi.installPlugin(new DialectPlugin(persistenceType));
+
+		// Determine DatabaseType from JDBC URL
+		DatabaseType databaseType = jdbcUrl.contains("postgresql") ? DatabaseType.POSTGRES : DatabaseType.MARIADB;
+		jdbi.installPlugin(new DialectPlugin(databaseType));
 
 		// Register Locale converters
 		jdbi.registerColumnMapper(new LocaleColumnMapper());
@@ -95,7 +95,7 @@ public abstract class BaseTest {
 		return jdbi;
 	}
 
-	protected Jdbi getJdbi(PersistenceType type) {
+	protected Jdbi getJdbi(DatabaseType type) {
 		return switch (type) {
 			case POSTGRES -> postgresJdbi;
 			case MARIADB -> mariaDbJdbi;
