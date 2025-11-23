@@ -106,9 +106,9 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify file was created
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("errors/permissions.yml");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePath("errors/permissions");
 		assertTrue(file.isPresent());
-		assertEquals("errors/permissions.yml", file.get().getFilePath());
+		assertEquals("errors/permissions", file.get().getFilePath());
 
 		// Verify entry was created
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "no-permission");
@@ -152,7 +152,7 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify entry was created
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("common/greeting.yml");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePath("common/greeting");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "greeting");
@@ -193,8 +193,8 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify both files were created
-		assertTrue(fileRepo.findByFilePath("errors/file1.yml").isPresent());
-		assertTrue(fileRepo.findByFilePath("errors/file2.yml").isPresent());
+		assertTrue(fileRepo.findByFilePath("errors/file1").isPresent());
+		assertTrue(fileRepo.findByFilePath("errors/file2").isPresent());
 		assertEquals(2, fileRepo.count());
 	}
 
@@ -252,7 +252,7 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify entry was created
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("chat/message.yml");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePath("chat/message");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "message");
@@ -319,7 +319,7 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify entry was created
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("chat/formatted.yml");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePath("chat/formatted");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "formatted");
@@ -402,7 +402,7 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify entry was created
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("messages/multi.yml");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePath("messages/multi");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "multi");
@@ -458,7 +458,7 @@ class MessagePersistenceServiceIntegrationTestTest extends BaseTest {
 		service.uploadMessages(snapshot);
 
 		// Verify entry was created
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("simple/message.yml");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePath("simple/message");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "message");

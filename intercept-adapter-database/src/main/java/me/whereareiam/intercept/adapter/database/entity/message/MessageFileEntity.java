@@ -22,7 +22,8 @@ public class MessageFileEntity implements EntitySchemaProvider {
 	private Long id;
 
 	/**
-	 * Relative path from messages root (e.g., "errors/permissions.yml", "common/styles.yml").
+	 * Relative path from messages root without file extension (e.g., "errors/permissions", "common/styles").
+	 * File extension is determined dynamically per server through ConfiguraBootstrap and is not stored.
 	 * Unique constraint ensures no duplicate files.
 	 */
 	private String filePath;
@@ -35,21 +36,16 @@ public class MessageFileEntity implements EntitySchemaProvider {
 
 	/**
 	 * Get the key prefix from file path.
-	 * Computed by removing extension and replacing path separators with dots.
+	 * Computed by replacing path separators with dots.
+	 * Note: File path does not include extension (it's determined dynamically per server).
 	 *
-	 * @return key prefix (e.g., "errors.permissions" from "errors/permissions.yml")
+	 * @return key prefix (e.g., "errors.permissions" from "errors/permissions")
 	 */
 	public String getKeyPrefix() {
 		if (filePath == null) return "";
 
-		// Remove extension
-		String path = filePath;
-		int lastDot = path.lastIndexOf('.');
-
-		if (lastDot > 0) path = path.substring(0, lastDot);
-
 		// Replace path separators with dots
-		return path.replace('\\', '.').replace('/', '.');
+		return filePath.replace('\\', '.').replace('/', '.');
 	}
 
 	@Override

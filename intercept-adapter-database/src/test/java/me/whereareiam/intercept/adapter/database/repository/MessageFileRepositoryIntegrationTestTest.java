@@ -32,16 +32,16 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
-		entity.setFilePath("errors/permissions.yml");
+		entity.setFilePath("errors/permissions");
 
 		MessageFileEntity saved = repo.save(entity);
 		assertNotNull(saved.getId());
-		assertEquals("errors/permissions.yml", saved.getFilePath());
+		assertEquals("errors/permissions", saved.getFilePath());
 
 		MessageFileEntity found = repo.findById(saved.getId()).orElse(null);
 		assertNotNull(found);
 		assertEquals(saved.getId(), found.getId());
-		assertEquals("errors/permissions.yml", found.getFilePath());
+		assertEquals("errors/permissions", found.getFilePath());
 	}
 
 	@ParameterizedTest
@@ -50,12 +50,12 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
-		entity.setFilePath("common/colors.yml");
+		entity.setFilePath("common/colors");
 		repo.save(entity);
 
-		MessageFileEntity found = repo.findByFilePath("common/colors.yml").orElse(null);
+		MessageFileEntity found = repo.findByFilePath("common/colors").orElse(null);
 		assertNotNull(found);
-		assertEquals("common/colors.yml", found.getFilePath());
+		assertEquals("common/colors", found.getFilePath());
 	}
 
 	@ParameterizedTest
@@ -64,15 +64,15 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
-		entity.setFilePath("test.yml");
+		entity.setFilePath("test");
 		MessageFileEntity saved = repo.save(entity);
 
-		saved.setFilePath("test_updated.yml");
+		saved.setFilePath("test_updated");
 		repo.save(saved);
 
 		MessageFileEntity updated = repo.findById(saved.getId()).orElse(null);
 		assertNotNull(updated);
-		assertEquals("test_updated.yml", updated.getFilePath());
+		assertEquals("test_updated", updated.getFilePath());
 	}
 
 	@ParameterizedTest
@@ -81,7 +81,7 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
-		entity.setFilePath("test.yml");
+		entity.setFilePath("test");
 		MessageFileEntity saved = repo.save(entity);
 
 		repo.deleteById(saved.getId());
@@ -96,7 +96,7 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
-		entity.setFilePath("test.yml");
+		entity.setFilePath("test");
 		MessageFileEntity saved = repo.save(entity);
 
 		assertTrue(repo.existsById(saved.getId()));
@@ -109,11 +109,11 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity = new MessageFileEntity();
-		entity.setFilePath("test.yml");
+		entity.setFilePath("test");
 		repo.save(entity);
 
-		assertTrue(repo.existsByFilePath("test.yml"));
-		assertFalse(repo.existsByFilePath("nonexistent.yml"));
+		assertTrue(repo.existsByFilePath("test"));
+		assertFalse(repo.existsByFilePath("nonexistent"));
 	}
 
 	@ParameterizedTest
@@ -124,11 +124,11 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		assertEquals(0, repo.count());
 
 		MessageFileEntity entity1 = new MessageFileEntity();
-		entity1.setFilePath("test1.yml");
+		entity1.setFilePath("test1");
 		repo.save(entity1);
 
 		MessageFileEntity entity2 = new MessageFileEntity();
-		entity2.setFilePath("test2.yml");
+		entity2.setFilePath("test2");
 		repo.save(entity2);
 
 		assertEquals(2, repo.count());
@@ -140,11 +140,11 @@ class MessageFileRepositoryIntegrationTestTest extends BaseTest {
 		MessageFileRepository repo = type == DatabaseType.POSTGRES ? postgresRepo : mariaDbRepo;
 
 		MessageFileEntity entity1 = new MessageFileEntity();
-		entity1.setFilePath("test1.yml");
+		entity1.setFilePath("test1");
 		repo.save(entity1);
 
 		MessageFileEntity entity2 = new MessageFileEntity();
-		entity2.setFilePath("test2.yml");
+		entity2.setFilePath("test2");
 		repo.save(entity2);
 
 		var all = repo.findAll();

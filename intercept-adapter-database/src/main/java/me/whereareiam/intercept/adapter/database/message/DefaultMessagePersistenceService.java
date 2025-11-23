@@ -2,7 +2,7 @@ package me.whereareiam.intercept.adapter.database.message;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import lombok.RequiredArgsConstructor;
+import com.google.inject.name.Named;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
 import me.whereareiam.intercept.adapter.database.repository.message.*;
@@ -24,14 +24,33 @@ import java.util.Map;
  * Orchestrates the upload and download of messages to/from the database.
  */
 @Singleton
-@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class DefaultMessagePersistenceService implements MessagePersistenceService {
 	private final MessageFileRepository fileRepository;
 	private final MessageEntryRepository entryRepository;
 	private final MessageTranslationRepository translationRepository;
 	private final MessageRegexPatternRepository patternRepository;
 	private final MessageRegexPlaceholderRepository placeholderRepository;
+	private final Path messagesPath;
 	private final Jdbi jdbi;
+
+	@Inject
+	public DefaultMessagePersistenceService(
+			MessageFileRepository fileRepository,
+			MessageEntryRepository entryRepository,
+			MessageTranslationRepository translationRepository,
+			MessageRegexPatternRepository patternRepository,
+			MessageRegexPlaceholderRepository placeholderRepository,
+			Jdbi jdbi,
+			@Named("messagesPath") Path messagesPath
+	) {
+		this.fileRepository = fileRepository;
+		this.entryRepository = entryRepository;
+		this.translationRepository = translationRepository;
+		this.patternRepository = patternRepository;
+		this.placeholderRepository = placeholderRepository;
+		this.jdbi = jdbi;
+		this.messagesPath = messagesPath;
+	}
 
 	@Override
 	public void uploadMessages(MessageSnapshot snapshot) {
@@ -98,6 +117,8 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 	/**
 	 * Creates file entities for all file paths.
 	 * Since all files are deleted before this method is called, it always creates new entities.
+	 * Paths are made relative to the messages directory, and file extensions are removed
+	 * since they are determined dynamically per server through ConfiguraBootstrap.
 	 *
 	 * @param filePaths map of key prefix to file path
 	 * @return map of key prefix to file entity
@@ -108,10 +129,17 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 		for (Map.Entry<String, Path> fileEntry : filePaths.entrySet()) {
 			String keyPrefix = fileEntry.getKey();
 			Path filePath = fileEntry.getValue();
-			String relativePath = filePath.toString().replace('\\', '/');
+
+			// Make path relative to messages directory
+			Path relativePath = messagesPath.relativize(filePath);
+			String relativePathString = relativePath.toString().replace('\\', '/');
+
+			// Remove file extension (e.g., .yml, .json) since it's determined dynamically per server
+			int lastDot = relativePathString.lastIndexOf('.');
+			if (lastDot > 0) relativePathString = relativePathString.substring(0, lastDot);
 
 			MessageFileEntity newFile = new MessageFileEntity();
-			newFile.setFilePath(relativePath);
+			newFile.setFilePath(relativePathString);
 			MessageFileEntity savedFile = fileRepository.save(newFile);
 
 			fileEntities.put(keyPrefix, savedFile);
