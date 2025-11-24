@@ -51,6 +51,12 @@ public class Persistence {
 	private String password;
 
 	/**
+	 * When true, download all messages from the database into storage on startup.
+	 * Default: false
+	 */
+	private boolean autoDownloadOnStartup;
+
+	/**
 	 * HikariCP connection pool configuration.
 	 */
 	private Hikari hikari;

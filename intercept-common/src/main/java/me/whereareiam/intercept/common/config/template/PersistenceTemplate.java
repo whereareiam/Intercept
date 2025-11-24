@@ -19,6 +19,7 @@ public class PersistenceTemplate implements TemplateProvider<Persistence> {
 		config.setDatabase("intercept");
 		config.setUsername("intercept");
 		config.setPassword("");
+		config.setAutoDownloadOnStartup(false);
 
 		// Initialize HikariCP settings with recommended defaults
 		Persistence.Hikari hikari = new Persistence.Hikari();
