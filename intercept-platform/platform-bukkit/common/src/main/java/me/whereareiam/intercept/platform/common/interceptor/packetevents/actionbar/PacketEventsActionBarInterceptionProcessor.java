@@ -6,11 +6,11 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerActionBar;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.common.util.LocaleUtil;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptor;
 import me.whereareiam.intercept.model.interception.actionbar.ActionBarInterceptionContext;
 import me.whereareiam.intercept.platform.common.interceptor.packetevents.PacketProcessor;
+import me.whereareiam.intercept.util.LocaleUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 

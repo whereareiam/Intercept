@@ -1,11 +1,11 @@
 package me.whereareiam.intercept.common.messaging.integration;
 
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,23 +34,23 @@ class MessageResolutionIntegrationTest {
 	@Test
 	void shouldResolveCompleteMessageSystem() {
 		// Setup color palette
-		registry.register("colors.primary", new DefaultMessageEntry(MessageType.TEMPLATE, "<#5DADE2>"));
-		registry.register("colors.error", new DefaultMessageEntry(MessageType.TEMPLATE, "<red>"));
-		registry.register("colors.success", new DefaultMessageEntry(MessageType.TEMPLATE, "<green>"));
+		registry.register("colors.primary", new CompiledMessageEntry(MessageType.TEMPLATE, "<#5DADE2>"));
+		registry.register("colors.error", new CompiledMessageEntry(MessageType.TEMPLATE, "<red>"));
+		registry.register("colors.success", new CompiledMessageEntry(MessageType.TEMPLATE, "<green>"));
 
 		// Setup style templates
-		registry.register("styles.prefix", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("styles.prefix", new CompiledMessageEntry(MessageType.TEMPLATE,
 				"<m:colors.primary>[Intercept]<reset>"));
-		registry.register("styles.player.name", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("styles.player.name", new CompiledMessageEntry(MessageType.TEMPLATE,
 				"<m:colors.primary><p:name><reset>"));
-		registry.register("styles.error.format", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("styles.error.format", new CompiledMessageEntry(MessageType.TEMPLATE,
 				"<m:colors.error>✗ <p:message>"));
 
 		// Setup messages
-		registry.register("errors.no.permission", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("errors.no.permission", new CompiledMessageEntry(MessageType.MESSAGE,
 				Map.of(
-						"en_US", "<m:styles.prefix> <tpl:styles.error.format message='You lack permission: <p:permission>'>",
-						"de_DE", "<m:styles.prefix> <tpl:styles.error.format message='Keine Berechtigung: <p:permission>'>"
+						Locale.US, "<m:styles.prefix> <tpl:styles.error.format message='You lack permission: <p:permission>'>",
+						Locale.GERMAN, "<m:styles.prefix> <tpl:styles.error.format message='Keine Berechtigung: <p:permission>'>"
 				)));
 
 		// Resolve in English
@@ -66,8 +66,8 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldResolveComplexConditionalMessage() {
-		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[Server]"));
-		registry.register("player.status", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[Server]"));
+		registry.register("player.status", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<m:prefix> Player <p:player> is <if online==true><green>online<else><red>offline</if><if online==true> on server <p:server></if>"));
 
 		// Online player
@@ -83,9 +83,9 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldResolveNestedTemplates() {
-		registry.register("base.color", new DefaultMessageEntry(MessageType.TEMPLATE, "<yellow>"));
-		registry.register("wrapper", new DefaultMessageEntry(MessageType.TEMPLATE, "[<m:base.color><p:content>]"));
-		registry.register("message", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("base.color", new CompiledMessageEntry(MessageType.TEMPLATE, "<yellow>"));
+		registry.register("wrapper", new CompiledMessageEntry(MessageType.TEMPLATE, "[<m:base.color><p:content>]"));
+		registry.register("message", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<tpl:wrapper content='Important'>"));
 
 		String result = service.resolve("message", Locale.US);
@@ -94,7 +94,7 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldResolveMultipleConditionsAndPlaceholders() {
-		registry.register("complex", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("complex", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<if rank==admin><red>[Admin]<else><if rank==mod><blue>[Mod]<else><gray>[Player]</if></if> <p:name>: <p:message>"));
 
 		String adminResult = service.resolve("complex", Locale.US,
@@ -112,7 +112,7 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldHandleEmptyConditionals() {
-		registry.register("vip.welcome", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("vip.welcome", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<if vip==true><gold>[VIP] </if>Welcome, <p:name>!"));
 
 		String vipResult = service.resolve("vip.welcome", Locale.US,
@@ -126,10 +126,10 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldResolveChainedReferences() {
-		registry.register("a", new DefaultMessageEntry(MessageType.TEMPLATE, "A"));
-		registry.register("b", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:a>B"));
-		registry.register("c", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>C"));
-		registry.register("final", new DefaultMessageEntry(MessageType.MESSAGE, "Value: <m:c>"));
+		registry.register("a", new CompiledMessageEntry(MessageType.TEMPLATE, "A"));
+		registry.register("b", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:a>B"));
+		registry.register("c", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>C"));
+		registry.register("final", new CompiledMessageEntry(MessageType.MESSAGE, "Value: <m:c>"));
 
 		String result = service.resolve("final", Locale.US);
 		assertEquals("Value: ABC", result);
@@ -137,7 +137,7 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldHandleMissingPlaceholderGracefully() {
-		registry.register("msg", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("msg", new CompiledMessageEntry(MessageType.MESSAGE,
 				"Hello, <p:name>! Balance: <p:balance>"));
 
 		// Only provide one placeholder
@@ -147,9 +147,9 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldHandleComplexTemplateParameters() {
-		registry.register("box", new DefaultMessageEntry(MessageType.TEMPLATE,
+		registry.register("box", new CompiledMessageEntry(MessageType.TEMPLATE,
 				"╔═══╗\n║ <p:title> ║\n║ <p:message> ║\n╚═══╗"));
-		registry.register("error", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("error", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<tpl:box title='Error' message='Something went wrong'>"));
 
 		String result = service.resolve("error", Locale.US);
@@ -158,7 +158,7 @@ class MessageResolutionIntegrationTest {
 
 	@Test
 	void shouldResolveNumericConditions() {
-		registry.register("health.status", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("health.status", new CompiledMessageEntry(MessageType.MESSAGE,
 				"Health: <if health>50><green>Good<else><red>Low</if> (<p:health>/100)"));
 
 		String goodHealth = service.resolve("health.status", Locale.US, Map.of("health", 75));

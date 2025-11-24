@@ -7,18 +7,19 @@ import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileData;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileLoader;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileScanner;
+import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
+import me.whereareiam.intercept.common.messaging.persistence.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
+import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.registry.Registry;
@@ -90,20 +91,20 @@ class RegexIntegrationTest {
 		MessageFileScanner scanner = new MessageFileScanner(Format.YAML);
 		List<Path> files = scanner.scanDirectory(messagesRoot);
 
-		// Load each file
+		// Load each persistence
 		TextProcessor textProcessor = new TextProcessor();
-		MessageFileLoader loader = new MessageFileLoader(textProcessor, registry);
+		MessageFileLoader loader = new DefaultMessageFileLoader(registry, textProcessor);
 
 		for (Path file : files) {
 			String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
-			MessageFileData fileData = Config.load(file, MessageFileData.class);
+			MessageDocument fileData = Config.load(file, MessageDocument.class);
 			loader.loadFromData(keyPrefix, fileData);
 		}
 	}
 
 	@Test
 	void shouldLoadRegexPatternsFromYAML() {
-		MessageEntry entry = registry.get("regex.patterns.permission.error");
+		CompiledMessageEntry entry = registry.get("regex.patterns.permission.error");
 		assertNotNull(entry);
 		assertTrue(entry.hasRegexPatterns());
 		assertEquals(2, entry.getRegexPatterns().size());

@@ -32,17 +32,17 @@ subprojects {
         "compileOnly"(rootProject.libs.configura)
         "compileOnly"(rootProject.libs.commandant)
         "compileOnly"(rootProject.libs.keystone)
+        "compileOnly"(rootProject.libs.dialectica)
         "compileOnly"(rootProject.libs.guice)
 
         // test
-        "testImplementation"(rootProject.libs.bundles.adventure)
         "testImplementation"(rootProject.libs.configura)
         "testImplementation"(rootProject.libs.commandant)
         "testImplementation"(rootProject.libs.keystone)
+        "testImplementation"(rootProject.libs.dialectica)
         "testImplementation"(rootProject.libs.guice)
-        "testImplementation"(rootProject.libs.junit.jupiter)
-        "testImplementation"(rootProject.libs.mockito.core)
-        "testImplementation"(rootProject.libs.mockito.junit)
+        "testImplementation"(rootProject.libs.bundles.adventure)
+        "testImplementation"(rootProject.libs.bundles.testing)
         "testRuntimeOnly"(rootProject.libs.junit.platform)
     }
 }

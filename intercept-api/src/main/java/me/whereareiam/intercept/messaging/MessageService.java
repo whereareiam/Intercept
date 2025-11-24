@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.messaging;
 
-import me.whereareiam.intercept.model.MessageRequest;
+import me.whereareiam.intercept.model.messaging.snapshot.MessageRequest;
 
 import java.util.Locale;
 import java.util.Map;
@@ -51,7 +51,7 @@ public interface MessageService {
 	 * @param key the message key
 	 * @return set of available locale codes
 	 */
-	Set<String> getAvailableLocales(String key);
+	Set<Locale> getAvailableLocales(String key);
 }
 
 

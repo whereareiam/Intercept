@@ -13,11 +13,18 @@ public final class Constants {
 		public static final String CONFIGURA = BuildConfig.CONFIGURA;
 		public static final String KEYSTONE = BuildConfig.KEYSTONE;
 		public static final String COMMANDANT = BuildConfig.COMMANDANT;
+		public static final String DIALECTICA = BuildConfig.DIALECTICA;
 		public static final String ADVENTURE = BuildConfig.ADVENTURE;
 		public static final String ADVENTURE_PLATFORM_BUKKIT = BuildConfig.ADVENTURE_PLATFORM_BUKKIT;
 		public static final String CLOUD_CORE = BuildConfig.CLOUD_CORE;
 		public static final String CLOUD_COOLDOWN = BuildConfig.CLOUD_COOLDOWN;
 		public static final String CLOUD_PAPER = BuildConfig.CLOUD_PAPER;
 		public static final String CLOUD_MINECRAFT_EXTRAS = BuildConfig.CLOUD_MINECRAFT_EXTRAS;
+
+		// Persistence
+		public static final String JDBI = BuildConfig.JDBI;
+		public static final String HIKARICP = BuildConfig.HIKARICP;
+		public static final String POSTGRESQL = BuildConfig.POSTGRESQL;
+		public static final String MARIADB = BuildConfig.MARIADB;
 	}
 }

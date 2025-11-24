@@ -3,6 +3,7 @@ package me.whereareiam.intercept.platform.paper.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import lombok.RequiredArgsConstructor;
+import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.Scheduler;
 import me.whereareiam.intercept.listener.ListenerRegistrar;
@@ -18,6 +19,7 @@ import org.incendo.cloud.CommandManager;
 @RequiredArgsConstructor
 public class PaperInjectorConfiguration extends AbstractModule {
 	private final Plugin plugin;
+	private final LibraryManager libraryManager;
 
 	@Override
 	protected void configure() {
@@ -28,5 +30,6 @@ public class PaperInjectorConfiguration extends AbstractModule {
 		bind(ListenerRegistrar.class).to(PaperListenerRegistrar.class);
 		bind(PlatformInteractor.class).to(PaperPlatformInteractor.class);
 		bind(new TypeLiteral<CommandManager<Actor>>() {}).toProvider(PaperCommandManagerProvider.class);
+		bind(LibraryManager.class).toInstance(libraryManager);
 	}
 }

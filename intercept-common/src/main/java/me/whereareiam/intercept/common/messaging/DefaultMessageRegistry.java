@@ -3,8 +3,8 @@ package me.whereareiam.intercept.common.messaging;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.Registry;
 
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 @Singleton
 public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
-	private final Map<String, MessageEntry> entries = new ConcurrentHashMap<>();
+	private final Map<String, CompiledMessageEntry> entries = new ConcurrentHashMap<>();
 
 	@Inject
 	public DefaultMessageRegistry(Registry<Reloadable> reloadableRegistry) {
@@ -26,14 +26,14 @@ public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
 	}
 
 	@Override
-	public void register(String key, MessageEntry entry) {
+	public void register(String key, CompiledMessageEntry entry) {
 		// Normalize hyphens to dots for consistent storage
 		String normalizedKey = normalizeKey(key);
 		entries.put(normalizedKey, entry);
 	}
 
 	@Override
-	public MessageEntry get(String key) {
+	public CompiledMessageEntry get(String key) {
 		return entries.get(key);
 	}
 
@@ -55,7 +55,7 @@ public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
 	}
 
 	@Override
-	public Map<String, MessageEntry> getAllEntries() {
+	public Map<String, CompiledMessageEntry> getAllEntries() {
 		return Map.copyOf(entries);
 	}
 

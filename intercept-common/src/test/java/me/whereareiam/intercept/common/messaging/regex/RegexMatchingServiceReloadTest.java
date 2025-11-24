@@ -2,10 +2,10 @@ package me.whereareiam.intercept.common.messaging.regex;
 
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.Registry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ class RegexMatchingServiceReloadTest {
 	@Test
 	void shouldHandleMatchAfterReloadWithPatternIndex() {
 		// Setup: Create a registry with regex patterns
-		MessageEntry entry = mock(MessageEntry.class);
+		CompiledMessageEntry entry = mock(CompiledMessageEntry.class);
 		when(entry.hasRegexPatterns()).thenReturn(true);
 		when(registry.getKeys()).thenReturn(Set.of("test.key"));
 		when(registry.get("test.key")).thenReturn(entry);
@@ -115,7 +115,7 @@ class RegexMatchingServiceReloadTest {
 
 		// Second match - rebuilds pattern index
 		when(registry.getKeys()).thenReturn(Set.of("new.key"));
-		MessageEntry newEntry = mock(MessageEntry.class);
+		CompiledMessageEntry newEntry = mock(CompiledMessageEntry.class);
 		when(newEntry.hasRegexPatterns()).thenReturn(false);
 		when(registry.get("new.key")).thenReturn(newEntry);
 

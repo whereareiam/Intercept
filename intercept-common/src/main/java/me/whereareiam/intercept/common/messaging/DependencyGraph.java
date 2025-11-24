@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.common.util.MessageTags;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,11 +23,11 @@ public class DependencyGraph {
 	 *
 	 * @param entries the message entries
 	 */
-	public void build(Map<String, DefaultMessageEntry> entries) {
+	public void build(Map<String, CompiledMessageEntry> entries) {
 		dependencies.clear();
 
 		// Extract dependencies for each entry
-		for (Map.Entry<String, DefaultMessageEntry> entry : entries.entrySet()) {
+		for (Map.Entry<String, CompiledMessageEntry> entry : entries.entrySet()) {
 			String key = entry.getKey();
 			String text = getTextForAnalysis(entry.getValue());
 			Set<String> deps = extractDependencies(text);
@@ -98,13 +99,13 @@ public class DependencyGraph {
 		return deps;
 	}
 
-	private String getTextForAnalysis(DefaultMessageEntry entry) {
+	private String getTextForAnalysis(CompiledMessageEntry entry) {
 		// Get any text from the entry for analysis
 		if (entry.getText() != null) return entry.getText();
 
 		// For multi-language, just analyze one (dependencies are the same)
 		if (entry.hasTranslations() && !entry.getLocales().isEmpty()) {
-			String locale = entry.getLocales().iterator().next();
+			Locale locale = entry.getLocales().iterator().next();
 			return entry.getText(locale);
 		}
 

@@ -16,16 +16,16 @@ import me.whereareiam.intercept.common.interceptor.processor.DefaultKickIntercep
 import me.whereareiam.intercept.common.listener.InspectionModeEnhancer;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
-import me.whereareiam.intercept.common.messaging.DefaultTagReplacementService;
-import me.whereareiam.intercept.common.messaging.MessagesService;
+import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
+import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
+import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
+import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileWriter;
 import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
+import me.whereareiam.intercept.common.messaging.tag.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
-import me.whereareiam.intercept.common.provider.config.CommandsProvider;
-import me.whereareiam.intercept.common.provider.config.InterceptionProvider;
-import me.whereareiam.intercept.common.provider.config.MessagesProvider;
-import me.whereareiam.intercept.common.provider.config.SettingsProvider;
+import me.whereareiam.intercept.common.provider.config.*;
 import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
 import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
@@ -34,14 +34,10 @@ import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
-import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.MessageService;
-import me.whereareiam.intercept.messaging.RegexMatchingService;
-import me.whereareiam.intercept.messaging.TagReplacementService;
-import me.whereareiam.intercept.model.config.Commands;
-import me.whereareiam.intercept.model.config.Interception;
-import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.messaging.*;
+import me.whereareiam.intercept.messaging.file.MessageFileLoader;
+import me.whereareiam.intercept.messaging.file.MessageFileWriter;
+import me.whereareiam.intercept.model.config.*;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.ProviderType;
@@ -75,6 +71,8 @@ public class CommonConfiguration extends AbstractModule {
 		// Configs
 		bind(SettingsProvider.class).asEagerSingleton();
 		bind(Settings.class).toProvider(SettingsProvider.class);
+		bind(PersistenceProvider.class).asEagerSingleton();
+		bind(Persistence.class).toProvider(PersistenceProvider.class);
 		bind(MessagesProvider.class).asEagerSingleton();
 		bind(Messages.class).toProvider(MessagesProvider.class);
 		bind(CommandsProvider.class).asEagerSingleton();
@@ -93,8 +91,11 @@ public class CommonConfiguration extends AbstractModule {
 
 		// Messages system
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
+		bind(MessageFileLoader.class).to(DefaultMessageFileLoader.class);
+		bind(MessageFileWriter.class).to(DefaultMessageFileWriter.class);
+		bind(MessageDataService.class).to(DefaultMessageDataService.class);
 		bind(MessageService.class).to(DefaultMessageService.class);
-		bind(MessagesService.class).asEagerSingleton();
+		bind(MessageLifecycleService.class).asEagerSingleton();
 		bind(TagReplacementService.class).to(DefaultTagReplacementService.class);
 		bind(RegexMatchingService.class).to(DefaultRegexMatchingService.class);
 

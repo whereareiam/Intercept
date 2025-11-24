@@ -1,10 +1,11 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
 import me.whereareiam.intercept.common.util.MessageTags;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,22 +31,17 @@ public class MessageReferenceProcessor {
 	 * @param locale the locale for multi-language entries
 	 * @return text with references resolved
 	 */
-	public String process(String text, String locale) {
-		if (text == null || text.isEmpty()) {
-			return text;
-		}
+	public String process(String text, Locale locale) {
+		if (text == null || text.isEmpty()) return text;
 
-		if (!text.contains(MessageTags.MESSAGE_REF_TAG)) {
+		if (!text.contains(MessageTags.MESSAGE_REF_TAG))
 			return text; // Fast path: no references
-		}
 
 		return resolveReferences(text, locale, new HashSet<>(), 0);
 	}
 
-	private String resolveReferences(String text, String locale, Set<String> resolutionPath, int depth) {
-		if (depth >= MAX_DEPTH) {
-			return text; // Prevent infinite recursion
-		}
+	private String resolveReferences(String text, Locale locale, Set<String> resolutionPath, int depth) {
+		if (depth >= MAX_DEPTH) return text; // Prevent infinite recursion
 
 		Matcher matcher = MESSAGE_REF_PATTERN.matcher(text);
 		StringBuilder result = new StringBuilder();
@@ -60,7 +56,7 @@ public class MessageReferenceProcessor {
 				continue;
 			}
 
-			MessageEntry entry = registry.get(key);
+			CompiledMessageEntry entry = registry.get(key);
 			if (entry == null) {
 				// Keep original if not found
 				matcher.appendReplacement(result, Matcher.quoteReplacement(matcher.group(0)));

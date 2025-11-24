@@ -74,6 +74,13 @@ public abstract class CommonDependencyResolver implements DependencyResolver {
 				.resolveTransitiveDependencies(true)
 				.build());
 
+		addDependency(Library.builder()
+				.groupId("me.whereareiam")
+				.artifactId("dialectica")
+				.version(Constants.Dependency.DIALECTICA)
+				.resolveTransitiveDependencies(true)
+				.build());
+
 		// Cloud libraries
 		addDependency(Library.builder()
 				.groupId("org{}incendo")
@@ -97,6 +104,47 @@ public abstract class CommonDependencyResolver implements DependencyResolver {
 				.groupId("org{}incendo")
 				.artifactId("cloud-minecraft-extras")
 				.version(Constants.Dependency.CLOUD_MINECRAFT_EXTRAS)
+				.build());
+
+		// Database libraries - always loaded to prevent NoClassDefFoundError
+		// Jdbi core runtime
+		addDependency(Library.builder()
+				.groupId("org{}jdbi")
+				.artifactId("jdbi3-core")
+				.version(Constants.Dependency.JDBI)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		// Jdbi SQL Object support
+		addDependency(Library.builder()
+				.groupId("org{}jdbi")
+				.artifactId("jdbi3-sqlobject")
+				.version(Constants.Dependency.JDBI)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		// HikariCP connection pool
+		addDependency(Library.builder()
+				.groupId("com{}zaxxer")
+				.artifactId("HikariCP")
+				.version(Constants.Dependency.HIKARICP)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		// PostgreSQL JDBC driver
+		addDependency(Library.builder()
+				.groupId("org{}postgresql")
+				.artifactId("postgresql")
+				.version(Constants.Dependency.POSTGRESQL)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		// MariaDB JDBC driver
+		addDependency(Library.builder()
+				.groupId("org{}mariadb{}jdbc")
+				.artifactId("mariadb-java-client")
+				.version(Constants.Dependency.MARIADB)
+				.resolveTransitiveDependencies(true)
 				.build());
 	}
 

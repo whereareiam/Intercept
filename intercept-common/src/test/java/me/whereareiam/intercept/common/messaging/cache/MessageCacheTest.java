@@ -3,6 +3,7 @@ package me.whereareiam.intercept.common.messaging.cache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,7 +18,7 @@ class MessageCacheTest {
 
 	@Test
 	void shouldCacheStaticMessage() {
-		CacheKey key = new CacheKey("test.key", "en_US", Map.of());
+		CacheKey key = new CacheKey("test.key", Locale.US, Map.of());
 
 		cache.put(key, "Cached text", CacheLevel.STATIC);
 
@@ -27,7 +28,7 @@ class MessageCacheTest {
 
 	@Test
 	void shouldCacheSemiStaticMessage() {
-		CacheKey key = new CacheKey("test.key", "en_US", Map.of("condition", "static"));
+		CacheKey key = new CacheKey("test.key", Locale.US, Map.of("condition", "static"));
 
 		cache.put(key, "Semi-static text", CacheLevel.SEMI_STATIC);
 
@@ -37,7 +38,7 @@ class MessageCacheTest {
 
 	@Test
 	void shouldCacheDynamicMessage() {
-		CacheKey key = new CacheKey("test.key", "en_US", Map.of("name", "Steve"));
+		CacheKey key = new CacheKey("test.key", Locale.US, Map.of("name", "Steve"));
 
 		cache.put(key, "Dynamic text", CacheLevel.DYNAMIC);
 
@@ -47,7 +48,7 @@ class MessageCacheTest {
 
 	@Test
 	void shouldReturnNullForMissingKey() {
-		CacheKey key = new CacheKey("missing", "en_US", Map.of());
+		CacheKey key = new CacheKey("missing", Locale.US, Map.of());
 
 		String result = cache.get(key, CacheLevel.STATIC);
 		assertNull(result);
@@ -55,8 +56,8 @@ class MessageCacheTest {
 
 	@Test
 	void shouldDifferentiateBetweenLocales() {
-		CacheKey enKey = new CacheKey("test", "en_US", Map.of());
-		CacheKey deKey = new CacheKey("test", "de_DE", Map.of());
+		CacheKey enKey = new CacheKey("test", Locale.US, Map.of());
+		CacheKey deKey = new CacheKey("test", Locale.GERMAN, Map.of());
 
 		cache.put(enKey, "English", CacheLevel.STATIC);
 		cache.put(deKey, "German", CacheLevel.STATIC);
@@ -67,8 +68,8 @@ class MessageCacheTest {
 
 	@Test
 	void shouldDifferentiateBetweenPlaceholders() {
-		CacheKey key1 = new CacheKey("test", "en_US", Map.of("condition", "a"));
-		CacheKey key2 = new CacheKey("test", "en_US", Map.of("condition", "b"));
+		CacheKey key1 = new CacheKey("test", Locale.US, Map.of("condition", "a"));
+		CacheKey key2 = new CacheKey("test", Locale.US, Map.of("condition", "b"));
 
 		cache.put(key1, "Text A", CacheLevel.SEMI_STATIC);
 		cache.put(key2, "Text B", CacheLevel.SEMI_STATIC);
@@ -79,7 +80,7 @@ class MessageCacheTest {
 
 	@Test
 	void shouldClearCache() {
-		CacheKey key = new CacheKey("test", "en_US", Map.of());
+		CacheKey key = new CacheKey("test", Locale.US, Map.of());
 		cache.put(key, "Text", CacheLevel.STATIC);
 
 		cache.clear();
@@ -89,8 +90,8 @@ class MessageCacheTest {
 
 	@Test
 	void shouldClearSpecificLevel() {
-		CacheKey key1 = new CacheKey("test1", "en_US", Map.of());
-		CacheKey key2 = new CacheKey("test2", "en_US", Map.of());
+		CacheKey key1 = new CacheKey("test1", Locale.US, Map.of());
+		CacheKey key2 = new CacheKey("test2", Locale.US, Map.of());
 
 		cache.put(key1, "Static", CacheLevel.STATIC);
 		cache.put(key2, "Dynamic", CacheLevel.DYNAMIC);
@@ -103,8 +104,8 @@ class MessageCacheTest {
 
 	@Test
 	void shouldHandleEmptyPlaceholders() {
-		CacheKey key1 = new CacheKey("test", "en_US", Map.of());
-		CacheKey key2 = new CacheKey("test", "en_US", Map.of());
+		CacheKey key1 = new CacheKey("test", Locale.US, Map.of());
+		CacheKey key2 = new CacheKey("test", Locale.US, Map.of());
 
 		cache.put(key1, "Text", CacheLevel.STATIC);
 
@@ -116,12 +117,12 @@ class MessageCacheTest {
 	void shouldRespectCacheSizeLimits() {
 		// Fill static cache beyond limit
 		for (int i = 0; i < 1500; i++) {
-			CacheKey key = new CacheKey("test" + i, "en_US", Map.of());
+			CacheKey key = new CacheKey("test" + i, Locale.US, Map.of());
 			cache.put(key, "Text " + i, CacheLevel.STATIC);
 		}
 
 		// Static cache has no size limit, but semi-static and dynamic do
-		CacheKey key = new CacheKey("test0", "en_US", Map.of());
+		CacheKey key = new CacheKey("test0", Locale.US, Map.of());
 		assertNotNull(cache.get(key, CacheLevel.STATIC)); // Should still be there
 	}
 }

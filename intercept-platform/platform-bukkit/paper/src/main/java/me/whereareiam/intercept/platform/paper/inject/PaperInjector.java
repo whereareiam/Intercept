@@ -3,6 +3,8 @@ package me.whereareiam.intercept.platform.paper.inject;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import lombok.Getter;
+import me.whereareiam.attache.LibraryManager;
+import me.whereareiam.intercept.adapter.database.DatabaseConfiguration;
 import me.whereareiam.intercept.command.CommandConfiguration;
 import me.whereareiam.intercept.common.CommonConfiguration;
 import me.whereareiam.intercept.platform.common.PlatformConfiguration;
@@ -14,12 +16,13 @@ import java.nio.file.Path;
 public class PaperInjector {
 	private final Injector injector;
 
-	public PaperInjector(Plugin plugin, Path dataPath) {
+	public PaperInjector(Plugin plugin, Path dataPath, LibraryManager libraryManager) {
 		this.injector = Guice.createInjector(
-				new PaperInjectorConfiguration(plugin),
+				new PaperInjectorConfiguration(plugin, libraryManager),
 				new PlatformConfiguration(),
 				new CommonConfiguration(dataPath),
-				new CommandConfiguration()
+				new CommandConfiguration(),
+				new DatabaseConfiguration()
 		);
 	}
 }

@@ -1,14 +1,13 @@
 package me.whereareiam.intercept.platform.paper;
 
+import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.attache.model.Library;
-import me.whereareiam.attache.platform.paper.PaperLibraryManager;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.common.CommonDependencyResolver;
-import org.bukkit.plugin.Plugin;
 
 public class PaperDependencyResolver extends CommonDependencyResolver {
-	public PaperDependencyResolver(Plugin plugin) {
-		this.libraryManager = new PaperLibraryManager(plugin, ".libraries");
+	public PaperDependencyResolver(LibraryManager libraryManager) {
+		this.libraryManager = libraryManager;
 	}
 
 	@Override

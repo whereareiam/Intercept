@@ -26,7 +26,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		ExceptionMessages exceptionMessages = new ExceptionMessages();
 		exceptionMessages.setNoPermission("{prefix}<white>You don't have \"<gray>{content}</gray>\" permission to use this command.</white>");
 		exceptionMessages.setExecutionError("{prefix}<white>An error occurred while executing the command:</white> <gray>{content}</gray>");
-		exceptionMessages.setInvalidSyntax("{prefix}<white>Invalid syntax, please use:</white> <yellow>/{content}</yellow>");
+		exceptionMessages.setInvalidSyntax("{prefix}<white>Invalid syntax, please use:</white> <gray>/{content}</gray>");
 		exceptionMessages.setInvalidSyntaxBoolean("{prefix}<white>You tried to use <gray>{content}</gray> as a boolean, but it's not a valid value, please use <green>true</green> or <red>false</red>.</white>");
 		exceptionMessages.setInvalidSyntaxNumber("{prefix}<white>You tried to use <gray>{content}</gray> as a number, but it's not a valid value, please use a valid number.</white>");
 		exceptionMessages.setInvalidSyntaxString("{prefix}<white>You tried to use <gray>{content}</gray> as a string, but it's not a valid value, please use a valid string.</white>");
@@ -90,6 +90,27 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		inspect.setHover(hover);
 
 		commands.setInspect(inspect);
+
+		// Configure database command messages
+		Messages.Commands.Database database = new Messages.Commands.Database();
+
+		// Configure database upload command messages
+		Messages.Commands.Database.Upload upload = new Messages.Commands.Database.Upload();
+		upload.setNoMessages("{prefix}<white>No messages to upload.");
+		upload.setUploading("{prefix}<white>Uploading <green>{entries} entries</green> from <green>{files}</green> files...");
+		upload.setSuccess("{prefix}<white>Successfully uploaded <green>{entries} entries</green> to the database <gray>[{time}ms]</gray>");
+		upload.setError("{prefix}<white>An <red>error occurred</red> while uploading: <gray>{error}</gray>");
+		database.setUpload(upload);
+
+		// Configure database download command messages
+		Messages.Commands.Database.Download download = new Messages.Commands.Database.Download();
+		download.setPreparing("{prefix}<white>Preparing to download messages from the database...");
+		download.setNoEntries("{prefix}<white>No messages found in the database.");
+		download.setSuccess("{prefix}<white>Downloaded <green>{files} files</green> with <green>{entries} entries</green> <gray>[{time}ms]</gray>");
+		download.setError("{prefix}<white>An <red>error occurred</red> while downloading: <gray>{error}</gray>");
+		database.setDownload(download);
+
+		commands.setDatabase(database);
 
 		// Configure custom argument names
 		commands.setArguments(Map.of(

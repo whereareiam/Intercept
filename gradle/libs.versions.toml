@@ -9,12 +9,14 @@ lombok = "1.18.42"
 
 # general
 guice = "7.0.0"
-configura = "dev-a76adc6"
+configura = "dev-b1bb54d"
 attache = "dev-5fad19f"
 keystone = "dev-697f401"
-commandant = "dev-0157bcc"
+commandant = "dev-57224b9"
+dialectica = "dev-74ce2b6"
 junit = "6.0.0"
 mockito = "5.20.0"
+testcontainers = "1.20.0"
 
 # cloud
 cloud-core = "2.0.0"
@@ -34,6 +36,12 @@ packetevents = "2.10.1"
 adventure = "4.25.0"
 adventure-platform-bukkit = "4.4.1"
 
+# database
+jdbi = "3.50.0"
+hikaricp = "7.0.2"
+postgresql = "42.7.8"
+mariadb = "3.5.6"
+
 [libraries]
 
 # compile time processing
@@ -44,6 +52,7 @@ guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
 keystone = { group = "me.whereareiam", name = "keystone", version.ref = "keystone" }
 commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
+dialectica = { group = "me.whereareiam", name = "dialectica", version.ref = "dialectica" }
 
 # attache
 attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }
@@ -54,6 +63,9 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 mockito-junit = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
+testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+testcontainers-mariadb = { group = "org.testcontainers", name = "mariadb", version.ref = "testcontainers" }
 
 # cloud
 cloud-core = { group = "org.incendo", name = "cloud-core", version.ref = "cloud-core" }
@@ -78,8 +90,17 @@ adventure-plain = { group = "net.kyori", name = "adventure-text-serializer-plain
 adventure-gson = { group = "net.kyori", name = "adventure-text-serializer-gson", version.ref = "adventure" }
 adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform-bukkit" }
 
+# database
+jdbi-core = { group = "org.jdbi", name = "jdbi3-core", version.ref = "jdbi" }
+jdbi-sqlobject = { group = "org.jdbi", name = "jdbi3-sqlobject", version.ref = "jdbi" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+
 [bundles]
 
+testing = ["junit-jupiter", "mockito-core", "mockito-junit", "testcontainers-junit"]
+database = ["jdbi-core", "jdbi-sqlobject", "hikaricp", "postgresql", "mariadb"]
 adventure = ["adventure", "adventure-minimessage", "adventure-legacy", "adventure-plain", "adventure-gson"]
 bukkit = ["spigot", "adventure-platform-bukkit"]
 paper = ["paper", "cloud-core", "cloud-paper"]
