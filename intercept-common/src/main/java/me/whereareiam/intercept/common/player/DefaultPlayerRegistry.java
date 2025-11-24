@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.player.PlayerAddedEvent;
-import me.whereareiam.intercept.event.player.PlayerDataChangedEvent;
 import me.whereareiam.intercept.event.player.PlayerRemovedEvent;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
@@ -51,26 +50,18 @@ public class DefaultPlayerRegistry implements PlayerRegistry {
 
 	@Override
 	public void syncPlayerData(@NotNull InterceptPlayer player) {
-		InterceptPlayer stored = playerDataMap.get(player.getUniqueId());
+		playerDataMap.compute(player.getUniqueId(), (id, stored) -> {
+			if (stored == null) {
+				eventManager.call(new PlayerAddedEvent(player));
+				return player;
+			}
 
-		if (stored == null) {
-			playerDataMap.put(player.getUniqueId(), player);
-			eventManager.call(new PlayerAddedEvent(player));
-			return;
-		}
+			if (stored == player) return stored;
 
-		// Track changes before updating
-		boolean previousInspectionMode = stored.isInspectionMode();
-		boolean newInspectionMode = player.isInspectionMode();
-		boolean inspectionModeChanged = previousInspectionMode != newInspectionMode;
-
-		// Update player data
-		stored.setInspectionMode(newInspectionMode);
-
-		// Fire event if data changed
-		if (inspectionModeChanged) {
-			eventManager.call(new PlayerDataChangedEvent(stored, inspectionModeChanged, previousInspectionMode));
-		}
+			// Preserve the canonical inspection state when new wrappers are created.
+			player.setInspectionMode(stored.isInspectionMode());
+			return player;
+		});
 	}
 }
 
