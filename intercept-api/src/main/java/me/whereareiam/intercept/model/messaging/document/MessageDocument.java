@@ -25,4 +25,8 @@ public class MessageDocument {
 	 * The scanner will prepend directory-based keys (e.g., "errors.permissions.")
 	 */
 	private Map<String, MessageDocumentEntry> items;
+
+	public void setItems(Map<String, MessageDocumentEntry> items) {
+		this.items = items == null || items.isEmpty() ? null : items;
+	}
 }

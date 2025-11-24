@@ -35,4 +35,8 @@ public class MessageDocumentRegex {
 	 * will be replaced.
 	 */
 	private boolean replaceMatched = false;
+
+	public void setPlaceholders(Map<String, String> placeholders) {
+		this.placeholders = placeholders == null || placeholders.isEmpty() ? null : placeholders;
+	}
 }

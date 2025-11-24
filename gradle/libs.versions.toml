@@ -9,7 +9,7 @@ lombok = "1.18.42"
 
 # general
 guice = "7.0.0"
-configura = "dev-a76adc6"
+configura = "dev-b1bb54d"
 attache = "dev-5fad19f"
 keystone = "dev-697f401"
 commandant = "dev-57224b9"

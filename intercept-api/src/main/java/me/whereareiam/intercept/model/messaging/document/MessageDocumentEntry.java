@@ -37,4 +37,12 @@ public class MessageDocumentEntry {
 	 * When text matches any of these patterns, this message will be resolved.
 	 */
 	private List<MessageDocumentRegex> regex;
+
+	public void setTranslations(Map<String, Object> translations) {
+		this.translations = translations == null || translations.isEmpty() ? null : translations;
+	}
+
+	public void setRegex(List<MessageDocumentRegex> regex) {
+		this.regex = regex == null || regex.isEmpty() ? null : regex;
+	}
 }
