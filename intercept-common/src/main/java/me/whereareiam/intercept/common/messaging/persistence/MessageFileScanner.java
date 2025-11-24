@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.messaging.loader;
+package me.whereareiam.intercept.common.messaging.persistence;
 
 import me.whereareiam.configura.type.Format;
 

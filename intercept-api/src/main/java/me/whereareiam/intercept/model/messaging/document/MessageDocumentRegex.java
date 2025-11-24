@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.messaging.loader;
+package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
-public class RegexPatternData {
+public class MessageDocumentRegex {
 	/**
 	 * The regex pattern string to match against.
 	 */

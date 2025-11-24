@@ -222,6 +222,31 @@ public class Messages {
 			@Setter
 			@ToString
 			public static class Download {
+				/**
+				 * Message shown when starting the download process.
+				 */
+				private String preparing;
+
+				/**
+				 * Message shown when there are no entries/files in the database.
+				 */
+				private String noEntries;
+
+				/**
+				 * Success message when download completes successfully.
+				 * Placeholders:
+				 * - {files}: Number of files written
+				 * - {entries}: Number of entries written
+				 * - {time}: Total time in milliseconds
+				 */
+				private String success;
+
+				/**
+				 * Error message when download fails.
+				 * Placeholders:
+				 * - {error}: The error message/reason
+				 */
+				private String error;
 			}
 		}
 	}

@@ -1,10 +1,8 @@
-package me.whereareiam.intercept.common.messaging.performance;
+package me.whereareiam.intercept.common.messaging;
 
-import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
-import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.DefaultMessageService;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +54,7 @@ class MessagePerformanceTest {
 	@Test
 	void staticMessageShouldResolveUnder10Microseconds() {
 		// Setup
-		registry.register("static", new DefaultMessageEntry(MessageType.MESSAGE, "Static text"));
+		registry.register("static", new CompiledMessageEntry(MessageType.MESSAGE, "Static text"));
 
 		// Warm up JVM and cache (multiple iterations)
 		for (int i = 0; i < 1000; i++) {
@@ -81,8 +79,8 @@ class MessagePerformanceTest {
 	@Test
 	void semiStaticMessageShouldResolveUnder100Microseconds() {
 		// Setup
-		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[App]"));
-		registry.register("semi", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[App]"));
+		registry.register("semi", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<m:prefix> <if enabled==true>Enabled<else>Disabled</if>"));
 
 		// Warm up JVM and cache
@@ -108,7 +106,7 @@ class MessagePerformanceTest {
 	@Test
 	void simpleDynamicMessageShouldResolveUnder100Microseconds() {
 		// Setup
-		registry.register("dynamic", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("dynamic", new CompiledMessageEntry(MessageType.MESSAGE,
 				"Hello, <p:name>!"));
 
 		// Warm up JVM
@@ -134,10 +132,10 @@ class MessagePerformanceTest {
 	@Test
 	void complexDynamicMessageShouldResolveUnder500Microseconds() {
 		// Setup complex message with all features
-		registry.register("color", new DefaultMessageEntry(MessageType.TEMPLATE, "<red>"));
-		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:color>[App]"));
-		registry.register("player-name", new DefaultMessageEntry(MessageType.TEMPLATE, "<p:name>"));
-		registry.register("complex", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("color", new CompiledMessageEntry(MessageType.TEMPLATE, "<red>"));
+		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:color>[App]"));
+		registry.register("player-name", new CompiledMessageEntry(MessageType.TEMPLATE, "<p:name>"));
+		registry.register("complex", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<m:prefix> <tpl:player-name name='<p:player>'> <if online==true>is online<else>is offline</if> on <p:server>"));
 
 		// Warm up JVM
@@ -165,8 +163,8 @@ class MessagePerformanceTest {
 	@Test
 	void concurrentAccessShouldHandleLoad() throws InterruptedException {
 		// Setup
-		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[App]"));
-		registry.register("msg", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[App]"));
+		registry.register("msg", new CompiledMessageEntry(MessageType.MESSAGE,
 				"<m:prefix> Player <p:name> joined"));
 
 		int threadCount = 50;
@@ -198,7 +196,7 @@ class MessagePerformanceTest {
 	@Test
 	void cacheHitRateShouldBeHigh() {
 		// Setup
-		registry.register("static", new DefaultMessageEntry(MessageType.MESSAGE, "Static text"));
+		registry.register("static", new CompiledMessageEntry(MessageType.MESSAGE, "Static text"));
 
 		// First call - cache miss
 		service.resolve("static", Locale.US);
@@ -216,12 +214,12 @@ class MessagePerformanceTest {
 	@Test
 	void nestedResolutionShouldStayFast() {
 		// Setup deep nesting
-		registry.register("a", new DefaultMessageEntry(MessageType.TEMPLATE, "A"));
-		registry.register("b", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:a>B"));
-		registry.register("c", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>C"));
-		registry.register("d", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:c>D"));
-		registry.register("e", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:d>E"));
-		registry.register("final", new DefaultMessageEntry(MessageType.MESSAGE, "Result: <m:e>"));
+		registry.register("a", new CompiledMessageEntry(MessageType.TEMPLATE, "A"));
+		registry.register("b", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:a>B"));
+		registry.register("c", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>C"));
+		registry.register("d", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:c>D"));
+		registry.register("e", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:d>E"));
+		registry.register("final", new CompiledMessageEntry(MessageType.MESSAGE, "Result: <m:e>"));
 
 		// Warm up
 		for (int i = 0; i < 100; i++) {
@@ -247,7 +245,7 @@ class MessagePerformanceTest {
 	void batchResolutionShouldBeEfficient() {
 		// Setup
 		for (int i = 0; i < 100; i++) {
-			registry.register("msg" + i, new DefaultMessageEntry(MessageType.MESSAGE,
+			registry.register("msg" + i, new CompiledMessageEntry(MessageType.MESSAGE,
 					"Message " + i + ": <p:value>"));
 		}
 
@@ -265,7 +263,7 @@ class MessagePerformanceTest {
 	void multiLocaleResolutionShouldBeFast() {
 		// Setup
 		Locale esLocale = Locale.forLanguageTag("es-ES");
-		registry.register("welcome", new DefaultMessageEntry(MessageType.MESSAGE,
+		registry.register("welcome", new CompiledMessageEntry(MessageType.MESSAGE,
 				Map.of(
 						Locale.US, "Welcome!",
 						Locale.GERMAN, "Willkommen!",

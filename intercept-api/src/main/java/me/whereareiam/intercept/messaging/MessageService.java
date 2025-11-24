@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.messaging;
 
-import me.whereareiam.intercept.model.MessageRequest;
+import me.whereareiam.intercept.model.messaging.snapshot.MessageRequest;
 
 import java.util.Locale;
 import java.util.Map;

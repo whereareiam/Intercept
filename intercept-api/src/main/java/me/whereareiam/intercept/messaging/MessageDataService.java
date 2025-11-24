@@ -1,5 +1,8 @@
 package me.whereareiam.intercept.messaging;
 
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
+
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -18,7 +21,7 @@ public interface MessageDataService {
 	 *
 	 * @return map of key to entry
 	 */
-	Map<String, MessageEntry> getAllEntries();
+	Map<String, CompiledMessageEntry> getAllEntries();
 
 	/**
 	 * Get the file path map (key prefix -> file path).
@@ -26,14 +29,6 @@ public interface MessageDataService {
 	 * @return map of key prefix to file path
 	 */
 	Map<String, Path> getFilePaths();
-
-	/**
-	 * Get the file path for a specific key prefix.
-	 *
-	 * @param keyPrefix the key prefix (e.g., "errors.permissions")
-	 * @return the file path, or null if not found
-	 */
-	Path getFileForPrefix(String keyPrefix);
 
 	/**
 	 * Create a snapshot of current message data.
@@ -47,5 +42,10 @@ public interface MessageDataService {
 	 * Reload the service by clearing and reinitializing.
 	 */
 	void reload();
+
+	/**
+	 * Remove all message files from the backing storage.
+	 */
+	void resetStorage();
 }
 

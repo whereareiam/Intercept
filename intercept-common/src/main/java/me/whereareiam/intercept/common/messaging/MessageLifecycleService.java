@@ -10,9 +10,9 @@ import me.whereareiam.intercept.common.messaging.cache.CacheStrategy;
 import me.whereareiam.intercept.common.messaging.cache.MessageCache;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageDataService;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.Registry;
 
 import java.util.Locale;
@@ -23,7 +23,7 @@ import java.util.Map;
  * Handles initialization and loading of all message files from the messages directory.
  */
 @Singleton
-public class MessagesService implements Reloadable {
+public class MessageLifecycleService implements Reloadable {
 	private final MessageDataService messageDataService;
 	private final DefaultMessageRegistry registry;
 	private final Provider<Settings> settingsProvider;
@@ -32,7 +32,7 @@ public class MessagesService implements Reloadable {
 	private final CacheStrategy cacheStrategy;
 
 	@Inject
-	public MessagesService(
+	public MessageLifecycleService(
 			MessageDataService messageDataService,
 			DefaultMessageRegistry registry,
 			Provider<Settings> settingsProvider,
@@ -77,8 +77,7 @@ public class MessagesService implements Reloadable {
 	private void buildDependencyGraph() {
 		Logger.debug("Building dependency graph...");
 
-		@SuppressWarnings("unchecked")
-		Map<String, DefaultMessageEntry> entries = (Map<String, DefaultMessageEntry>) (Map<?, ?>) registry.getAllEntries();
+		Map<String, CompiledMessageEntry> entries = registry.getAllEntries();
 		dependencyGraph.build(entries);
 
 		// Log warnings for circular dependencies
@@ -101,14 +100,14 @@ public class MessagesService implements Reloadable {
 		);
 
 		int preRendered = 0;
-		for (Map.Entry<String, MessageEntry> entry : registry.getAllEntries().entrySet()) {
+		for (Map.Entry<String, CompiledMessageEntry> entry : registry.getAllEntries().entrySet()) {
 			String key = entry.getKey();
-			MessageEntry messageEntry = entry.getValue();
+			CompiledMessageEntry compiledMessageEntry = entry.getValue();
 
 			// Get text for classification
-			String text = messageEntry.hasTranslations()
-					? messageEntry.getText(settings.getLocale())
-					: messageEntry.getText();
+			String text = compiledMessageEntry.hasTranslations()
+					? compiledMessageEntry.getText(settings.getLocale())
+					: compiledMessageEntry.getText();
 
 			if (text == null) continue;
 
@@ -116,8 +115,8 @@ public class MessagesService implements Reloadable {
 			CacheLevel level = cacheStrategy.classify(text);
 			if (level == CacheLevel.STATIC) {
 				// Pre-render for all available locales
-				if (messageEntry.hasTranslations()) {
-					for (Locale locale : messageEntry.getLocales()) {
+				if (compiledMessageEntry.hasTranslations()) {
+					for (Locale locale : compiledMessageEntry.getLocales()) {
 						String resolved = messageService.resolve(key, locale, Map.of());
 						if (resolved != null) {
 							cache.put(new CacheKey(key, locale, Map.of()), resolved, CacheLevel.STATIC);

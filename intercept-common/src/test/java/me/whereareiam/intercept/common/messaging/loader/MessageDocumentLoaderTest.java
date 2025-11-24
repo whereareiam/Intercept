@@ -1,7 +1,11 @@
 package me.whereareiam.intercept.common.messaging.loader;
 
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
+import me.whereareiam.intercept.messaging.file.MessageFileLoader;
+import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,23 +19,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-class MessageFileLoaderTest {
+class MessageDocumentLoaderTest {
 	private MessageFileLoader loader;
 	private DefaultMessageRegistry registry;
 
 	@BeforeEach
 	void setUp() {
 		registry = new DefaultMessageRegistry(mock(Registry.class));
-		TextProcessor textProcessor = new TextProcessor();
-		loader = new MessageFileLoader(textProcessor, registry);
+		loader = new DefaultMessageFileLoader(registry, new TextProcessor());
 	}
 
 	@Test
 	void shouldLoadSingleLanguageMessage() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setText("Welcome!");
 
 		fileData.setItems(Map.of("welcome", entry));
@@ -44,10 +47,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldLoadMultiLanguageMessage() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setTranslations(Map.of(
 				"en_US", "Welcome!",
 				"de_DE", "Willkommen!"
@@ -64,10 +67,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldLoadTemplates() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.TEMPLATE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setText("[Prefix]");
 
 		fileData.setItems(Map.of("prefix", entry));
@@ -80,10 +83,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldConvertArrayToMultiLineText() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setText(List.of("Line 1", "Line 2", "Line 3"));
 
 		fileData.setItems(Map.of("banner", entry));
@@ -96,10 +99,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldConvertArrayTranslations() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setTranslations(Map.of(
 				"en_US", List.of("Line 1", "Line 2"),
 				"de_DE", List.of("Zeile 1", "Zeile 2")
@@ -115,10 +118,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldInheritTypeFromFile() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.TEMPLATE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		// No type set on entry
 		entry.setText("Template text");
 
@@ -131,10 +134,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldOverrideFileType() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setType(MessageType.TEMPLATE); // Override
 		entry.setText("Template text");
 
@@ -147,13 +150,13 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldAutoDetectMessageType() {
-		MessageFileData fileData = new MessageFileData();
-		// No file-level type
+		MessageDocument fileData = new MessageDocument();
+		// No persistence-level type
 
-		MessageEntryData msgEntry = new MessageEntryData();
+		MessageDocumentEntry msgEntry = new MessageDocumentEntry();
 		msgEntry.setTranslations(Map.of("en_US", "Text"));
 
-		MessageEntryData tplEntry = new MessageEntryData();
+		MessageDocumentEntry tplEntry = new MessageDocumentEntry();
 		tplEntry.setText("Text");
 
 		fileData.setItems(Map.of("msg", msgEntry, "tpl", tplEntry));
@@ -167,10 +170,10 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldHandleMultipleTranslations() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry = new MessageEntryData();
+		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setTranslations(Map.of(
 				"en_US", "Hello",
 				"de_DE", "Hallo"
@@ -186,16 +189,16 @@ class MessageFileLoaderTest {
 
 	@Test
 	void shouldLoadMultipleEntries() {
-		MessageFileData fileData = new MessageFileData();
+		MessageDocument fileData = new MessageDocument();
 		fileData.setType(MessageType.MESSAGE);
 
-		MessageEntryData entry1 = new MessageEntryData();
+		MessageDocumentEntry entry1 = new MessageDocumentEntry();
 		entry1.setText("Message 1");
 
-		MessageEntryData entry2 = new MessageEntryData();
+		MessageDocumentEntry entry2 = new MessageDocumentEntry();
 		entry2.setText("Message 2");
 
-		MessageEntryData entry3 = new MessageEntryData();
+		MessageDocumentEntry entry3 = new MessageDocumentEntry();
 		entry3.setText("Message 3");
 
 		fileData.setItems(Map.of(

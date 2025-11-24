@@ -1,8 +1,8 @@
 package me.whereareiam.intercept.common.messaging.regex;
 
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ class PatternIndexBuilder {
 		List<PatternMatch> candidates = new ArrayList<>();
 
 		for (String key : registry.getKeys()) {
-			MessageEntry entry = registry.get(key);
+			CompiledMessageEntry entry = registry.get(key);
 			if (entry == null || !entry.hasRegexPatterns())
 				continue;
 

@@ -1,7 +1,6 @@
-package me.whereareiam.intercept.common.messaging;
+package me.whereareiam.intercept.model.messaging;
 
 import lombok.Getter;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 
@@ -10,39 +9,35 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Default implementation of MessageEntry.
- */
 @Getter
-public class DefaultMessageEntry implements MessageEntry {
+public class CompiledMessageEntry {
 	private final MessageType type;
 	private final String singleText; // For single-language messages/templates
 	private final Map<Locale, String> translations; // For multi-language messages
 	private final List<CompiledRegexPattern> regexPatterns; // Regex patterns for this message
 
-	public DefaultMessageEntry(MessageType type, String text) {
+	public CompiledMessageEntry(MessageType type, String text) {
 		this(type, text, null);
 	}
 
-	public DefaultMessageEntry(MessageType type, String text, List<CompiledRegexPattern> regexPatterns) {
+	public CompiledMessageEntry(MessageType type, String text, List<CompiledRegexPattern> regexPatterns) {
 		this.type = type;
 		this.singleText = text;
 		this.translations = null;
 		this.regexPatterns = regexPatterns != null ? regexPatterns : List.of();
 	}
 
-	public DefaultMessageEntry(MessageType type, Map<Locale, String> translations) {
+	public CompiledMessageEntry(MessageType type, Map<Locale, String> translations) {
 		this(type, translations, null);
 	}
 
-	public DefaultMessageEntry(MessageType type, Map<Locale, String> translations, List<CompiledRegexPattern> regexPatterns) {
+	public CompiledMessageEntry(MessageType type, Map<Locale, String> translations, List<CompiledRegexPattern> regexPatterns) {
 		this.type = type;
 		this.singleText = null;
 		this.translations = translations;
 		this.regexPatterns = regexPatterns != null ? regexPatterns : List.of();
 	}
 
-	@Override
 	public String getText(Locale locale, Locale defaultLocale, String messageKey) {
 		if (singleText != null) return singleText;
 		if (translations == null) return messageKey;
@@ -83,7 +78,6 @@ public class DefaultMessageEntry implements MessageEntry {
 		return messageKey;
 	}
 
-	@Override
 	public String getText(Locale locale) {
 		if (singleText != null) return singleText;
 		if (translations == null) return null;
@@ -91,27 +85,18 @@ public class DefaultMessageEntry implements MessageEntry {
 		return translations.get(locale);
 	}
 
-	@Override
 	public String getText() {
 		return singleText;
 	}
 
-	@Override
 	public Set<Locale> getLocales() {
 		return translations != null ? translations.keySet() : Set.of();
 	}
 
-	@Override
 	public boolean hasTranslations() {
 		return translations != null && !translations.isEmpty();
 	}
 
-	@Override
-	public List<CompiledRegexPattern> getRegexPatterns() {
-		return regexPatterns;
-	}
-
-	@Override
 	public boolean hasRegexPatterns() {
 		return !regexPatterns.isEmpty();
 	}

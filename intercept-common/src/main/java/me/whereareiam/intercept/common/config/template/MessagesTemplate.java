@@ -102,6 +102,14 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		upload.setError("{prefix}<white>An <red>error occurred</red> while uploading: <gray>{error}</gray>");
 		database.setUpload(upload);
 
+		// Configure database download command messages
+		Messages.Commands.Database.Download download = new Messages.Commands.Database.Download();
+		download.setPreparing("{prefix}<white>Preparing to download messages from the database...");
+		download.setNoEntries("{prefix}<white>No messages found in the database.");
+		download.setSuccess("{prefix}<white>Downloaded <green>{files} files</green> with <green>{entries} entries</green> <gray>[{time}ms]</gray>");
+		download.setError("{prefix}<white>An <red>error occurred</red> while downloading: <gray>{error}</gray>");
+		database.setDownload(download);
+
 		commands.setDatabase(database);
 
 		// Configure custom argument names

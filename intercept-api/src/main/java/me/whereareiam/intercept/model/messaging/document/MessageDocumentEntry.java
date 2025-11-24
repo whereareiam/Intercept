@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.messaging.loader;
+package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
-public class MessageEntryData {
+public class MessageDocumentEntry {
 	/**
 	 * Optional entry-level type
 	 * If not present, inherits from file-level type
@@ -36,5 +36,5 @@ public class MessageEntryData {
 	 * Optional regex patterns that can trigger this message.
 	 * When text matches any of these patterns, this message will be resolved.
 	 */
-	private List<RegexPatternData> regex;
+	private List<MessageDocumentRegex> regex;
 }

@@ -8,6 +8,7 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,6 +18,9 @@ import java.util.Optional;
 public interface MessageEntryRepository {
 	@SqlQuery("SELECT * FROM intercept_message_entries WHERE file_id = :fileId AND entry_key = :entryKey")
 	Optional<MessageEntryEntity> findByFileIdAndEntryKey(@Bind("fileId") long fileId, @Bind("entryKey") String entryKey);
+
+	@SqlQuery("SELECT * FROM intercept_message_entries WHERE file_id = :fileId ORDER BY entry_key")
+	List<MessageEntryEntity> findAllByFileId(@Bind("fileId") long fileId);
 
 	@SqlUpdate("INSERT INTO intercept_message_entries (file_id, entry_key, entry_type) VALUES (:fileId, :entryKey, :entryType)")
 	@GetGeneratedKeys("id")

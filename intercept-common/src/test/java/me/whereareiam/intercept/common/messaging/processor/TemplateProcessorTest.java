@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
-import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldApplyTemplateWithSingleParameter() {
-		registry.register("error.format", new DefaultMessageEntry(MessageType.TEMPLATE, "✗ <p:message>"));
+		registry.register("error.format", new CompiledMessageEntry(MessageType.TEMPLATE, "✗ <p:message>"));
 
 		String text = "<tpl:error.format message='Something went wrong'>";
 		String result = processor.process(text, Locale.US);
@@ -33,7 +33,7 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldApplyTemplateWithMultipleParameters() {
-		registry.register("box", new DefaultMessageEntry(MessageType.TEMPLATE, "║ <p:title> - <p:message> ║"));
+		registry.register("box", new CompiledMessageEntry(MessageType.TEMPLATE, "║ <p:title> - <p:message> ║"));
 
 		String text = "<tpl:box title='Error' message='Failed'>";
 		String result = processor.process(text, Locale.US);
@@ -56,7 +56,7 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldHandleTemplateWithNoParameters() {
-		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[Intercept]"));
+		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[Intercept]"));
 
 		String text = "<tpl:prefix>";
 		String result = processor.process(text, Locale.US);
@@ -65,7 +65,7 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldParseParameterValuesWithQuotes() {
-		registry.register("test", new DefaultMessageEntry(MessageType.TEMPLATE, "<p:val>"));
+		registry.register("test", new CompiledMessageEntry(MessageType.TEMPLATE, "<p:val>"));
 
 		String text = "<tpl:test val='value with spaces'>";
 		String result = processor.process(text, Locale.US);
@@ -74,7 +74,7 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldHandleMultiLineTemplate() {
-		registry.register("box", new DefaultMessageEntry(MessageType.TEMPLATE, "╔═══╗\n║ <p:text> ║\n╚═══╝"));
+		registry.register("box", new CompiledMessageEntry(MessageType.TEMPLATE, "╔═══╗\n║ <p:text> ║\n╚═══╝"));
 
 		String text = "<tpl:box text='Hi'>";
 		String result = processor.process(text, Locale.US);
@@ -83,8 +83,8 @@ class TemplateProcessorTest {
 
 	@Test
 	void shouldHandleMultipleTemplates() {
-		registry.register("prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "[<p:name>]"));
-		registry.register("suffix", new DefaultMessageEntry(MessageType.TEMPLATE, "(<p:note>)"));
+		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[<p:name>]"));
+		registry.register("suffix", new CompiledMessageEntry(MessageType.TEMPLATE, "(<p:note>)"));
 
 		String text = "<tpl:prefix name='App'> Message <tpl:suffix note='v1'>";
 		String result = processor.process(text, Locale.US);
@@ -94,7 +94,7 @@ class TemplateProcessorTest {
 	@Test
 	void shouldReturnTemplateTextAsIs() {
 		// Templates with parameters replace them immediately
-		registry.register("fmt", new DefaultMessageEntry(MessageType.TEMPLATE, "Value: <p:value>"));
+		registry.register("fmt", new CompiledMessageEntry(MessageType.TEMPLATE, "Value: <p:value>"));
 
 		String text = "<tpl:fmt value='123'>";
 		String result = processor.process(text, Locale.US);

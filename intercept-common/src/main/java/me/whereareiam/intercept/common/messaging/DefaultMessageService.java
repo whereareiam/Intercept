@@ -10,11 +10,11 @@ import me.whereareiam.intercept.common.messaging.processor.MessageReferenceProce
 import me.whereareiam.intercept.common.messaging.processor.PlaceholderProcessor;
 import me.whereareiam.intercept.common.messaging.processor.TemplateProcessor;
 import me.whereareiam.intercept.common.messaging.processor.conditional.ConditionalProcessor;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.MessageService;
-import me.whereareiam.intercept.model.MessageRequest;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+import me.whereareiam.intercept.model.messaging.snapshot.MessageRequest;
 
 import java.util.Locale;
 import java.util.Map;
@@ -65,7 +65,7 @@ public class DefaultMessageService implements MessageService {
 
 	@Override
 	public String resolve(String key, Locale locale, Map<String, Object> placeholders) {
-		MessageEntry entry = registry.get(key);
+		CompiledMessageEntry entry = registry.get(key);
 		if (entry == null) return key;
 
 		// Get text for locale with fallback
@@ -125,7 +125,7 @@ public class DefaultMessageService implements MessageService {
 
 	@Override
 	public Set<Locale> getAvailableLocales(String key) {
-		MessageEntry entry = registry.get(key);
+		CompiledMessageEntry entry = registry.get(key);
 		return entry != null ? entry.getLocales() : Set.of();
 	}
 }

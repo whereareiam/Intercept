@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CompiledRegexPatternTest {
+class CompiledMessageDocumentRegexTest {
 	@Test
 	void shouldMatchSimplePattern() {
 		CompiledRegexPattern pattern = new CompiledRegexPattern(

@@ -1,7 +1,8 @@
-package me.whereareiam.intercept.messaging;
+package me.whereareiam.intercept.model.messaging.snapshot;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -14,6 +15,6 @@ import java.util.Map;
 @Getter
 @RequiredArgsConstructor
 public class MessageSnapshot {
-	private final Map<String, MessageEntry> entries;
+	private final Map<String, CompiledMessageEntry> entries;
 	private final Map<String, Path> filePaths;
 }

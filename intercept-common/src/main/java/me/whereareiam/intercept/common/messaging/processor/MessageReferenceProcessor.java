@@ -1,8 +1,8 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
 import me.whereareiam.intercept.common.util.MessageTags;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -56,7 +56,7 @@ public class MessageReferenceProcessor {
 				continue;
 			}
 
-			MessageEntry entry = registry.get(key);
+			CompiledMessageEntry entry = registry.get(key);
 			if (entry == null) {
 				// Keep original if not found
 				matcher.appendReplacement(result, Matcher.quoteReplacement(matcher.group(0)));

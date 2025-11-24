@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.common.messaging.loader;
+package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
-public class MessageFileData {
+public class MessageDocument {
 	/**
 	 * Optional file-level type (messages, templates, mixed)
 	 * If present, all entries inherit this type unless they override it
@@ -24,5 +24,5 @@ public class MessageFileData {
 	 * Keys are relative to the file (e.g., "no-permission", "player-not-found")
 	 * The scanner will prepend directory-based keys (e.g., "errors.permissions.")
 	 */
-	private Map<String, MessageEntryData> items;
+	private Map<String, MessageDocumentEntry> items;
 }

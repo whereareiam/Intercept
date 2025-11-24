@@ -1,7 +1,6 @@
-package me.whereareiam.intercept.common.messaging.graph;
+package me.whereareiam.intercept.common.messaging;
 
-import me.whereareiam.intercept.common.messaging.DefaultMessageEntry;
-import me.whereareiam.intercept.common.messaging.DependencyGraph;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,8 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldExtractMessageReferenceDependencies() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"msg", new DefaultMessageEntry(MessageType.MESSAGE, "<m:prefix> Hello")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"msg", new CompiledMessageEntry(MessageType.MESSAGE, "<m:prefix> Hello")
 		);
 
 		graph.build(entries);
@@ -34,8 +33,8 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldExtractTemplateDependencies() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"msg", new DefaultMessageEntry(MessageType.MESSAGE, "<tpl:error-format message='Error'>")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"msg", new CompiledMessageEntry(MessageType.MESSAGE, "<tpl:error-format message='Error'>")
 		);
 
 		graph.build(entries);
@@ -46,8 +45,8 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldExtractMultipleDependencies() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"msg", new DefaultMessageEntry(MessageType.MESSAGE,
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"msg", new CompiledMessageEntry(MessageType.MESSAGE,
 						"<m:prefix> <tpl:format msg='<m:suffix>'>")
 		);
 
@@ -62,9 +61,9 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldDetectDirectCircularDependency() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"a", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>"),
-				"b", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:a>")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"a", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>"),
+				"b", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:a>")
 		);
 
 		graph.build(entries);
@@ -75,10 +74,10 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldDetectIndirectCircularDependency() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"a", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>"),
-				"b", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:c>"),
-				"c", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:a>")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"a", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>"),
+				"b", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:c>"),
+				"c", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:a>")
 		);
 
 		graph.build(entries);
@@ -90,8 +89,8 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldDetectSelfReference() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"a", new DefaultMessageEntry(MessageType.TEMPLATE, "Text <m:a> more")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"a", new CompiledMessageEntry(MessageType.TEMPLATE, "Text <m:a> more")
 		);
 
 		graph.build(entries);
@@ -101,10 +100,10 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldNotDetectCircularForAcyclicGraph() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"a", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>"),
-				"b", new DefaultMessageEntry(MessageType.TEMPLATE, "Text"),
-				"c", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"a", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>"),
+				"b", new CompiledMessageEntry(MessageType.TEMPLATE, "Text"),
+				"c", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>")
 		);
 
 		graph.build(entries);
@@ -116,10 +115,10 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldCalculateTopologicalOrder() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"a", new DefaultMessageEntry(MessageType.TEMPLATE, "A"),
-				"b", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:a>B"),
-				"c", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:b>C")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"a", new CompiledMessageEntry(MessageType.TEMPLATE, "A"),
+				"b", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:a>B"),
+				"c", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>C")
 		);
 
 		graph.build(entries);
@@ -137,8 +136,8 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldHandleNoDependencies() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"simple", new DefaultMessageEntry(MessageType.MESSAGE, "No dependencies")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"simple", new CompiledMessageEntry(MessageType.MESSAGE, "No dependencies")
 		);
 
 		graph.build(entries);
@@ -149,11 +148,11 @@ class DependencyGraphTest {
 
 	@Test
 	void shouldHandleComplexDependencyChain() {
-		Map<String, DefaultMessageEntry> entries = Map.of(
-				"color", new DefaultMessageEntry(MessageType.TEMPLATE, "<red>"),
-				"prefix", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:color>[App]"),
-				"format", new DefaultMessageEntry(MessageType.TEMPLATE, "<m:prefix> <p:msg>"),
-				"message", new DefaultMessageEntry(MessageType.MESSAGE, "<tpl:format msg='Hello'>")
+		Map<String, CompiledMessageEntry> entries = Map.of(
+				"color", new CompiledMessageEntry(MessageType.TEMPLATE, "<red>"),
+				"prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:color>[App]"),
+				"format", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:prefix> <p:msg>"),
+				"message", new CompiledMessageEntry(MessageType.MESSAGE, "<tpl:format msg='Hello'>")
 		);
 
 		graph.build(entries);

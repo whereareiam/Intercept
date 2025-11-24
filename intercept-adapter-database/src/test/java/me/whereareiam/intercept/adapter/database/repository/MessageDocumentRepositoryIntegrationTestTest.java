@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MessageFileRepositoryIntegrationTestTest extends BaseTest {
+class MessageDocumentRepositoryIntegrationTestTest extends BaseTest {
 	private MessageFileRepository postgresRepo;
 	private MessageFileRepository mariaDbRepo;
 

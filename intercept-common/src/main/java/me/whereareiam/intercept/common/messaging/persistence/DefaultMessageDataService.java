@@ -1,26 +1,28 @@
-package me.whereareiam.intercept.common.messaging;
+package me.whereareiam.intercept.common.messaging.persistence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileData;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileLoader;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileScanner;
-import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
+import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageDataService;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.MessageSnapshot;
+import me.whereareiam.intercept.messaging.file.MessageFileLoader;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.registry.Registry;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Default implementation of MessageDataService.
@@ -34,7 +36,7 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	private final MessageRegistry registry;
 	private final MessageFileScanner scanner;
 	private final MessageFileLoader loader;
-	
+
 	// Tracks key prefix -> file path mapping
 	private final Map<String, Path> filePathMap = new HashMap<>();
 
@@ -42,15 +44,14 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	public DefaultMessageDataService(
 			@Named("messagesPath") Path messagesPath,
 			MessageRegistry registry,
+			MessageFileLoader loader,
 			Registry<Reloadable> reloadableRegistry
 	) {
 		this.messagesPath = messagesPath;
 		this.registry = registry;
 		this.scanner = new MessageFileScanner(Config.getDefaultReader().getFormat());
-		
-		TextProcessor textProcessor = new TextProcessor();
-		this.loader = new MessageFileLoader(textProcessor, (DefaultMessageRegistry) registry);
-		
+		this.loader = loader;
+
 		reloadableRegistry.register(this);
 	}
 
@@ -93,7 +94,7 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 		filePathMap.put(keyPrefix, file);
 
 		// Read file data with Configura
-		MessageFileData data = Config.load(file, MessageFileData.class);
+		MessageDocument data = Config.load(file, MessageDocument.class);
 
 		// Load into registry
 		loader.loadFromData(keyPrefix, data);
@@ -104,7 +105,8 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 *
 	 * @return map of key to entry
 	 */
-	public Map<String, MessageEntry> getAllEntries() {
+	@Override
+	public Map<String, CompiledMessageEntry> getAllEntries() {
 		return registry.getAllEntries();
 	}
 
@@ -113,18 +115,9 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 *
 	 * @return map of key prefix to file path
 	 */
+	@Override
 	public Map<String, Path> getFilePaths() {
 		return Map.copyOf(filePathMap);
-	}
-
-	/**
-	 * Get the file path for a specific key prefix.
-	 *
-	 * @param keyPrefix the key prefix (e.g., "errors.permissions")
-	 * @return the file path, or null if not found
-	 */
-	public Path getFileForPrefix(String keyPrefix) {
-		return filePathMap.get(keyPrefix);
 	}
 
 	/**
@@ -133,8 +126,9 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 *
 	 * @return MessageSnapshot with current data
 	 */
+	@Override
 	public MessageSnapshot createSnapshot() {
-		Map<String, MessageEntry> entries = getAllEntries();
+		Map<String, CompiledMessageEntry> entries = getAllEntries();
 		Map<String, Path> filePaths = getFilePaths();
 		return new MessageSnapshot(entries, filePaths);
 	}
@@ -142,10 +136,35 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	@Override
 	public void reload() {
 		// Clear registry (if it supports clearing)
-		if (registry instanceof DefaultMessageRegistry) {
+		if (registry instanceof DefaultMessageRegistry)
 			((DefaultMessageRegistry) registry).reload();
-		}
+
 		// Reinitialize
 		initialize();
+	}
+
+	@Override
+	public void resetStorage() {
+		try {
+			if (Files.notExists(messagesPath)) {
+				Files.createDirectories(messagesPath);
+				return;
+			}
+
+			try (Stream<Path> stream = Files.walk(messagesPath)) {
+				stream
+						.sorted(Comparator.reverseOrder())
+						.filter(path -> !path.equals(messagesPath))
+						.forEach(path -> {
+							try {
+								Files.deleteIfExists(path);
+							} catch (IOException e) {
+								throw new IllegalStateException("Failed to delete path: " + path, e);
+							}
+						});
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException("Failed to reset messages directory: " + messagesPath, e);
+		}
 	}
 }

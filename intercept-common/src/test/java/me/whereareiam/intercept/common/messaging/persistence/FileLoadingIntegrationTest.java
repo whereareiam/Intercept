@@ -1,16 +1,15 @@
-package me.whereareiam.intercept.common.messaging.integration;
+package me.whereareiam.intercept.common.messaging.persistence;
 
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileData;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileLoader;
-import me.whereareiam.intercept.common.messaging.loader.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.registry.Registry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ class FileLoadingIntegrationTest {
 		Config.setReader(Config.reader(Format.YAML));
 
 		scanner = new MessageFileScanner(Format.YAML);
-		loader = new MessageFileLoader(new TextProcessor(), registry);
+		loader = new DefaultMessageFileLoader(registry, new TextProcessor());
 
 		// Get path to test resources
 		messagesRoot = Paths.get(getClass().getResource("/messages").toURI());
@@ -64,7 +63,7 @@ class FileLoadingIntegrationTest {
 		Path colorsFile = messagesRoot.resolve("common/colors.yml");
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile);
 
-		MessageFileData data = Config.load(colorsFile, MessageFileData.class);
+		MessageDocument data = Config.load(colorsFile, MessageDocument.class);
 		loader.loadFromData(keyPrefix, data);
 
 		assertTrue(registry.exists("common.colors.primary"));
@@ -175,7 +174,7 @@ class FileLoadingIntegrationTest {
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
 
 		// Read with Configura - Jackson handles deserialization automatically
-		MessageFileData data = Config.load(file, MessageFileData.class);
+		MessageDocument data = Config.load(file, MessageDocument.class);
 
 		loader.loadFromData(keyPrefix, data);
 	}

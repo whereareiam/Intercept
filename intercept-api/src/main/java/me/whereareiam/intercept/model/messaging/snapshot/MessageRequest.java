@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.model;
+package me.whereareiam.intercept.model.messaging.snapshot;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

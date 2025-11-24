@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.messaging;
 
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -14,14 +16,15 @@ public interface MessageRegistry {
 	 * @param key   the message key
 	 * @param entry the message entry
 	 */
-	void register(String key, MessageEntry entry);
+	void register(String key, CompiledMessageEntry entry);
+
 	/**
 	 * Get a message entry by key.
 	 *
 	 * @param key the message key
 	 * @return the message entry, or null if not found
 	 */
-	MessageEntry get(String key);
+	CompiledMessageEntry get(String key);
 
 	/**
 	 * Get all registered keys.
@@ -51,5 +54,5 @@ public interface MessageRegistry {
 	 *
 	 * @return map of key to entry
 	 */
-	Map<String, MessageEntry> getAllEntries();
+	Map<String, CompiledMessageEntry> getAllEntries();
 }

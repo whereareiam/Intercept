@@ -1,8 +1,8 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
 import me.whereareiam.intercept.common.util.MessageTags;
-import me.whereareiam.intercept.messaging.MessageEntry;
 import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -45,7 +45,7 @@ public class TemplateProcessor {
 			String templateName = matcher.group(1);
 			String paramsString = matcher.group(2);
 
-			MessageEntry entry = registry.get(templateName);
+			CompiledMessageEntry entry = registry.get(templateName);
 			if (entry == null) {
 				// Keep original if template not found
 				matcher.appendReplacement(result, Matcher.quoteReplacement(matcher.group(0)));

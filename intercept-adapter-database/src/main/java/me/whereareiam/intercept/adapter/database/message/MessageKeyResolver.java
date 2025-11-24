@@ -31,12 +31,10 @@ public final class MessageKeyResolver {
 	 * @return the entry key (e.g., "no-permission")
 	 */
 	public static String extractEntryKey(String fullKey, String keyPrefix) {
-		if (keyPrefix.isEmpty()) {
-			return fullKey;
-		}
-		if (fullKey.startsWith(keyPrefix + ".")) {
+		if (keyPrefix.isEmpty()) return fullKey;
+		if (fullKey.startsWith(keyPrefix + "."))
 			return fullKey.substring(keyPrefix.length() + 1);
-		}
+
 		return fullKey;
 	}
 }

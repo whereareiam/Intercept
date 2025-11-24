@@ -39,6 +39,7 @@ subprojects {
         "testImplementation"(rootProject.libs.configura)
         "testImplementation"(rootProject.libs.commandant)
         "testImplementation"(rootProject.libs.keystone)
+        "testImplementation"(rootProject.libs.dialectica)
         "testImplementation"(rootProject.libs.guice)
         "testImplementation"(rootProject.libs.bundles.adventure)
         "testImplementation"(rootProject.libs.bundles.testing)

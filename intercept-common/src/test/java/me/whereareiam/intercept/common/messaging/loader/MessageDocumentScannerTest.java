@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.common.messaging.loader;
 
 import me.whereareiam.configura.type.Format;
+import me.whereareiam.intercept.common.messaging.persistence.MessageFileScanner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -13,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MessageFileScannerTest {
+class MessageDocumentScannerTest {
 	private MessageFileScanner yamlScanner;
 	private MessageFileScanner jsonScanner;
 

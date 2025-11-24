@@ -7,7 +7,7 @@ import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.command.CommandService;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
-import me.whereareiam.intercept.common.messaging.MessagesService;
+import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
 import me.whereareiam.intercept.common.updater.UpdateScheduler;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
@@ -49,7 +49,7 @@ public class Intercept implements EventListener {
 		injector.getInstance(ListenerRegistrar.class).registerListeners();
 
 		// Initialize messages system
-		injector.getInstance(MessagesService.class).initialize();
+		injector.getInstance(MessageLifecycleService.class).initialize();
 
 		// Initialize interceptors (providers registered by platform classes)
 		injector.getInstance(InterceptorService.class).initialize();

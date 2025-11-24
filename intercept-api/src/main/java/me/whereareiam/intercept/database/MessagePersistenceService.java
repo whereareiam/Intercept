@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.database;
 
-import me.whereareiam.intercept.messaging.MessageSnapshot;
+import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 
 /**
  * Service for persisting and retrieving messages from the database.
