@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.adapter.database;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
@@ -34,20 +35,20 @@ import javax.sql.DataSource;
 @Getter
 @Singleton
 public class DefaultDatabaseService implements DatabaseService, EventListener {
+	private final Provider<MessagePersistenceService> messagePersistenceServiceProvider;
 	private final Persistence persistence;
-	private final MessagePersistenceService messagePersistenceService;
 	private boolean initialized = false;
 	private DataSource dataSource;
 	private Jdbi jdbi;
 
 	@Inject
 	public DefaultDatabaseService(
+			Provider<MessagePersistenceService> messagePersistenceServiceProvider,
 			Persistence persistence,
-			EventManager eventManager,
-			MessagePersistenceService messagePersistenceService
+			EventManager eventManager
 	) {
+		this.messagePersistenceServiceProvider = messagePersistenceServiceProvider;
 		this.persistence = persistence;
-		this.messagePersistenceService = messagePersistenceService;
 		eventManager.register(this);
 	}
 
@@ -90,7 +91,7 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 
 		try {
 			Logger.info("Auto-downloading messages from database...");
-			messagePersistenceService.downloadMessages();
+			messagePersistenceServiceProvider.get().downloadMessages();
 			Logger.info("Messages downloaded from database into storage");
 		} catch (Exception e) {
 			Logger.warn("Failed to auto-download messages: %s", e.getMessage());
