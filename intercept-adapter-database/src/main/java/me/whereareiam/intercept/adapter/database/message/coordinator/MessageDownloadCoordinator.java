@@ -13,6 +13,7 @@ import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.intercept.util.LocaleUtil;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -117,7 +118,7 @@ public class MessageDownloadCoordinator {
 		Map<String, Object> documentTranslations = new LinkedHashMap<>();
 		for (Map.Entry<Locale, String> entry : translations.entrySet()) {
 			Locale locale = entry.getKey();
-			String localeKey = locale != null ? locale.toLanguageTag() : "default";
+			String localeKey = locale != null ? LocaleUtil.formatLocale(locale) : "default";
 			documentTranslations.put(localeKey, entry.getValue());
 		}
 
