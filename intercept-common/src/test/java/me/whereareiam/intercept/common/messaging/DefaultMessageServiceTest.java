@@ -24,9 +24,10 @@ class DefaultMessageServiceTest {
 	@BeforeEach
 	void setUp() {
 		Registry<Reloadable> mockRegistry = mock(Registry.class);
+		Registry<Reloadable> reloadableRegistry = mock(Registry.class);
 		registry = new DefaultMessageRegistry(mockRegistry);
 		Settings settings = new SettingsTemplate().supply(new Settings());
-		service = new DefaultMessageService(registry, settings);
+		service = new DefaultMessageService(registry, settings, reloadableRegistry);
 	}
 
 	@Test
@@ -136,5 +137,19 @@ class DefaultMessageServiceTest {
 
 		String result = service.resolve(request);
 		assertEquals("Hello, Alice!", result);
+	}
+
+	@Test
+	void shouldUseUpdatedMessageAfterReload() {
+		registry.register("cached", new CompiledMessageEntry(MessageType.MESSAGE, "Original"));
+
+		assertEquals("Original", service.resolve("cached", Locale.US));
+
+		registry.register("cached", new CompiledMessageEntry(MessageType.MESSAGE, "Updated"));
+		assertEquals("Original", service.resolve("cached", Locale.US), "Cache should still return original text");
+
+		((DefaultMessageService) service).reload();
+
+		assertEquals("Updated", service.resolve("cached", Locale.US), "Reload should clear cache so updated text is used");
 	}
 }

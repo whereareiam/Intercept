@@ -2,6 +2,7 @@ package me.whereareiam.intercept.common.messaging.persistence;
 
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.type.Format;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
@@ -36,9 +37,11 @@ class FileLoadingIntegrationTest {
 
 	@BeforeEach
 	void setUp() throws URISyntaxException {
-		registry = new DefaultMessageRegistry(mock(Registry.class));
+		Registry<Reloadable> registryMock = mock(Registry.class);
+		registry = new DefaultMessageRegistry(registryMock);
 		Settings settings = new SettingsTemplate().supply(new Settings());
-		service = new DefaultMessageService(registry, settings);
+		Registry<Reloadable> reloadables = mock(Registry.class);
+		service = new DefaultMessageService(registry, settings, reloadables);
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));

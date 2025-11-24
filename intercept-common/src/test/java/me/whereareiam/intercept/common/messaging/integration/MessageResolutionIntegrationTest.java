@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.messaging.integration;
 
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.DefaultMessageService;
@@ -26,9 +27,11 @@ class MessageResolutionIntegrationTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry(mock(Registry.class));
+		Registry<Reloadable> registryMock = mock(Registry.class);
+		registry = new DefaultMessageRegistry(registryMock);
 		Settings settings = new SettingsTemplate().supply(new Settings());
-		service = new DefaultMessageService(registry, settings);
+		Registry<Reloadable> reloadables = mock(Registry.class);
+		service = new DefaultMessageService(registry, settings, reloadables);
 	}
 
 	@Test

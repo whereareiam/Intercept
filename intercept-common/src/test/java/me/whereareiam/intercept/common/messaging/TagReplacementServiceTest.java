@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Provider;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
@@ -37,10 +38,12 @@ class TagReplacementServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry(mock(Registry.class));
+		Registry<Reloadable> registryMock = mock(Registry.class);
+		registry = new DefaultMessageRegistry(registryMock);
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		messages = new MessagesTemplate().supply(new Messages());
-		MessageService messageService = new DefaultMessageService(registry, settings);
+		Registry<Reloadable> serviceReloadables = mock(Registry.class);
+		MessageService messageService = new DefaultMessageService(registry, settings, serviceReloadables);
 
 		// Initialize Serializer for tests
 		SerializerOptions options = SerializerOptions.builder()

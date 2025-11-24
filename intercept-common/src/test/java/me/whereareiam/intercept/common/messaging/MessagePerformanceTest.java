@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.messaging;
 
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
@@ -28,7 +29,8 @@ class MessagePerformanceTest {
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry(mock(Registry.class));
+		Registry<Reloadable> registryMock = mock(Registry.class);
+		registry = new DefaultMessageRegistry(registryMock);
 
 		// Create settings with cache enabled
 		Settings settings = new Settings();
@@ -48,7 +50,8 @@ class MessagePerformanceTest {
 
 		settings.setPerformance(performance);
 
-		service = new DefaultMessageService(registry, settings);
+		Registry<Reloadable> reloadables = mock(Registry.class);
+		service = new DefaultMessageService(registry, settings, reloadables);
 	}
 
 	@Test

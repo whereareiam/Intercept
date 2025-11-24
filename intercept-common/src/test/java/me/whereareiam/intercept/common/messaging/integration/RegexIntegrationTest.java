@@ -76,7 +76,8 @@ class RegexIntegrationTest {
 		loadTestMessages();
 
 		// Create message service
-		MessageService messageService = new DefaultMessageService(registry, settings);
+		Registry<Reloadable> serviceReloadables = mock(Registry.class);
+		MessageService messageService = new DefaultMessageService(registry, settings, serviceReloadables);
 
 		// Create regex matching service with Provider
 		Provider<Settings> settingsProvider = () -> settings;
