@@ -2,6 +2,7 @@ package me.whereareiam.intercept.common.messaging;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.messaging.cache.CacheKey;
 import me.whereareiam.intercept.common.messaging.cache.CacheLevel;
 import me.whereareiam.intercept.common.messaging.cache.CacheStrategy;
@@ -15,6 +16,7 @@ import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageRequest;
+import me.whereareiam.intercept.registry.Registry;
 
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +27,7 @@ import java.util.Set;
  * Orchestrates the message resolution pipeline with caching support.
  */
 @Singleton
-public class DefaultMessageService implements MessageService {
+public class DefaultMessageService implements MessageService, Reloadable {
 	private final MessageRegistry registry;
 	private final TemplateProcessor templateProcessor;
 	private final MessageReferenceProcessor referenceProcessor;
@@ -38,7 +40,8 @@ public class DefaultMessageService implements MessageService {
 	@Inject
 	public DefaultMessageService(
 			MessageRegistry registry,
-			Settings settings
+			Settings settings,
+			Registry<Reloadable> reloadableRegistry
 	) {
 		this.registry = registry;
 		this.settings = settings;
@@ -56,6 +59,8 @@ public class DefaultMessageService implements MessageService {
 				cacheConfig.getSemiStaticExpireMinutes(),
 				cacheConfig.getDynamicExpireMinutes()
 		);
+
+		reloadableRegistry.register(this);
 	}
 
 	@Override
@@ -127,5 +132,10 @@ public class DefaultMessageService implements MessageService {
 	public Set<Locale> getAvailableLocales(String key) {
 		CompiledMessageEntry entry = registry.get(key);
 		return entry != null ? entry.getLocales() : Set.of();
+	}
+
+	@Override
+	public void reload() {
+		cache.clear();
 	}
 }
