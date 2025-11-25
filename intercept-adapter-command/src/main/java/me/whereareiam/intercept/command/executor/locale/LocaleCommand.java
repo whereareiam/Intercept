@@ -34,9 +34,9 @@ public class LocaleCommand extends AbstractLocaleCommand {
 
 	@Definition("locale-self")
 	@Command("locale <locale>")
-	public void handle(
+	public void command(
 			@NotNull Actor sender,
-			@Argument("locale") @NotNull String localeInput
+			@Argument(value = "locale", suggestions = "locales") @NotNull String localeInput
 	) {
 		Messages.Commands.LocaleCommand localeMessages = getLocaleMessages();
 

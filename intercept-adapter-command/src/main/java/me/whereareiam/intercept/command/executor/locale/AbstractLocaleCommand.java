@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.command.executor.locale;
 
 import com.google.inject.Provider;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.util.LocaleUtil;
@@ -11,10 +12,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
+@RequiredArgsConstructor
 public abstract class AbstractLocaleCommand {
 	protected final Provider<Messages> messagesProvider;
-
-	protected AbstractLocaleCommand(Provider<Messages> messagesProvider) {this.messagesProvider = messagesProvider;}
 
 	@NotNull
 	protected Messages.Commands.LocaleCommand getLocaleMessages() {

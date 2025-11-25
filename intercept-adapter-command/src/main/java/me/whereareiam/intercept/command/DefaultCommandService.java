@@ -12,12 +12,15 @@ import me.whereareiam.intercept.CommandService;
 import me.whereareiam.intercept.command.executor.*;
 import me.whereareiam.intercept.command.executor.locale.LocaleCommand;
 import me.whereareiam.intercept.command.executor.locale.LocaleTargetCommand;
+import me.whereareiam.intercept.command.suggestion.LocaleSuggestionProvider;
+import me.whereareiam.intercept.command.suggestion.PlayerSuggestionProvider;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.Player;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.annotations.AnnotationParser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -55,6 +58,10 @@ public class DefaultCommandService implements CommandService {
 	public void initialize() {
 		CommandManager<Actor> commandManager = commandManagerProvider.get();
 		Function<String, CommandDefinition> definitionLookup = this::lookupDefinition;
+		
+		// Register suggestion providers first using the real command manager
+		registerSuggestionProviders(commandManager);
+		
 		CommandRegistrar<Actor> registrar = Commandant.createAnnotationRegistrar(
 				commandManager,
 				this::resolveCooldownKey,
@@ -85,6 +92,18 @@ public class DefaultCommandService implements CommandService {
 			return "intercept";
 
 		return definition.getAliases().getFirst();
+	}
+
+	/**
+	 * Registers suggestion providers using Cloud's AnnotationParser with the real command manager.
+	 * This ensures suggestions are registered before commands that reference them.
+	 */
+	private void registerSuggestionProviders(@NotNull CommandManager<Actor> commandManager) {
+		AnnotationParser<Actor> parser = new AnnotationParser<>(commandManager, Actor.class);
+		parser.parse(
+				injector.getInstance(PlayerSuggestionProvider.class),
+				injector.getInstance(LocaleSuggestionProvider.class)
+		);
 	}
 
 	private void registerCommands(@NotNull CommandRegistrar<Actor> registrar) {

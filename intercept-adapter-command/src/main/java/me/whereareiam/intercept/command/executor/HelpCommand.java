@@ -48,7 +48,7 @@ public class HelpCommand implements Reloadable {
 	}
 
 	@Definition("help")
-	@Command("help [page]")
+	@Command("intercept help [page]")
 	public void command(@NotNull Actor sender, @Argument("page") @Default("1") @Range(min = "1") int page) {
 		// Get help message
 		String helpMessage = getHelpBuilder().build(getFilteredCommands(sender), page);

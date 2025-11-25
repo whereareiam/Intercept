@@ -3,6 +3,7 @@ package me.whereareiam.intercept.command.executor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
@@ -22,18 +23,13 @@ import java.util.UUID;
  * When inspection mode is enabled, messages become clickable and show regex patterns.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class InspectCommand {
 	private final Provider<Messages> messagesProvider;
 	private final PlayerRegistry playerRegistry;
 
-	@Inject
-	public InspectCommand(Provider<Messages> messagesProvider, PlayerRegistry playerRegistry) {
-		this.messagesProvider = messagesProvider;
-		this.playerRegistry = playerRegistry;
-	}
-
 	@Definition("inspect")
-	@Command("inspect")
+	@Command("intercept inspect")
 	public void command(@NotNull Actor sender) {
 		InterceptPlayer interceptPlayer = getInterceptPlayer(sender);
 		if (interceptPlayer == null) return;

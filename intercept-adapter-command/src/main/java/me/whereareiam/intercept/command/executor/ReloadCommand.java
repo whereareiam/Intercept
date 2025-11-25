@@ -35,7 +35,7 @@ public class ReloadCommand {
 	}
 
 	@Definition("reload")
-	@Command("reload")
+	@Command("intercept reload")
 	public void command(@NotNull Actor sender) {
 		Messages.Commands.Reload reload = messagesProvider.get().getCommands().getReload();
 

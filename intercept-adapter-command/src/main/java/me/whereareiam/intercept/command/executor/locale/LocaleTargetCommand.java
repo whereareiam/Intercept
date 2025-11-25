@@ -34,11 +34,11 @@ public class LocaleTargetCommand extends AbstractLocaleCommand {
 	}
 
 	@Definition("locale-target")
-	@Command("{command} locale <player> <locale>")
+	@Command("intercept locale <player> <locale>")
 	public void command(
 			@NotNull Actor sender,
-			@Argument("player") @NotNull String targetName,
-			@Argument("locale") @NotNull String localeInput
+			@Argument(value = "player", suggestions = "players") @NotNull String targetName,
+			@Argument(value = "locale", suggestions = "locales") @NotNull String localeInput
 	) {
 		Messages.Commands.LocaleCommand localeMessages = getLocaleMessages();
 

@@ -3,6 +3,7 @@ package me.whereareiam.intercept.command.executor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.database.MessagePersistenceService;
@@ -23,20 +24,14 @@ import java.util.Map;
  * Only available when database is enabled.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class DownloadDatabaseCommand {
 	private final Provider<Messages> messagesProvider;
 	private final MessagePersistenceService persistenceService;
 	private final MessageDataService messageDataService;
 
-	@Inject
-	public DownloadDatabaseCommand(Provider<Messages> messagesProvider, MessagePersistenceService persistenceService, MessageDataService messageDataService) {
-		this.messagesProvider = messagesProvider;
-		this.persistenceService = persistenceService;
-		this.messageDataService = messageDataService;
-	}
-
 	@Definition("database-download")
-	@Command("database download")
+	@Command("intercept database download")
 	public void command(@NotNull Actor sender) {
 		Messages.Commands.Database.Download download = messagesProvider.get()
 				.getCommands()
