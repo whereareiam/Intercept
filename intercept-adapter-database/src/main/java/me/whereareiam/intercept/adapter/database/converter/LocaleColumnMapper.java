@@ -27,3 +27,5 @@ public class LocaleColumnMapper implements ColumnMapper<Locale> {
 	}
 }
 
+
+

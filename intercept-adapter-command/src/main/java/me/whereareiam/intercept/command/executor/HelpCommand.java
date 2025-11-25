@@ -3,10 +3,9 @@ package me.whereareiam.intercept.command.executor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import me.whereareiam.commandant.Command;
-import me.whereareiam.commandant.CommandRegistrar;
 import me.whereareiam.commandant.Help;
 import me.whereareiam.commandant.Pagination;
+import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.commandant.builder.HelpBuilder;
 import me.whereareiam.commandant.model.CommandDefinition;
 import me.whereareiam.intercept.Reloadable;
@@ -17,19 +16,21 @@ import me.whereareiam.intercept.registry.Registry;
 import me.whereareiam.keystone.Actor;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
-import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.annotation.specifier.Range;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Default;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class HelpCommand implements Command<Actor>, Reloadable {
-	private static final String COMMAND_NAME = "help";
+public class HelpCommand implements Reloadable {
 	private final Provider<Commands> commandsProvider;
 	private final Provider<Messages> messagesProvider;
-	private final Provider<CommandRegistrar<Actor>> commandRegistrarProvider;
+	private final Provider<CommandManager<Actor>> commandManagerProvider;
 
 	private HelpBuilder<Actor> helpBuilder;
 
@@ -37,41 +38,18 @@ public class HelpCommand implements Command<Actor>, Reloadable {
 	public HelpCommand(
 			@NotNull Provider<Commands> commandsProvider,
 			@NotNull Provider<Messages> messagesProvider,
-			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
+			@NotNull Provider<CommandManager<Actor>> commandManagerProvider,
 			@NotNull Registry<Reloadable> reloadableRegistry
 	) {
 		this.commandsProvider = commandsProvider;
 		this.messagesProvider = messagesProvider;
-		this.commandRegistrarProvider = commandRegistrarProvider;
+		this.commandManagerProvider = commandManagerProvider;
 		reloadableRegistry.register(this);
 	}
 
-	@Override
-	@NotNull
-	public CommandDefinition getDefinition() {
-		Commands commands = commandsProvider.get();
-		CommandDefinition definition = commands.getCommands().get(COMMAND_NAME);
-		if (definition == null)
-			return CommandDefinition.builder()
-					.enabled(false)
-					.build();
-
-		return definition;
-	}
-
-	@Override
-	@NotNull
-	public Consumer<CommandContext<Actor>> getHandler() {
-		return this::handleCommand;
-	}
-
-	private void handleCommand(@NotNull CommandContext<Actor> context) {
-		Actor sender = context.sender();
-
-		// Get page argument (default to 1 if not provided)
-		int page = context.getOrDefault("page", 1);
-		if (page < 1) page = 1;
-
+	@Definition("help")
+	@Command("help [page]")
+	public void command(@NotNull Actor sender, @Argument("page") @Default("1") @Range(min = "1") int page) {
 		// Get help message
 		String helpMessage = getHelpBuilder().build(getFilteredCommands(sender), page);
 
@@ -92,11 +70,26 @@ public class HelpCommand implements Command<Actor>, Reloadable {
 
 			helpBuilder = Help.create(
 					messages.getCommands().getHelp(),
-					messages.getCommands().getArguments(),
-					Pagination.create(messages.getCommands().getPagination())
+					collectArgumentDescriptions(),
+					Pagination.create(messages.getCommands().getPagination()),
+					messages.getCommands().getHelp().getCommandsPerPage(),
+					true
 			);
 		}
 		return helpBuilder;
+	}
+
+	@NotNull
+	private Map<String, String> collectArgumentDescriptions() {
+		return commandsProvider.get().getCommands().values().stream()
+				.map(CommandDefinition::getArguments)
+				.filter(map -> map != null && !map.isEmpty())
+				.flatMap(map -> map.entrySet().stream())
+				.collect(Collectors.toMap(
+						Map.Entry::getKey,
+						Map.Entry::getValue,
+						(existing, replacement) -> replacement
+				));
 	}
 
 	/**
@@ -107,7 +100,7 @@ public class HelpCommand implements Command<Actor>, Reloadable {
 	 */
 	@NotNull
 	private Collection<org.incendo.cloud.Command<Actor>> getFilteredCommands(@NotNull Actor sender) {
-		CommandManager<Actor> commandManager = commandRegistrarProvider.get().getCommandManager();
+		CommandManager<Actor> commandManager = commandManagerProvider.get();
 
 		return commandManager.commands()
 				.stream()

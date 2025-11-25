@@ -3,58 +3,38 @@ package me.whereareiam.intercept.command.executor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import lombok.RequiredArgsConstructor;
-import me.whereareiam.commandant.Command;
-import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.intercept.Serializer;
-import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.Player;
 import net.kyori.adventure.text.Component;
-import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.annotations.Command;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * Command that toggles inspection mode for a user.
  * When inspection mode is enabled, messages become clickable and show regex patterns.
  */
 @Singleton
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class InspectCommand implements Command<Actor> {
-	private static final String COMMAND_NAME = "inspect";
-	private final Provider<Commands> commandsProvider;
+public class InspectCommand {
 	private final Provider<Messages> messagesProvider;
 	private final PlayerRegistry playerRegistry;
 
-	@Override
-	@NotNull
-	public CommandDefinition getDefinition() {
-		Commands commands = commandsProvider.get();
-		CommandDefinition definition = commands.getCommands().get(COMMAND_NAME);
-		if (definition == null)
-			return CommandDefinition.builder()
-					.enabled(false)
-					.build();
-
-		return definition;
+	@Inject
+	public InspectCommand(Provider<Messages> messagesProvider, PlayerRegistry playerRegistry) {
+		this.messagesProvider = messagesProvider;
+		this.playerRegistry = playerRegistry;
 	}
 
-	@Override
-	@NotNull
-	public Consumer<CommandContext<Actor>> getHandler() {
-		return this::handleCommand;
-	}
-
-	private void handleCommand(@NotNull CommandContext<Actor> context) {
-		Actor sender = context.sender();
-
+	@Definition("inspect")
+	@Command("inspect")
+	public void command(@NotNull Actor sender) {
 		InterceptPlayer interceptPlayer = getInterceptPlayer(sender);
 		if (interceptPlayer == null) return;
 

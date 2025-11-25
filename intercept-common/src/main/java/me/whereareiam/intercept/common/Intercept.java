@@ -2,9 +2,9 @@ package me.whereareiam.intercept.common;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import me.whereareiam.intercept.CommandService;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.PlatformInteractor;
-import me.whereareiam.intercept.command.CommandService;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
 import me.whereareiam.intercept.common.messaging.MessageLifecycleService;

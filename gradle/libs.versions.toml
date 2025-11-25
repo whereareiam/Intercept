@@ -9,10 +9,10 @@ lombok = "1.18.42"
 
 # general
 guice = "7.0.0"
-configura = "dev-b1bb54d"
+configura = "dev-a76adc6"
 attache = "dev-5fad19f"
 keystone = "dev-697f401"
-commandant = "dev-57224b9"
+commandant = "dev-c86c2c9"
 dialectica = "dev-74ce2b6"
 junit = "6.0.0"
 mockito = "5.20.0"
@@ -69,6 +69,7 @@ testcontainers-mariadb = { group = "org.testcontainers", name = "mariadb", versi
 
 # cloud
 cloud-core = { group = "org.incendo", name = "cloud-core", version.ref = "cloud-core" }
+cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud-core" }
 cloud-cooldowns = { group = "org.incendo", name = "cloud-processors-cooldown", version.ref = "cloud-cooldown" }
 cloud-paper = { group = "org.incendo", name = "cloud-paper", version.ref = "cloud-paper" }
 cloud-minecraft-extras = { group = "org.incendo", name = "cloud-minecraft-extras", version.ref = "cloud-minecraft-extras" }

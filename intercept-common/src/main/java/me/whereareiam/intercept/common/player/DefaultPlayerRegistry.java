@@ -9,6 +9,7 @@ import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +37,15 @@ public class DefaultPlayerRegistry implements PlayerRegistry {
 	}
 
 	@Override
+	@NotNull
+	public Optional<InterceptPlayer> getPlayerData(@NotNull String username) {
+		return playerDataMap.values()
+				.stream()
+				.filter(player -> player.getUsername().equalsIgnoreCase(username))
+				.findFirst();
+	}
+
+	@Override
 	public void removePlayerData(@NotNull UUID playerId) {
 		InterceptPlayer removed = playerDataMap.remove(playerId);
 
@@ -60,8 +70,15 @@ public class DefaultPlayerRegistry implements PlayerRegistry {
 
 			// Preserve the canonical inspection state when new wrappers are created.
 			player.setInspectionMode(stored.isInspectionMode());
+			player.setLocale(stored.getLocale());
 			return player;
 		});
+	}
+
+	@Override
+	@NotNull
+	public Collection<InterceptPlayer> getPlayers() {
+		return playerDataMap.values();
 	}
 }
 

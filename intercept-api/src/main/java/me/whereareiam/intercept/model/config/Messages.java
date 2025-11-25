@@ -56,13 +56,6 @@ public class Messages {
 		 */
 		private HelpMessages help;
 		/**
-		 * Custom argument display names (project-specific)
-		 * Key: argument name (e.g., "page")
-		 * Value: display name (e.g., "page number")
-		 */
-		private Map<String, String> arguments;
-
-		/**
 		 * Reload command messages
 		 */
 		private Reload reload;
@@ -71,6 +64,11 @@ public class Messages {
 		 * Inspect command messages
 		 */
 		private Inspect inspect;
+
+		/**
+		 * Locale command messages
+		 */
+		private LocaleCommand locale;
 
 		/**
 		 * Database command messages
@@ -159,8 +157,48 @@ public class Messages {
 		}
 
 		/**
-		 * Configuration for database command messages.
+		 * Configuration for locale command messages.
 		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class LocaleCommand {
+			/**
+			 * Message shown when the executor is not a player.
+			 */
+			private String playerOnly;
+
+			/**
+			 * Message shown when a locale argument is missing.
+			 */
+			private String missingLocaleArgument;
+
+			/**
+			 * Message shown when target-specific arguments are missing.
+			 */
+			private String missingTargetArguments;
+
+			/**
+			 * Message shown when the supplied locale cannot be parsed.
+			 */
+			private String invalidLocale;
+
+			/**
+			 * Message shown when a target player cannot be found.
+			 */
+			private String playerNotFound;
+
+			/**
+			 * Message shown after a player updates their own locale.
+			 */
+			private String selfUpdated;
+
+			/**
+			 * Message shown after updating someone else's locale.
+			 */
+			private String targetUpdated;
+		}
+
 		@Getter
 		@Setter
 		@ToString

@@ -4,87 +4,111 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import me.whereareiam.commandant.Command;
-import me.whereareiam.commandant.CommandRegistrar;
 import me.whereareiam.commandant.Commandant;
 import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.commandant.model.message.ExceptionMessages;
+import me.whereareiam.commandant.registration.CommandRegistrar;
+import me.whereareiam.intercept.CommandService;
 import me.whereareiam.intercept.command.executor.*;
+import me.whereareiam.intercept.command.executor.locale.LocaleCommand;
+import me.whereareiam.intercept.command.executor.locale.LocaleTargetCommand;
+import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
+import me.whereareiam.keystone.Player;
 import me.whereareiam.keystone.serializer.SerializerEngine;
+import org.incendo.cloud.CommandManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.UUID;
+import java.util.function.Function;
 
 /**
- * Implementation of CommandService for managing and registering commands.
+ * Implementation of DefaultCommandService for managing and registering commands.
  * Initializes all commands at plugin startup and registers exception handlers.
  */
 @Singleton
 public class DefaultCommandService implements CommandService {
 	private final SerializerEngine serializer;
-	private final CommandRegistrar<Actor> registrar;
 	private final Provider<Messages> messagesProvider;
+	private final Provider<Commands> commandsProvider;
+	private final Provider<CommandManager<Actor>> commandManagerProvider;
 	private final Injector injector;
-
-	@SuppressWarnings("unchecked")
-	private final Class<Command<Actor>>[] commands = new Class[]{
-			HelpCommand.class,
-			ReloadCommand.class,
-			InspectCommand.class,
-			UploadDatabaseCommand.class,
-			DownloadDatabaseCommand.class
-	};
 
 	@Inject
 	public DefaultCommandService(
-			@NotNull Provider<CommandRegistrar<Actor>> commandRegistrarProvider,
 			@NotNull SerializerEngine serializer,
 			@NotNull Provider<Messages> messagesProvider,
+			@NotNull Provider<Commands> commandsProvider,
+			@NotNull Provider<CommandManager<Actor>> commandManagerProvider,
 			@NotNull Injector injector
 	) {
 		this.messagesProvider = messagesProvider;
+		this.commandsProvider = commandsProvider;
 		this.serializer = serializer;
+		this.commandManagerProvider = commandManagerProvider;
 		this.injector = injector;
 
-		registrar = commandRegistrarProvider.get();
-		registerExceptionHandlers(registrar);
 		initialize();
 	}
 
 	public void initialize() {
-		// Register MainCommand as root command
-		MainCommand mainCommand = injector.getInstance(MainCommand.class);
-		CommandDefinition primary = mainCommand.getDefinition();
+		CommandManager<Actor> commandManager = commandManagerProvider.get();
+		Function<String, CommandDefinition> definitionLookup = this::lookupDefinition;
+		CommandRegistrar<Actor> registrar = Commandant.createAnnotationRegistrar(
+				commandManager,
+				this::resolveCooldownKey,
+				Actor.class,
+				definitionLookup
+		);
 
-		if (primary.isEnabled()) {
-			registrar.registerCommand(primary, mainCommand.getHandler());
+		registrar.setRootCommand(resolveRootCommand(definitionLookup));
+		registerCommands(registrar);
+		registerExceptionHandlers(commandManager);
+	}
 
-			// Set root command name from first alias
-			List<String> aliases = primary.getAliases();
-			if (aliases != null && !aliases.isEmpty())
-				registrar.setRootCommand(aliases.getFirst());
+	private CommandDefinition lookupDefinition(@NotNull String key) {
+		Commands commands = commandsProvider.get();
+		return commands.getCommands().get(key);
+	}
+
+	private @NotNull UUID resolveCooldownKey(@NotNull Actor actor) {
+		if (actor instanceof Player player) {
+			return player.getUniqueId();
 		}
-
-		// Register all other commands
-		Stream.of(commands)
-				.map(injector::getInstance)
-				.forEach(this::register);
+		return UUID.nameUUIDFromBytes(actor.getClass().getName().getBytes());
 	}
 
-	@Override
-	public void register(@NotNull Command<Actor> command) {
-		CommandDefinition definition = command.getDefinition();
-		if (definition.isEnabled())
-			registrar.registerCommand(definition, command.getHandler());
+	private @NotNull String resolveRootCommand(@NotNull Function<String, CommandDefinition> definitionLookup) {
+		CommandDefinition definition = definitionLookup.apply("main");
+		if (definition == null || definition.getAliases() == null || definition.getAliases().isEmpty())
+			return "intercept";
+
+		return definition.getAliases().getFirst();
 	}
 
-	private void registerExceptionHandlers(@NotNull CommandRegistrar<Actor> registrar) {
+	private void registerCommands(@NotNull CommandRegistrar<Actor> registrar) {
+		registrar.register(
+				injector.getInstance(MainCommand.class),
+				injector.getInstance(HelpCommand.class),
+				injector.getInstance(ReloadCommand.class),
+				injector.getInstance(InspectCommand.class),
+				injector.getInstance(LocaleCommand.class),
+				injector.getInstance(LocaleTargetCommand.class),
+				injector.getInstance(UploadDatabaseCommand.class),
+				injector.getInstance(DownloadDatabaseCommand.class)
+		);
+	}
+
+	private void registerExceptionHandlers(@NotNull CommandManager<Actor> commandManager) {
+		ExceptionMessages exceptionMessages = messagesProvider.get().getCommands() != null
+				? messagesProvider.get().getCommands().getExceptions()
+				: new ExceptionMessages();
+
 		Commandant.registerExceptionHandler(
-				messagesProvider.get().getCommands().getExceptions(),
+				exceptionMessages,
 				serializer,
-				registrar.getCommandManager(),
+				commandManager,
 				Actor::getAudience
 		);
 	}

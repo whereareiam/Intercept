@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,9 +53,51 @@ class DefaultPlayerRegistryTest {
 		verifyNoMoreInteractions(eventManager);
 	}
 
+	@Test
+	void syncPlayerDataPreservesLocaleAcrossWrappers() {
+		UUID playerId = UUID.randomUUID();
+
+		TestInterceptPlayer initialWrapper = new TestInterceptPlayer(playerId);
+		initialWrapper.setLocale(Locale.FRANCE);
+
+		TestInterceptPlayer newWrapper = new TestInterceptPlayer(playerId);
+
+		assertEquals(Locale.FRANCE, newWrapper.getLocale());
+		assertSame(newWrapper, playerRegistry.getPlayerData(playerId).orElseThrow());
+	}
+
+	@Test
+	void getPlayerDataByUsernameIsCaseInsensitive() {
+		UUID playerId = UUID.randomUUID();
+		String username = "TestUser";
+
+		new TestInterceptPlayer(playerId, username);
+
+		Optional<InterceptPlayer> found = playerRegistry.getPlayerData("testuser");
+
+		assertTrue(found.isPresent());
+		assertEquals(username, found.orElseThrow().getUsername());
+	}
+
+	@Test
+	void getPlayersReturnsAllEntries() {
+		UUID first = UUID.randomUUID();
+		UUID second = UUID.randomUUID();
+
+		TestInterceptPlayer playerOne = new TestInterceptPlayer(first);
+		TestInterceptPlayer playerTwo = new TestInterceptPlayer(second);
+
+		assertTrue(playerRegistry.getPlayers().contains(playerOne));
+		assertTrue(playerRegistry.getPlayers().contains(playerTwo));
+	}
+
 	private static final class TestInterceptPlayer extends InterceptPlayer {
 		private TestInterceptPlayer(UUID uniqueId) {
-			super(uniqueId, "Tester", Locale.ENGLISH);
+			this(uniqueId, "Tester");
+		}
+
+		private TestInterceptPlayer(UUID uniqueId, String username) {
+			super(uniqueId, username, Locale.ENGLISH);
 		}
 
 		@Override

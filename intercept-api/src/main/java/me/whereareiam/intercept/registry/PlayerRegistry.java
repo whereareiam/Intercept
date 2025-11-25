@@ -3,6 +3,7 @@ package me.whereareiam.intercept.registry;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +23,16 @@ public interface PlayerRegistry {
 	 */
 	@NotNull
 	Optional<InterceptPlayer> getPlayerData(@NotNull UUID playerId);
+
+	/**
+	 * Gets an InterceptPlayer instance by username if it exists.
+	 * Lookup is case-insensitive and matches the most recent known username.
+	 *
+	 * @param username The player's username
+	 * @return Optional containing the InterceptPlayer if present, empty otherwise
+	 */
+	@NotNull
+	Optional<InterceptPlayer> getPlayerData(@NotNull String username);
 
 	/**
 	 * Removes player data for the given player.
@@ -47,5 +58,13 @@ public interface PlayerRegistry {
 	 * @param player The InterceptPlayer instance to sync
 	 */
 	void syncPlayerData(@NotNull InterceptPlayer player);
+
+	/**
+	 * Returns all stored player entries.
+	 *
+	 * @return collection of players currently tracked by the registry
+	 */
+	@NotNull
+	Collection<InterceptPlayer> getPlayers();
 }
 

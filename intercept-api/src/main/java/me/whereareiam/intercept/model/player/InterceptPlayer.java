@@ -35,8 +35,9 @@ public abstract class InterceptPlayer implements Player {
 	/**
 	 * The player's preferred locale
 	 */
+	@Setter
 	@NotNull
-	protected final Locale locale;
+	protected Locale locale;
 
 	/**
 	 * Whether inspection mode is enabled for this player.

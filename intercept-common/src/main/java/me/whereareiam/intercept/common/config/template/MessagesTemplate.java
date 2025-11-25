@@ -54,7 +54,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 				"{commands}",
 				"{pagination}"
 		));
-		helpMessages.setCommandFormat(" <yellow>/{command}{arguments}</yellow> <dark_gray>- <white>{description}");
+		helpMessages.setCommandFormat("  <yellow>/{command}{arguments}</yellow> <dark_gray>- <white>{description}");
 		helpMessages.setNoCommands("  <red>No commands found</red>");
 		helpMessages.setCommandsPerPage(7);
 
@@ -91,6 +91,17 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		commands.setInspect(inspect);
 
+		// Configure locale command messages
+		Messages.Commands.LocaleCommand locale = new Messages.Commands.LocaleCommand();
+		locale.setPlayerOnly("{prefix}<white>Only players can use this command.</white>");
+		locale.setMissingLocaleArgument("{prefix}<white>Usage:</white> <gray>/locale <locale></gray>");
+		locale.setMissingTargetArguments("{prefix}<white>Usage:</white> <gray>/locale <player> <locale></gray>");
+		locale.setInvalidLocale("{prefix}<white>\"<gray>{locale}</gray>\" is not a valid locale.</white>");
+		locale.setPlayerNotFound("{prefix}<white>Unable to find player <gray>{player}</gray>.</white>");
+		locale.setSelfUpdated("{prefix}<white>Your preferred locale is now <green>{locale}</green>.</white>");
+		locale.setTargetUpdated("{prefix}<white>Set <green>{player}</green>'s locale to <green>{locale}</green>.</white>");
+		commands.setLocale(locale);
+
 		// Configure database command messages
 		Messages.Commands.Database database = new Messages.Commands.Database();
 
@@ -111,11 +122,6 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		database.setDownload(download);
 
 		commands.setDatabase(database);
-
-		// Configure custom argument names
-		commands.setArguments(Map.of(
-				"page", "page"
-		));
 
 		messages.setCommands(commands);
 

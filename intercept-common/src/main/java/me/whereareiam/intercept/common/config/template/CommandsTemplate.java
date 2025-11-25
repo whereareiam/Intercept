@@ -6,6 +6,7 @@ import me.whereareiam.configura.TemplateProvider;
 import me.whereareiam.intercept.model.config.Commands;
 
 import java.util.List;
+import java.util.Map;
 
 @Singleton
 public class CommandsTemplate implements TemplateProvider<Commands> {
@@ -40,7 +41,7 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 				.enabled(true)
 				.aliases(List.of("reload", "r"))
 				.permission("")
-				.description("Reload all configuration and resources")
+				.description("Reload the plugin configuration")
 				.usage("{command} {alias}")
 				.cooldown(CommandDefinition.Cooldown.builder()
 						.enabled(false)
@@ -52,11 +53,42 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 				.enabled(true)
 				.aliases(List.of("inspect", "i"))
 				.permission("")
-				.description("Toggle inspection mode to get regex patterns")
+				.description("Toggle inspection mode")
 				.usage("{command} {alias}")
 				.cooldown(CommandDefinition.Cooldown.builder()
 						.enabled(false)
 						.build())
+				.build();
+
+		// Locale self command definition (root)
+		CommandDefinition localeSelf = CommandDefinition.builder()
+				.enabled(true)
+				.aliases(List.of("locale", "language", "lang"))
+				.permission("")
+				.description("Change preferred locale")
+				.usage("{alias} <locale>")
+				.cooldown(CommandDefinition.Cooldown.builder()
+						.enabled(false)
+						.build())
+				.arguments(Map.of(
+						"locale", "Locale"
+				))
+				.build();
+
+		// Locale target command definition (root)
+		CommandDefinition localeTarget = CommandDefinition.builder()
+				.enabled(true)
+				.aliases(List.of("locale", "language", "lang"))
+				.permission("intercept.locale.target")
+				.description("Change player's preferred locale")
+				.usage("{command} {alias} <player> <locale>")
+				.cooldown(CommandDefinition.Cooldown.builder()
+						.enabled(false)
+						.build())
+				.arguments(Map.of(
+						"player", "Recipient",
+						"locale", "Locale"
+				))
 				.build();
 
 		// Upload translations command definition (subcommand)
@@ -64,7 +96,7 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 				.enabled(true)
 				.aliases(List.of("database upload", "database u"))
 				.permission("")
-				.description("Upload translations to the database")
+				.description("Upload translations")
 				.usage("{command} {alias}")
 				.cooldown(CommandDefinition.Cooldown.builder()
 						.enabled(false)
@@ -76,7 +108,7 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 				.enabled(true)
 				.aliases(List.of("database download", "database d"))
 				.permission("")
-				.description("Download translations from the database")
+				.description("Download translations")
 				.usage("{command} {alias}")
 				.cooldown(CommandDefinition.Cooldown.builder()
 						.enabled(false)
@@ -87,6 +119,8 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 		commands.getCommands().put("help", help);
 		commands.getCommands().put("reload", reload);
 		commands.getCommands().put("inspect", inspect);
+		commands.getCommands().put("locale-self", localeSelf);
+		commands.getCommands().put("locale-target", localeTarget);
 		commands.getCommands().put("database-upload", uploadTranslations);
 		commands.getCommands().put("database-download", downloadTranslations);
 
