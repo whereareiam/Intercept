@@ -89,6 +89,9 @@
         - [ ] Tab list
         - [ ] Titles
 
+## Planned features
+- [ ] Permission-based selection of translations
+
 ## Developer
 
 Add the API as `compileOnly` (runtime is provided by the platform jar).
