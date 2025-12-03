@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import me.whereareiam.intercept.CommandService;
 import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.InterceptAPI;
 import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
@@ -31,7 +32,6 @@ public class Intercept implements EventListener {
 			Injector injector
 	) {
 		this.injector = injector;
-
 		eventManager.register(this);
 	}
 
@@ -42,6 +42,9 @@ public class Intercept implements EventListener {
 
 		// Load settings early - this will trigger @PostProcess which initializes InterceptionHelper
 		injector.getInstance(Settings.class);
+
+		// Initialize the public API for external plugins
+		InterceptAPI.initialize(injector);
 	}
 
 	@IntercepticEvent
@@ -67,5 +70,8 @@ public class Intercept implements EventListener {
 	@IntercepticEvent
 	public void onShutdown(InterceptShutdownEvent event) {
 		injector.getInstance(InterceptorService.class).shutdown();
+
+		// Shutdown the public API
+		InterceptAPI.shutdown();
 	}
 }
