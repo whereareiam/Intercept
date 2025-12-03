@@ -2,6 +2,7 @@ defaultTasks("shadowJar")
 
 allprojects {
     version = (System.getenv("VERSION") ?: "dev")
+    group = "me.whereareiam"
 
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
