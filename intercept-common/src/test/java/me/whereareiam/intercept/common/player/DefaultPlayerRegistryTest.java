@@ -3,9 +3,11 @@ package me.whereareiam.intercept.common.player;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.player.PlayerAddedEvent;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
+import me.whereareiam.intercept.util.EventUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,6 +26,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 class DefaultPlayerRegistryTest {
 	private EventManager eventManager;
 	private DefaultPlayerRegistry playerRegistry;
+
+	@BeforeAll
+	static void setUpEventUtil() {
+		// Initialize EventUtil with a mock EventManager for tests
+		EventManager mockEventManager = mock(EventManager.class);
+		EventUtil.init(mockEventManager);
+	}
 
 	@BeforeEach
 	void setUp() {

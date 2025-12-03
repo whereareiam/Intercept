@@ -3,7 +3,10 @@ package me.whereareiam.intercept.model.player;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import me.whereareiam.intercept.event.player.change.PlayerInspectionModeChangedEvent;
+import me.whereareiam.intercept.event.player.change.PlayerLocaleChangedEvent;
 import me.whereareiam.intercept.registry.PlayerRegistry;
+import me.whereareiam.intercept.util.EventUtil;
 import me.whereareiam.keystone.Player;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -35,15 +38,12 @@ public abstract class InterceptPlayer implements Player {
 	/**
 	 * The player's preferred locale
 	 */
-	@Setter
 	@NotNull
 	protected Locale locale;
 
 	/**
 	 * Whether inspection mode is enabled for this player.
 	 */
-	@Setter
-	@Getter
 	private boolean inspectionMode = false;
 
 	/**
@@ -70,6 +70,32 @@ public abstract class InterceptPlayer implements Player {
 		this.locale = locale;
 
 		if (playerRegistry != null) playerRegistry.syncPlayerData(this);
+	}
+
+	/**
+	 * Sets the player's locale and fires a locale changed event.
+	 *
+	 * @param locale the new locale
+	 */
+	public void setLocale(@NotNull Locale locale) {
+		if (this.locale.equals(locale)) return;
+		
+		Locale oldLocale = this.locale;
+		this.locale = locale;
+		EventUtil.callEvent(new PlayerLocaleChangedEvent(this, oldLocale, locale));
+	}
+
+	/**
+	 * Sets the inspection mode and fires an inspection mode changed event.
+	 *
+	 * @param inspectionMode whether inspection mode should be enabled
+	 */
+	public void setInspectionMode(boolean inspectionMode) {
+		if (this.inspectionMode == inspectionMode) return;
+		
+		boolean oldValue = this.inspectionMode;
+		this.inspectionMode = inspectionMode;
+		EventUtil.callEvent(new PlayerInspectionModeChangedEvent(this, oldValue, inspectionMode));
 	}
 
 	/**

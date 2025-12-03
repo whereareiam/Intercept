@@ -1,6 +1,5 @@
 package me.whereareiam.intercept.util;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.base.CancellableEvent;
@@ -24,8 +23,7 @@ public class EventUtil {
 	 *
 	 * @param eventManager the event manager instance to use
 	 */
-	@Inject
-	public EventUtil(EventManager eventManager) {
+	public static void init(EventManager eventManager) {
 		EventUtil.eventManager = eventManager;
 	}
 

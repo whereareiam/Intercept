@@ -4,14 +4,18 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.adapter.database.message.DefaultMessagePersistenceService;
+import me.whereareiam.intercept.adapter.database.player.DefaultPlayerPersistenceService;
+import me.whereareiam.intercept.adapter.database.player.PlayerDatabaseBridge;
 import me.whereareiam.intercept.adapter.database.provider.JdbiProvider;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPatternRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPlaceholderRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
+import me.whereareiam.intercept.adapter.database.repository.player.PlayerRepository;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.database.MessagePersistenceService;
+import me.whereareiam.intercept.database.PlayerPersistenceService;
 import org.jdbi.v3.core.Jdbi;
 
 /**
@@ -24,6 +28,10 @@ public class DatabaseConfiguration extends AbstractModule {
 		bind(DatabaseService.class).to(DefaultDatabaseService.class).asEagerSingleton();
 		bind(Jdbi.class).toProvider(JdbiProvider.class);
 		bind(MessagePersistenceService.class).to(DefaultMessagePersistenceService.class);
+		bind(PlayerPersistenceService.class).to(DefaultPlayerPersistenceService.class);
+		
+		// Bridge registers itself as an event listener in constructor
+		bind(PlayerDatabaseBridge.class).asEagerSingleton();
 	}
 
 	@Provides
@@ -54,5 +62,11 @@ public class DatabaseConfiguration extends AbstractModule {
 	@Singleton
 	public MessageRegexPlaceholderRepository provideMessageRegexPlaceholderRepository(Jdbi jdbi) {
 		return jdbi.onDemand(MessageRegexPlaceholderRepository.class);
+	}
+
+	@Provides
+	@Singleton
+	public PlayerRepository providePlayerRepository(Jdbi jdbi) {
+		return jdbi.onDemand(PlayerRepository.class);
 	}
 }

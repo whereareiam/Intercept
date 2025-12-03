@@ -6,10 +6,11 @@ import me.whereareiam.dialectica.EntitySchemaProvider;
 import me.whereareiam.dialectica.annotation.Entity;
 import me.whereareiam.dialectica.type.DatabaseType;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
- * ORMLite entity representing a player's persistent data.
+ * Entity representing a player's persistent data.
  * Stores player state such as inspection mode, locale, and other preferences.
  */
 @Getter
@@ -28,13 +29,24 @@ public class PlayerEntity implements EntitySchemaProvider {
 	 */
 	private boolean inspectionMode;
 
+	/**
+	 * The player's preferred locale.
+	 */
+	private Locale locale;
+
 	@Override
 	public String statement(DatabaseType databaseType) {
+		String uuidType = switch (databaseType) {
+			case POSTGRES -> "UUID";
+			case MARIADB -> "CHAR(36)";
+		};
+		
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_players (
-					unique_id CHAR(36) PRIMARY KEY,
-					inspection_mode BOOLEAN NOT NULL DEFAULT FALSE
+					unique_id %s PRIMARY KEY,
+					inspection_mode BOOLEAN NOT NULL DEFAULT FALSE,
+					locale VARCHAR(16) NOT NULL DEFAULT 'en_US'
 				)
-				""";
+				""".formatted(uuidType);
 	}
 }
