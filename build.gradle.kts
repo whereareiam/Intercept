@@ -29,20 +29,22 @@ subprojects {
         "annotationProcessor"(rootProject.libs.lombok)
 
         // general
-        "compileOnly"(rootProject.libs.bundles.adventure)
-        "compileOnly"(rootProject.libs.attache.common)
+        "compileOnly"(rootProject.libs.guice)
+        "compileOnly"(rootProject.libs.annotations)
         "compileOnly"(rootProject.libs.configura)
         "compileOnly"(rootProject.libs.commandant)
         "compileOnly"(rootProject.libs.keystone)
         "compileOnly"(rootProject.libs.dialectica)
-        "compileOnly"(rootProject.libs.guice)
+        "compileOnly"(rootProject.libs.bundles.adventure)
+        "implementation"(rootProject.libs.attache.common)
 
         // test
+        "testImplementation"(rootProject.libs.guice)
+        "testImplementation"(rootProject.libs.annotations)
         "testImplementation"(rootProject.libs.configura)
         "testImplementation"(rootProject.libs.commandant)
         "testImplementation"(rootProject.libs.keystone)
         "testImplementation"(rootProject.libs.dialectica)
-        "testImplementation"(rootProject.libs.guice)
         "testImplementation"(rootProject.libs.bundles.adventure)
         "testImplementation"(rootProject.libs.bundles.testing)
         "testRuntimeOnly"(rootProject.libs.junit.platform)

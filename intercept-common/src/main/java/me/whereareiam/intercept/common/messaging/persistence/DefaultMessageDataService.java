@@ -13,7 +13,7 @@ import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.io.IOException;
 import java.nio.file.Files;

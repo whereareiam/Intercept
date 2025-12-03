@@ -16,7 +16,7 @@ import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageRequest;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.util.Locale;
 import java.util.Map;

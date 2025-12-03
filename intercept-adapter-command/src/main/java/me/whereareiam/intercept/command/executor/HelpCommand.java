@@ -12,7 +12,7 @@ import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.keystone.Actor;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;

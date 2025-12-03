@@ -11,7 +11,7 @@ import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.scheduler.PeriodicalRunnableTask;
 import me.whereareiam.intercept.model.update.UpdateConfiguration;
 import me.whereareiam.intercept.model.update.UpdateSource;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.AnsiColor;
 import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;

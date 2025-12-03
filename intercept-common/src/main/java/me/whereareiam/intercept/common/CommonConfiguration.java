@@ -23,6 +23,7 @@ import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileW
 import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
 import me.whereareiam.intercept.common.messaging.tag.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
+import me.whereareiam.intercept.common.provider.IntegrationProvider;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
 import me.whereareiam.intercept.common.provider.config.*;
@@ -31,6 +32,7 @@ import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.integration.Integration;
 import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
@@ -39,7 +41,7 @@ import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
 import me.whereareiam.intercept.model.config.*;
 import me.whereareiam.intercept.registry.PlayerRegistry;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
 import me.whereareiam.intercept.util.EventUtil;
@@ -117,6 +119,11 @@ public class CommonConfiguration extends AbstractModule {
 		bind(InspectionModeEnhancer.class).asEagerSingleton();
 
 		// Other
+		bind(new TypeLiteral<me.whereareiam.intercept.registry.base.Registry<Integration>>() {
+		}).to(IntegrationProvider.class).asEagerSingleton();
+		bind(new TypeLiteral<Set<Integration>>() {
+		}).toProvider(IntegrationProvider.class).asEagerSingleton();
+
 		bind(new TypeLiteral<Registry<Reloadable>>() {
 		}).to(ReloadableProvider.class).asEagerSingleton();
 		bind(new TypeLiteral<Set<Reloadable>>() {

@@ -3,7 +3,7 @@ package me.whereareiam.intercept.common.provider.config;
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.config.ConfigProvider;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.nio.file.Path;
 

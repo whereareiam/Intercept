@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.registry;
+package me.whereareiam.intercept.registry.base;
 
 /**
  * A generic registry interface that provides registration functionality for
@@ -11,10 +11,10 @@ package me.whereareiam.intercept.registry;
  * @param <T> the type of element that can be registered in this registry
  */
 public interface Registry<T> {
-	/**
-	 * Registers a new element in this registry.
-	 *
-	 * @param integration the element to register
-	 */
-	void register(T integration);
+    /**
+     * Registers a new element in this registry.
+     *
+     * @param integration the element to register
+     */
+    void register(T integration);
 }

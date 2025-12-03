@@ -10,7 +10,7 @@ import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.regex.MatchDetails;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.util.Locale;
 import java.util.Optional;

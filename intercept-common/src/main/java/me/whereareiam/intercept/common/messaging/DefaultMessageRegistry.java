@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.util.Map;
 import java.util.Set;

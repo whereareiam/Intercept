@@ -7,7 +7,7 @@ import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.PersistenceTemplate;
 import me.whereareiam.intercept.model.config.Persistence;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.nio.file.Path;
 

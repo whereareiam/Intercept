@@ -5,6 +5,7 @@ import me.whereareiam.attache.platform.paper.PaperLibraryManager;
 import me.whereareiam.intercept.DependencyResolver;
 import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.integration.placeholderapi.PlaceholderAPIIntegration;
 import me.whereareiam.intercept.event.lifecycle.InterceptBootstrappedEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptShutdownEvent;
@@ -43,6 +44,9 @@ public class PaperIntercept extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		// Initialize integrations
+		paperInjector.getInjector().getInstance(PlaceholderAPIIntegration.class);
+
 		// Register interceptor providers (platform-specific)
 		InterceptorRegistry registry = paperInjector.getInjector().getInstance(InterceptorRegistry.class);
 		PacketEventsInterceptorProvider packetEventsProvider = paperInjector.getInjector().getInstance(PacketEventsInterceptorProvider.class);

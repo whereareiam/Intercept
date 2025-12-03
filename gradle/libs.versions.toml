@@ -9,6 +9,7 @@ lombok = "1.18.42"
 
 # general
 guice = "7.0.0"
+annotations = "26.0.1"
 configura = "dev-a76adc6"
 attache = "dev-5fad19f"
 keystone = "dev-697f401"
@@ -32,6 +33,9 @@ paper = "1.21.8-R0.1-SNAPSHOT"
 # platform hooks
 packetevents = "2.10.1"
 
+# platform integrations
+placeholderAPI = "2.11.6"
+
 # adventure
 adventure = "4.25.0"
 adventure-platform-bukkit = "4.4.1"
@@ -49,6 +53,7 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 
 # general
 guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
+annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
 keystone = { group = "me.whereareiam", name = "keystone", version.ref = "keystone" }
 commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
@@ -82,6 +87,9 @@ paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" 
 # platform hooks
 packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
 packetevents-velocity = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
+
+# platform integrations
+placeholderAPI = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderAPI" }
 
 # adventure
 adventure = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }

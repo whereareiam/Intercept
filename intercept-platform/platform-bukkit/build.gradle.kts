@@ -7,6 +7,7 @@ subprojects {
     if (project.name != "common") {
         dependencies {
             "implementation"(project(":intercept-platform:platform-bukkit:common"))
+            "implementation"(project(":intercept-integration:integration-placeholderapi"))
         }
 
         tasks.named<Copy>("processResources") {

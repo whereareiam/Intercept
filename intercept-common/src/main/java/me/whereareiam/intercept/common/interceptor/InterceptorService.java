@@ -9,7 +9,7 @@ import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.Map;
