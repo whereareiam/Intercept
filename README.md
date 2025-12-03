@@ -147,7 +147,7 @@ dependencies {
 <dependencies>
 <dependency>
     <groupId>me.whereareiam</groupId>
-    <artifactId>intercept-api</artifactId>
+    <artifactId>Intercept</artifactId>
     <version>&lt;version&gt;</version>
     <scope>provided</scope>
 </dependency>

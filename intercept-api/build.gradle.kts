@@ -19,3 +19,29 @@ buildConfig {
         buildConfigField("String", fieldName, "\"$version\"")
     }
 }
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifactId = "Intercept"
+            pom {
+                name.set("Intercept")
+                description.set("Public API for Intercept - Minecraft translation plugin")
+            }
+        }
+    }
+}
+
+tasks.withType<Javadoc> {
+    (options as StandardJavadocDocletOptions).apply {
+        addStringOption("Xdoclint:none", "-quiet")
+        title = "Intercept API"
+        windowTitle = "Intercept API"
+    }
+}
