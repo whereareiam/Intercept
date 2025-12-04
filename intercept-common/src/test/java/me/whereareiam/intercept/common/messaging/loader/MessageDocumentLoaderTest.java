@@ -6,7 +6,7 @@ import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

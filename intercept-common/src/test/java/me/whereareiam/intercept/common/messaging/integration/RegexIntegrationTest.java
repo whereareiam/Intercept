@@ -22,7 +22,7 @@ import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.regex.MatchDetails;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;

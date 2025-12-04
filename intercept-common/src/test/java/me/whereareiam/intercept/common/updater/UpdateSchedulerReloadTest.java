@@ -7,7 +7,7 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.scheduler.PeriodicalRunnableTask;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

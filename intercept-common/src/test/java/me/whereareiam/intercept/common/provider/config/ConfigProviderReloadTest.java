@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.common.provider.config;
 
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

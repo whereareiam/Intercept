@@ -2,7 +2,7 @@ package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
-import me.whereareiam.intercept.registry.Registry;
+import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
