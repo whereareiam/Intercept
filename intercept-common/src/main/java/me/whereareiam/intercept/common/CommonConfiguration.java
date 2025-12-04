@@ -135,6 +135,11 @@ public class CommonConfiguration extends AbstractModule {
 		Serializer.initialize(serializerProvider);
 	}
 
+	@Inject
+	void initializeEventUtil(EventManager eventManager) {
+		EventUtil.initialize(eventManager);
+	}
+
 	@Provides
 	@Singleton
 	Path provideBasePath() {

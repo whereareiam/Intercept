@@ -29,7 +29,7 @@ class PlayerPersistenceServiceTest extends BasePlayerPersistenceIntegrationTest 
 	static void setUpEventUtil() {
 		// Initialize EventUtil with a mock EventManager for tests
 		EventManager mockEventManager = mock(EventManager.class);
-		EventUtil.init(mockEventManager);
+		EventUtil.initialize(mockEventManager);
 	}
 
 	@ParameterizedTest
