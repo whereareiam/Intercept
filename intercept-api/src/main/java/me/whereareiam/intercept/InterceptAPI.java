@@ -133,4 +133,3 @@ public final class InterceptAPI {
 		return getService(CommandService.class);
 	}
 }
-

@@ -1,10 +1,13 @@
 package me.whereareiam.intercept.adapter.database;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.adapter.database.message.DefaultMessagePersistenceService;
+import me.whereareiam.intercept.adapter.database.message.DummyMessagePersistenceService;
 import me.whereareiam.intercept.adapter.database.player.DefaultPlayerPersistenceService;
+import me.whereareiam.intercept.adapter.database.player.DummyPlayerPersistenceService;
 import me.whereareiam.intercept.adapter.database.player.PlayerDatabaseBridge;
 import me.whereareiam.intercept.adapter.database.provider.JdbiProvider;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
@@ -16,57 +19,95 @@ import me.whereareiam.intercept.adapter.database.repository.player.PlayerReposit
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.database.PlayerPersistenceService;
+import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.model.config.Persistence;
 import org.jdbi.v3.core.Jdbi;
 
 /**
  * Guice configuration module for database adapter.
  * Provides database-related services and bindings.
+ * Conditionally provides real or dummy implementations based on persistence configuration.
  */
 public class DatabaseConfiguration extends AbstractModule {
 	@Override
 	protected void configure() {
-		bind(DatabaseService.class).to(DefaultDatabaseService.class).asEagerSingleton();
 		bind(Jdbi.class).toProvider(JdbiProvider.class);
-		bind(MessagePersistenceService.class).to(DefaultMessagePersistenceService.class);
-		bind(PlayerPersistenceService.class).to(DefaultPlayerPersistenceService.class);
-		
-		// Bridge registers itself as an event listener in constructor
-		bind(PlayerDatabaseBridge.class).asEagerSingleton();
 	}
 
 	@Provides
 	@Singleton
-	public MessageFileRepository provideMessageFileRepository(Jdbi jdbi) {
-		return jdbi.onDemand(MessageFileRepository.class);
+	public DatabaseService provideDatabaseService(
+			Provider<DefaultDatabaseService> realServiceProvider,
+			Provider<DummyDatabaseService> dummyServiceProvider,
+			Persistence persistence
+	) {
+		return persistence.isEnabled() ? realServiceProvider.get() : dummyServiceProvider.get();
 	}
 
 	@Provides
 	@Singleton
-	public MessageEntryRepository provideMessageEntryRepository(Jdbi jdbi) {
-		return jdbi.onDemand(MessageEntryRepository.class);
+	public MessagePersistenceService provideMessagePersistenceService(
+			Provider<DefaultMessagePersistenceService> realServiceProvider,
+			Provider<DummyMessagePersistenceService> dummyServiceProvider,
+			Persistence persistence
+	) {
+		return persistence.isEnabled() ? realServiceProvider.get() : dummyServiceProvider.get();
 	}
 
 	@Provides
 	@Singleton
-	public MessageTranslationRepository provideMessageTranslationRepository(Jdbi jdbi) {
-		return jdbi.onDemand(MessageTranslationRepository.class);
+	public PlayerPersistenceService providePlayerPersistenceService(
+			Provider<DefaultPlayerPersistenceService> realServiceProvider,
+			Provider<DummyPlayerPersistenceService> dummyServiceProvider,
+			Persistence persistence
+	) {
+		return persistence.isEnabled() ? realServiceProvider.get() : dummyServiceProvider.get();
 	}
 
 	@Provides
 	@Singleton
-	public MessageRegexPatternRepository provideMessageRegexPatternRepository(Jdbi jdbi) {
-		return jdbi.onDemand(MessageRegexPatternRepository.class);
+	public PlayerDatabaseBridge providePlayerDatabaseBridge(
+			PlayerPersistenceService persistenceService,
+			DatabaseService databaseService,
+			EventManager eventManager
+	) {
+		// Always create the bridge - it checks databaseService.isInitialized() before operations
+		return new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
 	}
 
 	@Provides
 	@Singleton
-	public MessageRegexPlaceholderRepository provideMessageRegexPlaceholderRepository(Jdbi jdbi) {
-		return jdbi.onDemand(MessageRegexPlaceholderRepository.class);
+	public MessageFileRepository provideMessageFileRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageFileRepository.class) : null;
 	}
 
 	@Provides
 	@Singleton
-	public PlayerRepository providePlayerRepository(Jdbi jdbi) {
-		return jdbi.onDemand(PlayerRepository.class);
+	public MessageEntryRepository provideMessageEntryRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageEntryRepository.class) : null;
+	}
+
+	@Provides
+	@Singleton
+	public MessageTranslationRepository provideMessageTranslationRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageTranslationRepository.class) : null;
+	}
+
+	@Provides
+	@Singleton
+	public MessageRegexPatternRepository provideMessageRegexPatternRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageRegexPatternRepository.class) : null;
+	}
+
+	@Provides
+	@Singleton
+	public MessageRegexPlaceholderRepository provideMessageRegexPlaceholderRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageRegexPlaceholderRepository.class) : null;
+	}
+
+	@Provides
+	@Singleton
+	public PlayerRepository providePlayerRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(PlayerRepository.class) : null;
 	}
 }
