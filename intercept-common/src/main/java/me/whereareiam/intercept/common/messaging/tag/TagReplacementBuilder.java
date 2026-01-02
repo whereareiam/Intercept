@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.util.TagParser;
-import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.type.ComponentType;
+import me.whereareiam.semantica.translation.TranslationService;
 import net.kyori.adventure.text.Component;
 
 import java.util.HashMap;
@@ -15,12 +15,15 @@ import java.util.Map;
 
 @Singleton
 public class TagReplacementBuilder {
-	private final MessageService messageService;
+	private final TranslationService<Locale> translationService;
 	private final FallbackMessageFormatter fallbackFormatter;
 
 	@Inject
-	public TagReplacementBuilder(MessageService messageService, FallbackMessageFormatter fallbackFormatter) {
-		this.messageService = messageService;
+	public TagReplacementBuilder(
+			TranslationService<Locale> translationService,
+			FallbackMessageFormatter fallbackFormatter
+	) {
+		this.translationService = translationService;
 		this.fallbackFormatter = fallbackFormatter;
 	}
 
@@ -30,7 +33,7 @@ public class TagReplacementBuilder {
 		for (TagParser.TagData tag : tags) {
 			try {
 				Map<String, Object> placeholders = convertPlaceholders(tag.placeholders());
-				String resolved = messageService.resolve(tag.key(), locale, placeholders);
+				String resolved = translationService.resolve(tag.key(), locale, placeholders);
 
 				if (resolved != null && !resolved.equals(tag.key())) {
 					replacements.put(tag.originalTag(), Serializer.serialize(resolved));

@@ -1,11 +1,9 @@
-type: MESSAGE
-
-items:
-  permission-error:
-    translations:
-      en_US: "You lack permission: <p:permission>"
-      de_DE: "Keine Berechtigung: <p:permission>"
-    regex:
+permission-error:
+  locales:
+    en_US: "You lack permission: <p:permission>"
+    de_DE: "Keine Berechtigung: <p:permission>"
+  interception:
+    patterns:
       - pattern: "You don't have permission:\\s*([\\w.]+)"
         placeholders:
           permission: "$1"
@@ -15,10 +13,11 @@ items:
           permission: "$1"
         priority: 5
 
-  player-joined:
-    translations:
-      en_US: "Welcome, <p:name>!"
-    regex:
+player-joined:
+  locales:
+    en_US: "Welcome, <p:name>!"
+  interception:
+    patterns:
       - pattern: "Player (\\w+) joined the game"
         placeholders:
           name: "$1"
@@ -28,10 +27,11 @@ items:
           name: "$1"
         priority: 5
 
-  priority-test:
-    translations:
-      en_US: "High priority: <p:word>"
-    regex:
+priority-test:
+  locales:
+    en_US: "High priority: <p:word>"
+  interception:
+    patterns:
       - pattern: "test (\\w+)"
         placeholders:
           word: "$1"
@@ -41,19 +41,21 @@ items:
           word: "should not match"
         priority: 5
 
-  priority-test-low:
-    translations:
-      en_US: "Low priority: <p:word>"
-    regex:
+priority-test-low:
+  locales:
+    en_US: "Low priority: <p:word>"
+  interception:
+    patterns:
       - pattern: "test (\\w+)"
         placeholders:
           word: "$1"
         priority: 5
 
-  partial-replace:
-    translations:
-      en_US: "test test"
-    regex:
+partial-replace:
+  locales:
+    en_US: "test test"
+  interception:
+    patterns:
       - pattern: "or incomplete command"
         replaceMatched: true
         priority: 10

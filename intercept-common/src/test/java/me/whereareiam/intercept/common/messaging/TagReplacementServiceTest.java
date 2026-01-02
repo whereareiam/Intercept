@@ -8,7 +8,6 @@ import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.tag.DefaultTagReplacementService;
 import me.whereareiam.intercept.common.messaging.tag.FallbackMessageFormatter;
 import me.whereareiam.intercept.common.messaging.tag.TagReplacementBuilder;
-import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
@@ -23,6 +22,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +35,7 @@ class TagReplacementServiceTest {
 	private DefaultMessageRegistry registry;
 	private TagReplacementService tagService;
 	private Messages messages;
+	private TranslationService<Locale> translationService;
 
 	@BeforeEach
 	void setUp() {
@@ -42,8 +43,7 @@ class TagReplacementServiceTest {
 		registry = new DefaultMessageRegistry(registryMock);
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		messages = new MessagesTemplate().supply(new Messages());
-		Registry<Reloadable> serviceReloadables = mock(Registry.class);
-		MessageService messageService = new DefaultMessageService(registry, settings, serviceReloadables);
+		translationService = SemanticaTestHelper.createService(settings);
 
 		// Initialize Serializer for tests
 		SerializerOptions options = SerializerOptions.builder()
@@ -57,13 +57,13 @@ class TagReplacementServiceTest {
 
 		Provider<Messages> messagesProvider = () -> messages;
 		FallbackMessageFormatter fallbackFormatter = new FallbackMessageFormatter(messagesProvider);
-		TagReplacementBuilder builder = new TagReplacementBuilder(messageService, fallbackFormatter);
+		TagReplacementBuilder builder = new TagReplacementBuilder(translationService, fallbackFormatter);
 		tagService = new DefaultTagReplacementService(builder);
 	}
 
 	@Test
 	void shouldReplaceSimpleTag() {
-		registry.register("welcome.message", new CompiledMessageEntry(MessageType.MESSAGE, "Welcome to the server!"));
+		registerMessage("welcome.message", new CompiledMessageEntry(MessageType.MESSAGE, "Welcome to the server!"));
 		Component input = Component.text("<lang key=\"welcome.message\">");
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
@@ -74,7 +74,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldReplaceTagWithPlaceholders() {
-		registry.register("player.join", new CompiledMessageEntry(MessageType.MESSAGE, "<p:name> joined the game!"));
+		registerMessage("player.join", new CompiledMessageEntry(MessageType.MESSAGE, "<p:name> joined the game!"));
 		Component input = Component.text("<lang key=\"player.join\" name=\"Steve\">");
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
@@ -85,8 +85,8 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldReplaceMultipleTags() {
-		registry.register("prefix.info", new CompiledMessageEntry(MessageType.MESSAGE, "[INFO]"));
-		registry.register("shop.opened", new CompiledMessageEntry(MessageType.MESSAGE, "Shop opened"));
+		registerMessage("prefix.info", new CompiledMessageEntry(MessageType.MESSAGE, "[INFO]"));
+		registerMessage("shop.opened", new CompiledMessageEntry(MessageType.MESSAGE, "Shop opened"));
 		Component input = Component.text("<lang key=\"prefix.info\"> <lang key=\"shop.opened\">");
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
@@ -97,7 +97,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldPreserveFormattingWhenReplacingTags() {
-		registry.register("welcome", new CompiledMessageEntry(MessageType.MESSAGE, "Welcome!"));
+		registerMessage("welcome", new CompiledMessageEntry(MessageType.MESSAGE, "Welcome!"));
 		Component input = Component.text("Server: ")
 				.append(Component.text("<lang key=\"welcome\">").color(NamedTextColor.GOLD));
 
@@ -113,7 +113,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldPreserveBoldAndItalic() {
-		registry.register("message", new CompiledMessageEntry(MessageType.MESSAGE, "Important"));
+		registerMessage("message", new CompiledMessageEntry(MessageType.MESSAGE, "Important"));
 		Component input = Component.text("<lang key=\"message\">")
 				.decorate(TextDecoration.BOLD)
 				.decorate(TextDecoration.ITALIC);
@@ -146,7 +146,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldOnlyReplaceMatchingTagName() {
-		registry.register("message", new CompiledMessageEntry(MessageType.MESSAGE, "Hello"));
+		registerMessage("message", new CompiledMessageEntry(MessageType.MESSAGE, "Hello"));
 		Component input = Component.text("<lang key=\"message\"> <other key=\"test\">");
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
@@ -158,8 +158,8 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldHandleComplexComponentTree() {
-		registry.register("greeting", new CompiledMessageEntry(MessageType.MESSAGE, "Hello"));
-		registry.register("name", new CompiledMessageEntry(MessageType.MESSAGE, "World"));
+		registerMessage("greeting", new CompiledMessageEntry(MessageType.MESSAGE, "Hello"));
+		registerMessage("name", new CompiledMessageEntry(MessageType.MESSAGE, "World"));
 
 		Component input = Component.text("Start ")
 				.append(Component.text("<lang key=\"greeting\">").color(NamedTextColor.RED))
@@ -174,8 +174,8 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldReplaceTagsWithMessageReferences() {
-		registry.register("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[Server]"));
-		registry.register("announcement", new CompiledMessageEntry(MessageType.MESSAGE, "<m:prefix> Maintenance soon"));
+		registerMessage("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[Server]"));
+		registerMessage("announcement", new CompiledMessageEntry(MessageType.MESSAGE, "<m:prefix> Maintenance soon"));
 
 		Component input = Component.text("<lang key=\"announcement\">");
 
@@ -187,7 +187,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldHandleTagsWithMultiplePlaceholders() {
-		registry.register("player.info", new CompiledMessageEntry(
+		registerMessage("player.info", new CompiledMessageEntry(
 				MessageType.MESSAGE,
 				"<p:name> (<p:rank>) from <p:location>"
 		));
@@ -228,7 +228,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldHandleTagsSurroundedByText() {
-		registry.register("item", new CompiledMessageEntry(MessageType.MESSAGE, "Diamond Sword"));
+		registerMessage("item", new CompiledMessageEntry(MessageType.MESSAGE, "Diamond Sword"));
 		Component input = Component.text("You received a <lang key=\"item\">!");
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
@@ -246,7 +246,7 @@ class TagReplacementServiceTest {
 						Locale.FRANCE, "Bienvenue!"
 				)
 		);
-		registry.register("welcome", entry);
+		registerMessage("welcome", entry);
 
 		Component input = Component.text("<lang key=\"welcome\">");
 
@@ -259,7 +259,7 @@ class TagReplacementServiceTest {
 
 	@Test
 	void shouldHandleNestedFormattingWithTags() {
-		registry.register("important", new CompiledMessageEntry(MessageType.MESSAGE, "ALERT"));
+		registerMessage("important", new CompiledMessageEntry(MessageType.MESSAGE, "ALERT"));
 
 		Component input = Component.text()
 				.append(Component.text("[").color(NamedTextColor.GRAY))
@@ -309,7 +309,7 @@ class TagReplacementServiceTest {
 	@Test
 	void shouldNotApplyFallbackToExistingTranslations() {
 		// Test that existing translations are not affected by fallback mechanism
-		registry.register("existing.message", new CompiledMessageEntry(MessageType.MESSAGE, "This exists!"));
+		registerMessage("existing.message", new CompiledMessageEntry(MessageType.MESSAGE, "This exists!"));
 		Component input = Component.text("<lang key=\"existing.message\">");
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
@@ -369,43 +369,10 @@ class TagReplacementServiceTest {
 		assertNotNull(result);
 	}
 
-	@Test
-	void shouldNormalizeHyphensToDotsOnRegistration() {
-		// Register with hyphen - should be normalized to dots
-		registry.register("player-joined", new CompiledMessageEntry(MessageType.MESSAGE, "<p:name> joined the game!"));
-		// Reference with dot notation (normalized format)
-		Component input = Component.text("<lang key=\"player.joined\" name=\"Steve\">");
-
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
-
-		String plainText = extractPlainText(result);
-		assertEquals("Steve joined the game!", plainText);
-	}
-
-	@Test
-	void shouldWorkWithDotNotationDirectly() {
-		// Register with dots directly - should work without normalization
-		registry.register("player.joined", new CompiledMessageEntry(MessageType.MESSAGE, "Player joined"));
-		// Reference with same dot notation
-		Component input = Component.text("<lang key=\"player.joined\">");
-
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
-
-		String plainText = extractPlainText(result);
-		assertEquals("Player joined", plainText);
-	}
-
-	@Test
-	void shouldHandleMultipleDotsInKey() {
-		// Register key with hyphens
-		registry.register("error-permission-denied", new CompiledMessageEntry(MessageType.MESSAGE, "Permission denied"));
-		// Reference it with dots
-		Component input = Component.text("<lang key=\"error.permission.denied\">");
-
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
-
-		String plainText = extractPlainText(result);
-		assertEquals("Permission denied", plainText);
+	// Helper method to register entries for both registries
+	private void registerMessage(String key, CompiledMessageEntry entry) {
+		registry.register(key, entry);
+		SemanticaTestHelper.register(translationService, key, entry);
 	}
 
 	// Helper method to extract plain text from component
@@ -413,3 +380,4 @@ class TagReplacementServiceTest {
 		return PlainTextComponentSerializer.plainText().serialize(component);
 	}
 }
+

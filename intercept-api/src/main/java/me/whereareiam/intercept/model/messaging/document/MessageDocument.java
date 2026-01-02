@@ -1,9 +1,8 @@
 package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
-import lombok.Setter;
-import me.whereareiam.intercept.type.message.MessageType;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -11,22 +10,44 @@ import java.util.Map;
  * This is what we get after parsing YAML/JSON with Configura.
  */
 @Getter
-@Setter
 public class MessageDocument {
-	/**
-	 * Optional file-level type (messages, templates, mixed)
-	 * If present, all entries inherit this type unless they override it
-	 */
-	private MessageType type;
+	private final Map<String, Object> entries = new LinkedHashMap<>();
 
-	/**
-	 * Map of message key to message entry data
-	 * Keys are relative to the file (e.g., "no-permission", "player-not-found")
-	 * The scanner will prepend directory-based keys (e.g., "errors.permissions.")
-	 */
-	private Map<String, MessageDocumentEntry> items;
+	public void putEntry(String key, Object value) {
+		if (key == null) return;
+		if (value == null) {
+			entries.remove(key);
+			return;
+		}
+		entries.put(key, value);
+	}
 
-	public void setItems(Map<String, MessageDocumentEntry> items) {
-		this.items = items == null || items.isEmpty() ? null : items;
+	public Map<String, Object> getEntries() {
+		return entries;
+	}
+
+	public void putEntries(Map<String, ?> values) {
+		if (values == null || values.isEmpty()) return;
+		for (Map.Entry<String, ?> entry : values.entrySet()) {
+			putEntry(entry.getKey(), entry.getValue());
+		}
+	}
+
+	public Map<String, Object> toMap() {
+		return new LinkedHashMap<>(entries);
+	}
+
+	public static MessageDocument fromRawMap(Map<?, ?> raw) {
+		MessageDocument document = new MessageDocument();
+		if (raw == null || raw.isEmpty()) return document;
+		for (Map.Entry<?, ?> entry : raw.entrySet()) {
+			if (entry.getKey() == null) continue;
+			document.putEntry(String.valueOf(entry.getKey()), entry.getValue());
+		}
+		return document;
+	}
+
+	public boolean isEmpty() {
+		return entries.isEmpty();
 	}
 }

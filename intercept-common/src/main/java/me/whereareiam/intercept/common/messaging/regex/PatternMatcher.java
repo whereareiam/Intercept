@@ -3,10 +3,10 @@ package me.whereareiam.intercept.common.messaging.regex;
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.regex.MatchDetails;
+import me.whereareiam.semantica.translation.TranslationService;
 
 import java.util.List;
 import java.util.Locale;
@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 class PatternMatcher {
-	private final MessageService messageService;
+	private final TranslationService<Locale> translationService;
 	private final Provider<Settings> settingsProvider;
 
 	/**
@@ -54,7 +54,7 @@ class PatternMatcher {
 				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - MATCHED with placeholders: %s",
 						candidate.pattern.getRegex(), candidate.key, placeholders);
 
-				String resolved = messageService.resolve(candidate.key, locale, placeholders);
+				String resolved = translationService.resolve(candidate.key, locale, placeholders);
 
 				String finalText = resolved;
 				if (candidate.pattern.isReplaceMatched())
@@ -109,7 +109,7 @@ class PatternMatcher {
 				Logger.debug("[Regex] Pattern \"%s\" (key: %s) - MATCHED with placeholders: %s",
 						candidate.pattern.getRegex(), candidate.key, placeholders);
 
-				String resolved = messageService.resolve(candidate.key, locale, placeholders);
+				String resolved = translationService.resolve(candidate.key, locale, placeholders);
 				boolean replaceMatched = candidate.pattern.isReplaceMatched();
 
 				return Optional.of(new MatchDetails(resolved, result.start(), result.end(), replaceMatched));

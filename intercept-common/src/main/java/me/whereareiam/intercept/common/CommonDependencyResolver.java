@@ -76,6 +76,13 @@ public abstract class CommonDependencyResolver implements DependencyResolver {
 
 		addDependency(Library.builder()
 				.groupId("me.whereareiam")
+				.artifactId("semantica")
+				.version(Constants.Dependency.SEMANTICA)
+				.resolveTransitiveDependencies(true)
+				.build());
+
+		addDependency(Library.builder()
+				.groupId("me.whereareiam")
 				.artifactId("dialectica")
 				.version(Constants.Dependency.DIALECTICA)
 				.resolveTransitiveDependencies(true)

@@ -5,15 +5,14 @@ import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
+import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
 import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
-import me.whereareiam.intercept.type.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +38,6 @@ class FileWritingIntegrationTest {
 	@Test
 	void shouldWriteDocumentWithNestedPath() {
 		MessageDocument document = new MessageDocument();
-		document.setType(MessageType.MESSAGE);
 
 		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setText("Welcome!");
@@ -49,9 +47,11 @@ class FileWritingIntegrationTest {
 		regex.setPriority(5);
 		regex.setReplaceMatched(true);
 		regex.setPlaceholders(Map.of("name", "$1"));
-		entry.setRegex(List.of(regex));
+		MessageDocumentInterception interception = new MessageDocumentInterception();
+		interception.setPatterns(List.of(regex));
+		entry.setInterception(interception);
 
-		document.setItems(new LinkedHashMap<>(Map.of("welcome", entry)));
+		document.putEntry("welcome", entry);
 
 		String relativePath = "errors/permissions";
 		writer.write(relativePath, document);
@@ -59,10 +59,18 @@ class FileWritingIntegrationTest {
 		Path writtenPath = writer.resolvePath(relativePath);
 		assertTrue(Files.exists(writtenPath), "Expected file to be written to disk");
 
-		MessageDocument loaded = Config.load(writtenPath, MessageDocument.class);
-		assertEquals(MessageType.MESSAGE, loaded.getType());
-		assertTrue(loaded.getItems().containsKey("welcome"));
-		assertEquals("Welcome!", loaded.getItems().get("welcome").getText());
-		assertEquals(1, loaded.getItems().get("welcome").getRegex().size());
+		@SuppressWarnings("unchecked")
+		Map<String, Object> loaded = (Map<String, Object>) Config.load(writtenPath, Map.class);
+		assertTrue(loaded.containsKey("welcome"));
+		Object loadedEntry = loaded.get("welcome");
+		assertTrue(loadedEntry instanceof Map);
+		Map<?, ?> loadedMap = (Map<?, ?>) loadedEntry;
+		assertEquals("Welcome!", loadedMap.get("text"));
+		Object interceptionRaw = loadedMap.get("interception");
+		assertTrue(interceptionRaw instanceof Map);
+		Map<?, ?> interceptionMap = (Map<?, ?>) interceptionRaw;
+		Object patternsRaw = interceptionMap.get("patterns");
+		assertTrue(patternsRaw instanceof List);
+		assertEquals(1, ((List<?>) patternsRaw).size());
 	}
 }

@@ -3,12 +3,12 @@ package me.whereareiam.intercept.messaging.file;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 
 /**
- * Loads message files into the MessageRegistry.
- * Converts persistence data into CompiledMessageEntry instances and registers them.
+ * Loads message files into the messaging system.
+ * Converts persistence data into Semantica translations and interception rules.
  */
 public interface MessageFileLoader {
 	/**
-	 * Load messages from parsed persistence data into the registry or backing store.
+	 * Load messages from parsed persistence data into the backing stores.
 	 *
 	 * @param keyPrefix the key prefix for this persistence (e.g., "errors.permissions")
 	 * @param fileData  the parsed persistence data

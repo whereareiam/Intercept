@@ -1,13 +1,7 @@
-type: MESSAGE
+debug: "<m:common.styles.prefix> <m:common.colors.info>Debug: <p:info>"
 
-items:
-  debug:
-    text: "<m:common.styles.prefix> <m:common.colors.info>Debug: <p:info>"
+command-usage:
+  - "<m:common.styles.prefix>"
+  - "<m:common.colors.warning>Usage: <m:common.colors.accent>/myplugin <p:args>"
 
-  command-usage:
-    text:
-      - "<m:common.styles.prefix>"
-      - "<m:common.colors.warning>Usage: <m:common.colors.accent>/myplugin <p:args>"
-
-  status:
-    text: "Status: <if enabled==true><m:common.colors.success>Enabled<else><m:common.colors.error>Disabled</if>"
+status: "Status: <if enabled==true><m:common.colors.success>Enabled<else><m:common.colors.error>Disabled</if>"

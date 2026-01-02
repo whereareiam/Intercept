@@ -27,9 +27,7 @@ public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
 
 	@Override
 	public void register(String key, CompiledMessageEntry entry) {
-		// Normalize hyphens to dots for consistent storage
-		String normalizedKey = normalizeKey(key);
-		entries.put(normalizedKey, entry);
+		entries.put(key, entry);
 	}
 
 	@Override
@@ -62,16 +60,5 @@ public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
 	@Override
 	public void reload() {
 		entries.clear();
-	}
-
-	/**
-	 * Normalizes a key by converting hyphens to dots.
-	 * This ensures consistent storage format (dots) regardless of input format.
-	 *
-	 * @param key the key to normalize
-	 * @return the normalized key with dots instead of hyphens
-	 */
-	private String normalizeKey(String key) {
-		return key.replace("-", ".");
 	}
 }

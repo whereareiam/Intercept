@@ -1,22 +1,18 @@
-type: MESSAGE
+no-permission:
+  locales:
+    en_US: "<m:common.styles.prefix> <m:common.styles.error.format message='You lack permission: <m:common.colors.accent><p:permission>'>"
+    de_DE: "<m:common.styles.prefix> <m:common.styles.error.format message='Keine Berechtigung: <m:common.colors.accent><p:permission>'>"
+    fr_FR: "<m:common.styles.prefix> <m:common.styles.error.format message='Permission manquante: <m:common.colors.accent><p:permission>'>"
 
-items:
-  no-permission:
-    translations:
-      en_US: "<m:common.styles.prefix> <tpl:common.styles.error.format message='You lack permission: <m:common.colors.accent><p:permission>'>"
-      de_DE: "<m:common.styles.prefix> <tpl:common.styles.error.format message='Keine Berechtigung: <m:common.colors.accent><p:permission>'>"
-      fr_FR: "<m:common.styles.prefix> <tpl:common.styles.error.format message='Permission manquante: <m:common.colors.accent><p:permission>'>"
+rank-required:
+  locales:
+    en_US:
+      - "<m:common.styles.error.box"
+      - "  title='Access Denied'"
+      - "  message='Rank <m:common.colors.accent><p:rank><m:common.colors.error> required'>"
+    de_DE:
+      - "<m:common.styles.error.box"
+      - "  title='Zugriff verweigert'"
+      - "  message='Rang <m:common.colors.accent><p:rank><m:common.colors.error> erforderlich'>"
 
-  rank-required:
-    translations:
-      en_US:
-        - "<tpl:common.styles.error.box"
-        - "  title='Access Denied'"
-        - "  message='Rank <m:common.colors.accent><p:rank><m:common.colors.error> required'>"
-      de_DE:
-        - "<tpl:common.styles.error.box"
-        - "  title='Zugriff verweigert'"
-        - "  message='Rang <m:common.colors.accent><p:rank><m:common.colors.error> erforderlich'>"
-
-  admin-only:
-    text: "<m:common.styles.prefix> <m:common.colors.error>This command is admin-only!"
+admin-only: "<m:common.styles.prefix> <m:common.colors.error>This command is admin-only!"

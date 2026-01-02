@@ -93,8 +93,10 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 		// Track the file path for this key prefix
 		filePathMap.put(keyPrefix, file);
 
-		// Read file data with Configura
-		MessageDocument data = Config.load(file, MessageDocument.class);
+		// Read file data with Configura as a raw map (Configura does not expose Jackson annotations)
+		@SuppressWarnings("unchecked")
+		Map<String, Object> raw = (Map<String, Object>) Config.load(file, Map.class);
+		MessageDocument data = MessageDocument.fromRawMap(raw);
 
 		// Load into registry
 		loader.loadFromData(keyPrefix, data);

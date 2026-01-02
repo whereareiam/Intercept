@@ -5,12 +5,12 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.translation.TranslationService;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -28,14 +28,14 @@ public class DefaultRegexMatchingService implements RegexMatchingService, Reload
 
 	@Inject
 	public DefaultRegexMatchingService(
-			MessageRegistry registry,
-			MessageService messageService,
+			InterceptionRegistry registry,
+			TranslationService<Locale> translationService,
 			Provider<Settings> settingsProvider,
 			Registry<Reloadable> reloadableRegistry
 	) {
 		this.settingsProvider = settingsProvider;
 		this.patternIndexBuilder = new PatternIndexBuilder(registry);
-		this.patternMatcher = new PatternMatcher(messageService, settingsProvider);
+		this.patternMatcher = new PatternMatcher(translationService, settingsProvider);
 		this.resultCache = new ResultCache(settingsProvider);
 
 		reloadableRegistry.register(this);

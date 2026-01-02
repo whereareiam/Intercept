@@ -15,8 +15,9 @@ import me.whereareiam.intercept.common.interceptor.processor.DefaultChatIntercep
 import me.whereareiam.intercept.common.interceptor.processor.DefaultKickInterceptionProcessor;
 import me.whereareiam.intercept.common.listener.InspectionModeEnhancer;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.DefaultMessageService;
+import me.whereareiam.intercept.common.messaging.InterceptSemanticaLogger;
 import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
+import me.whereareiam.intercept.common.messaging.interception.DefaultInterceptionRegistry;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileWriter;
@@ -30,6 +31,7 @@ import me.whereareiam.intercept.common.provider.config.*;
 import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
 import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
+import me.whereareiam.intercept.common.util.MessageTags;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.integration.Integration;
@@ -46,10 +48,18 @@ import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
 import me.whereareiam.intercept.util.EventUtil;
 import me.whereareiam.keystone.serializer.SerializerEngine;
+import me.whereareiam.semantica.Semantica;
+import me.whereareiam.semantica.SemanticaConfiguration;
+import me.whereareiam.semantica.TagConfiguration;
+import me.whereareiam.semantica.SemanticaLogger;
+import me.whereareiam.semantica.locale.LocaleParser;
+import me.whereareiam.semantica.model.SemanticLocale;
+import me.whereareiam.semantica.translation.TranslationService;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -93,10 +103,10 @@ public class CommonConfiguration extends AbstractModule {
 
 		// Messages system
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
+		bind(InterceptionRegistry.class).to(DefaultInterceptionRegistry.class).asEagerSingleton();
 		bind(MessageFileLoader.class).to(DefaultMessageFileLoader.class);
 		bind(MessageFileWriter.class).to(DefaultMessageFileWriter.class);
 		bind(MessageDataService.class).to(DefaultMessageDataService.class);
-		bind(MessageService.class).to(DefaultMessageService.class);
 		bind(MessageLifecycleService.class).asEagerSingleton();
 		bind(TagReplacementService.class).to(DefaultTagReplacementService.class);
 		bind(RegexMatchingService.class).to(DefaultRegexMatchingService.class);
@@ -158,6 +168,63 @@ public class CommonConfiguration extends AbstractModule {
 	@Named("messagesPath")
 	Path provideMessagesPath(@Named("dataPath") Path dataPath) {
 		return ensureDirectory(dataPath.resolve("messages"), "messages");
+	}
+
+	@Provides
+	@Singleton
+	SemanticaLogger provideSemanticaLogger() {
+		return new InterceptSemanticaLogger();
+	}
+
+	@Provides
+	@Singleton
+	LocaleParser<Locale> provideLocaleParser() {
+		return SemanticLocale::wrap;
+	}
+
+	@Provides
+	@Singleton
+	SemanticaConfiguration<Locale> provideSemanticaConfiguration(
+			Provider<Settings> settingsProvider,
+			LocaleParser<Locale> localeParser,
+			SemanticaLogger logger
+	) {
+		Settings settings = settingsProvider.get();
+		Settings.Performance.Cache cache = settings.getPerformance().getCache();
+
+		TagConfiguration tags = TagConfiguration.builder()
+				.referencePrefix(MessageTags.MESSAGE_REF_PREFIX)
+				.placeholderPrefix(MessageTags.PLACEHOLDER_PREFIX)
+				.conditionalIf(MessageTags.CONDITIONAL_IF)
+				.conditionalElse(MessageTags.CONDITIONAL_ELSE)
+				.build();
+
+		return SemanticaConfiguration.<Locale>builder()
+				.defaultLocale(SemanticLocale.wrap(settings.getLocale()))
+				.tagConfiguration(tags)
+				.performance(SemanticaConfiguration.PerformanceSettings.builder()
+						.cache(SemanticaConfiguration.PerformanceSettings.CacheSettings.builder()
+								.enabled(cache.isEnabled())
+								.semiStaticSize(cache.getSemiStaticSize())
+								.dynamicSize(cache.getDynamicSize())
+								.semiStaticExpireMinutes(cache.getSemiStaticExpireMinutes())
+								.dynamicExpireMinutes(cache.getDynamicExpireMinutes())
+								.build())
+						.prerenderStatic(settings.getPerformance().isPrerenderStatic())
+						.buildDependencyGraph(settings.getPerformance().isBuildDependencyGraph())
+						.logTimings(false)
+						.build())
+				.localeParser(localeParser)
+				.logger(logger)
+				.build();
+	}
+
+	@Provides
+	@Singleton
+	TranslationService<Locale> provideTranslationService(
+			SemanticaConfiguration<Locale> configuration
+	) {
+		return Semantica.createService(configuration);
 	}
 
 	private Path ensureDirectory(Path path, String label) {

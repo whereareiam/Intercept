@@ -7,7 +7,7 @@ import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.interceptor.Interceptor;
 import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.semantica.translation.TranslationService;
 import me.whereareiam.intercept.type.AnsiColor;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.type.PlatformType;
@@ -16,13 +16,14 @@ import me.whereareiam.intercept.type.PluginType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class WelcomeBannerPrinter {
 	private final LoggingHelper loggingHelper;
 	private final InterceptorRegistry interceptorRegistry;
-	private final MessageRegistry messageRegistry;
+	private final TranslationService<Locale> translationService;
 
 	public void print() {
 		List<String> lines = new ArrayList<>();
@@ -55,7 +56,7 @@ public class WelcomeBannerPrinter {
 
 	private List<String> buildMessagesLine() {
 		List<String> l = new ArrayList<>();
-		int totalKeys = messageRegistry.getKeys().size();
+		int totalKeys = translationService.getKeys().size();
 
 		l.add("  Messages: " + AnsiColor.CYAN + totalKeys + " keys" + AnsiColor.RESET);
 		l.add("");

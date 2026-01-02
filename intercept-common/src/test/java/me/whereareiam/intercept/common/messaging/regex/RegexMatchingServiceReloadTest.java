@@ -2,15 +2,15 @@ package me.whereareiam.intercept.common.messaging.regex;
 
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -22,15 +22,15 @@ import static org.mockito.Mockito.*;
 class RegexMatchingServiceReloadTest {
 
 	private MessageRegistry registry;
-	private MessageService messageService;
+	private TranslationService<Locale> translationService;
 	private Provider<Settings> settingsProvider;
 	private Registry<Reloadable> reloadableRegistry;
 	private DefaultRegexMatchingService regexMatchingService;
 
 	@BeforeEach
 	void setUp() {
-		registry = mock(MessageRegistry.class);
-		messageService = mock(MessageService.class);
+		registry = mock(InterceptionRegistry.class);
+		translationService = mock(TranslationService.class);
 		settingsProvider = mock(Provider.class);
 		reloadableRegistry = mock(Registry.class);
 
@@ -39,7 +39,7 @@ class RegexMatchingServiceReloadTest {
 
 		regexMatchingService = new DefaultRegexMatchingService(
 				registry,
-				messageService,
+				translationService,
 				settingsProvider,
 				reloadableRegistry
 		);
@@ -53,10 +53,8 @@ class RegexMatchingServiceReloadTest {
 	@Test
 	void shouldHandleMatchAfterReloadWithPatternIndex() {
 		// Setup: Create a registry with regex patterns
-		CompiledMessageEntry entry = mock(CompiledMessageEntry.class);
-		when(entry.hasRegexPatterns()).thenReturn(true);
 		when(registry.getKeys()).thenReturn(Set.of("test.key"));
-		when(registry.get("test.key")).thenReturn(entry);
+		when(registry.get("test.key")).thenReturn(List.of());
 
 		// Trigger pattern index build by calling match
 		regexMatchingService.match("test text", Locale.ENGLISH);
@@ -79,7 +77,7 @@ class RegexMatchingServiceReloadTest {
 		// Create new service with caching enabled
 		DefaultRegexMatchingService serviceWithCache = new DefaultRegexMatchingService(
 				registry,
-				messageService,
+				translationService,
 				settingsProvider,
 				reloadableRegistry
 		);
@@ -115,9 +113,7 @@ class RegexMatchingServiceReloadTest {
 
 		// Second match - rebuilds pattern index
 		when(registry.getKeys()).thenReturn(Set.of("new.key"));
-		CompiledMessageEntry newEntry = mock(CompiledMessageEntry.class);
-		when(newEntry.hasRegexPatterns()).thenReturn(false);
-		when(registry.get("new.key")).thenReturn(newEntry);
+		when(registry.get("new.key")).thenReturn(List.of());
 
 		// Should not throw exception even with new registry state
 		assertDoesNotThrow(() -> regexMatchingService.match("test2", Locale.ENGLISH));
@@ -131,7 +127,7 @@ class RegexMatchingServiceReloadTest {
 
 		DefaultRegexMatchingService disabledService = new DefaultRegexMatchingService(
 				registry,
-				messageService,
+				translationService,
 				settingsProvider,
 				reloadableRegistry
 		);

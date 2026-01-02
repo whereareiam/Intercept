@@ -6,7 +6,8 @@ import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.DefaultMessageService;
+import me.whereareiam.intercept.common.messaging.interception.DefaultInterceptionRegistry;
+import me.whereareiam.intercept.common.messaging.SemanticaTestHelper;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
 import me.whereareiam.intercept.common.messaging.persistence.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
@@ -14,7 +15,7 @@ import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingServi
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
@@ -23,6 +24,7 @@ import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.translation.TranslationService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -38,6 +40,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +52,10 @@ import static org.mockito.Mockito.mock;
  */
 class RegexIntegrationTest {
 	private DefaultMessageRegistry registry;
+	private InterceptionRegistry interceptionRegistry;
 	private RegexMatchingService regexService;
+	private TranslationService<Locale> translationService;
+	private Settings settings;
 
 	@BeforeAll
 	static void initLogger() {
@@ -63,11 +69,13 @@ class RegexIntegrationTest {
 		// Setup registry
 		Registry<Reloadable> mockRegistry = mock(Registry.class);
 		registry = new DefaultMessageRegistry(mockRegistry);
+		interceptionRegistry = new DefaultInterceptionRegistry();
 
 		// Setup settings with regex enabled
-		Settings settings = new SettingsTemplate().supply(new Settings());
+		settings = new SettingsTemplate().supply(new Settings());
 		settings.getPerformance().getRegex().setEnabled(true);
 		settings.getPerformance().getRegex().setCacheResults(false);
+		translationService = SemanticaTestHelper.createService(settings);
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
@@ -75,13 +83,9 @@ class RegexIntegrationTest {
 		// Load test message files
 		loadTestMessages();
 
-		// Create message service
-		Registry<Reloadable> serviceReloadables = mock(Registry.class);
-		MessageService messageService = new DefaultMessageService(registry, settings, serviceReloadables);
-
 		// Create regex matching service with Provider
 		Provider<Settings> settingsProvider = () -> settings;
-		regexService = new DefaultRegexMatchingService(registry, messageService, settingsProvider, mockRegistry);
+		regexService = new DefaultRegexMatchingService(interceptionRegistry, translationService, settingsProvider, mockRegistry);
 	}
 
 	private void loadTestMessages() throws URISyntaxException {
@@ -94,18 +98,26 @@ class RegexIntegrationTest {
 
 		// Load each persistence
 		TextProcessor textProcessor = new TextProcessor();
-		MessageFileLoader loader = new DefaultMessageFileLoader(registry, textProcessor);
+		MessageFileLoader loader = new DefaultMessageFileLoader(
+				registry,
+				interceptionRegistry,
+				textProcessor,
+				translationService,
+				() -> settings
+		);
 
 		for (Path file : files) {
 			String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
-			MessageDocument fileData = Config.load(file, MessageDocument.class);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> raw = (Map<String, Object>) Config.load(file, Map.class);
+			MessageDocument fileData = MessageDocument.fromRawMap(raw);
 			loader.loadFromData(keyPrefix, fileData);
 		}
 	}
 
 	@Test
 	void shouldLoadRegexPatternsFromYAML() {
-		CompiledMessageEntry entry = registry.get("regex.patterns.permission.error");
+		CompiledMessageEntry entry = registry.get("regex.patterns.permission-error");
 		assertNotNull(entry);
 		assertTrue(entry.hasRegexPatterns());
 		assertEquals(2, entry.getRegexPatterns().size());

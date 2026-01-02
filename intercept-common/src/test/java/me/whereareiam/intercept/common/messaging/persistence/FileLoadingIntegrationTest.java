@@ -5,13 +5,15 @@ import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.DefaultMessageService;
+import me.whereareiam.intercept.common.messaging.interception.DefaultInterceptionRegistry;
+import me.whereareiam.intercept.common.messaging.SemanticaTestHelper;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
-import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +32,9 @@ import static org.mockito.Mockito.mock;
  */
 class FileLoadingIntegrationTest {
 	private DefaultMessageRegistry registry;
-	private MessageService service;
+	private TranslationService<Locale> service;
+	private InterceptionRegistry interceptionRegistry;
+	private Settings settings;
 	private MessageFileScanner scanner;
 	private MessageFileLoader loader;
 	private Path messagesRoot;
@@ -39,15 +43,21 @@ class FileLoadingIntegrationTest {
 	void setUp() throws URISyntaxException {
 		Registry<Reloadable> registryMock = mock(Registry.class);
 		registry = new DefaultMessageRegistry(registryMock);
-		Settings settings = new SettingsTemplate().supply(new Settings());
-		Registry<Reloadable> reloadables = mock(Registry.class);
-		service = new DefaultMessageService(registry, settings, reloadables);
+		settings = new SettingsTemplate().supply(new Settings());
+		interceptionRegistry = new DefaultInterceptionRegistry();
+		service = SemanticaTestHelper.createService(settings);
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
 
 		scanner = new MessageFileScanner(Format.YAML);
-		loader = new DefaultMessageFileLoader(registry, new TextProcessor());
+		loader = new DefaultMessageFileLoader(
+				registry,
+				interceptionRegistry,
+				new TextProcessor(),
+				service,
+				() -> settings
+		);
 
 		// Get path to test resources
 		messagesRoot = Paths.get(getClass().getResource("/messages").toURI());
@@ -66,7 +76,9 @@ class FileLoadingIntegrationTest {
 		Path colorsFile = messagesRoot.resolve("common/colors.yml");
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile);
 
-		MessageDocument data = Config.load(colorsFile, MessageDocument.class);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> raw = (Map<String, Object>) Config.load(colorsFile, Map.class);
+		MessageDocument data = MessageDocument.fromRawMap(raw);
 		loader.loadFromData(keyPrefix, data);
 
 		assertTrue(registry.exists("common.colors.primary"));
@@ -83,8 +95,8 @@ class FileLoadingIntegrationTest {
 		loadFile(messagesRoot.resolve("common/styles.yml"));
 
 		assertTrue(registry.exists("common.styles.prefix"));
-		assertTrue(registry.exists("common.styles.error.format"));
-		assertTrue(registry.exists("common.styles.error.box"));
+		assertTrue(registry.exists("common.styles.error-format"));
+		assertTrue(registry.exists("common.styles.error-box"));
 	}
 
 	@Test
@@ -93,10 +105,10 @@ class FileLoadingIntegrationTest {
 		loadFile(messagesRoot.resolve("common/styles.yml"));
 		loadFile(messagesRoot.resolve("errors/permissions.yml"));
 
-		assertTrue(registry.exists("errors.permissions.no.permission"));
+		assertTrue(registry.exists("errors.permissions.no-permission"));
 
-		String enText = registry.get("errors.permissions.no.permission").getText(Locale.US);
-		String deText = registry.get("errors.permissions.no.permission").getText(Locale.GERMANY);
+		String enText = registry.get("errors.permissions.no-permission").getText(Locale.US);
+		String deText = registry.get("errors.permissions.no-permission").getText(Locale.GERMANY);
 
 		assertNotNull(enText);
 		assertNotNull(deText);
@@ -109,7 +121,7 @@ class FileLoadingIntegrationTest {
 		loadAllFiles();
 
 		String result = service.resolve(
-				"errors.permissions.no.permission",
+				"errors.permissions.no-permission",
 				Locale.US,
 				Map.of("permission", "intercept.admin")
 		);
@@ -124,7 +136,7 @@ class FileLoadingIntegrationTest {
 		loadAllFiles();
 
 		String result = service.resolve(
-				"errors.permissions.rank.required",
+				"errors.permissions.rank-required",
 				Locale.US,
 				Map.of("rank", "ADMIN")
 		);
@@ -154,7 +166,7 @@ class FileLoadingIntegrationTest {
 		loadAllFiles();
 
 		String result = service.resolve(
-				"errors.permissions.no.permission",
+				"errors.permissions.no-permission",
 				Locale.GERMANY,
 				Map.of("permission", "intercept.admin")
 		);
@@ -176,9 +188,11 @@ class FileLoadingIntegrationTest {
 	private void loadFile(Path file) {
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
 
-		// Read with Configura - Jackson handles deserialization automatically
-		MessageDocument data = Config.load(file, MessageDocument.class);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> raw = (Map<String, Object>) Config.load(file, Map.class);
+		MessageDocument data = MessageDocument.fromRawMap(raw);
 
 		loader.loadFromData(keyPrefix, data);
 	}
 }
+

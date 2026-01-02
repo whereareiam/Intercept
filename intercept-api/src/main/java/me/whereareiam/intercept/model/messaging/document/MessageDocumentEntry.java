@@ -2,9 +2,6 @@ package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.whereareiam.intercept.type.message.MessageType;
-
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,35 +11,28 @@ import java.util.Map;
 @Setter
 public class MessageDocumentEntry {
 	/**
-	 * Optional entry-level type
-	 * If not present, inherits from file-level type
-	 * If file-level type also not present, auto-detect based on structure
-	 */
-	private MessageType type;
-
-	/**
-	 * Single-language text (String or List&lt;String&gt;)
-	 * Used for templates or single-language messages
+	 * Single text (String or List&lt;String&gt;).
+	 * Used for templates or non-localized messages.
 	 */
 	private Object text;
 
 	/**
-	 * Multi-language translations (Map&lt;String, String or List&lt;String&gt;&gt;)
-	 * Key = locale, Value = text (String or List&lt;String&gt;)
+	 * Locale translations grouped under "locales".
+	 * Keys are locale strings or "default".
 	 */
-	private Map<String, Object> translations;
+	private Map<String, Object> locales;
 
 	/**
-	 * Optional regex patterns that can trigger this message.
-	 * When text matches any of these patterns, this message will be resolved.
+	 * Optional interception rules for this key.
 	 */
-	private List<MessageDocumentRegex> regex;
+	private MessageDocumentInterception interception;
 
-	public void setTranslations(Map<String, Object> translations) {
-		this.translations = translations == null || translations.isEmpty() ? null : translations;
+	public void setLocales(Map<String, Object> locales) {
+		this.locales = locales == null || locales.isEmpty() ? null : locales;
 	}
 
-	public void setRegex(List<MessageDocumentRegex> regex) {
-		this.regex = regex == null || regex.isEmpty() ? null : regex;
+	public void setInterception(MessageDocumentInterception interception) {
+		this.interception = interception == null || interception.getPatterns() == null
+				|| interception.getPatterns().isEmpty() ? null : interception;
 	}
 }
