@@ -7,7 +7,7 @@ import me.whereareiam.intercept.event.player.change.PlayerInspectionModeChangedE
 import me.whereareiam.intercept.event.player.change.PlayerLocaleChangedEvent;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.intercept.util.EventUtil;
-import me.whereareiam.keystone.Player;
+import me.whereareiam.keystone.Actor;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,12 +17,10 @@ import java.util.UUID;
 /**
  * Abstract base class for Intercept player implementations.
  * Platform-specific modules (Paper, Velocity) extend this with concrete implementations.
- * <p>
- * Implements Player (Keystone) which extends Actor.
  */
 @Getter
 @ToString
-public abstract class InterceptPlayer implements Player {
+public abstract class InterceptPlayer implements Actor {
 	/**
 	 * The player's unique identifier
 	 */

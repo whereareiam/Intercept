@@ -10,11 +10,12 @@ lombok = "1.18.42"
 # general
 guice = "7.0.0"
 annotations = "26.0.1"
-configura = "dev-a76adc6"
-attache = "dev-5fad19f"
-keystone = "dev-697f401"
-commandant = "dev-5f99bce"
-dialectica = "dev-74ce2b6"
+configura = "dev"
+attache = "dev-0ac3086"
+keystone = "dev"
+commandant = "dev"
+semantica = "dev"
+dialectica = "dev-97e4633"
 junit = "6.0.0"
 mockito = "5.20.0"
 testcontainers = "2.0.2"
@@ -57,6 +58,7 @@ annotations = { group = "org.jetbrains", name = "annotations", version.ref = "an
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
 keystone = { group = "me.whereareiam", name = "keystone", version.ref = "keystone" }
 commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
+semantica = { group = "me.whereareiam", name = "semantica", version.ref = "semantica" }
 dialectica = { group = "me.whereareiam", name = "dialectica", version.ref = "dialectica" }
 
 # attache

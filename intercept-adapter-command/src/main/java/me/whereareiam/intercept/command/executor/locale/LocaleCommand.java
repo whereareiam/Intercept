@@ -8,7 +8,6 @@ import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.keystone.Actor;
-import me.whereareiam.keystone.Player;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +59,7 @@ public class LocaleCommand extends AbstractLocaleCommand {
 			@NotNull Actor sender,
 			@NotNull Messages.Commands.LocaleCommand localeMessages
 	) {
-		if (!(sender instanceof Player player) || !(player instanceof InterceptPlayer interceptPlayer)) {
+		if (!(sender instanceof InterceptPlayer interceptPlayer)) {
 			sendPlainMessage(sender, localeMessages.getPlayerOnly());
 			return null;
 		}

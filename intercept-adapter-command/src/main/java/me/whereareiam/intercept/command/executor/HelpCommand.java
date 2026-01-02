@@ -7,7 +7,7 @@ import me.whereareiam.commandant.Help;
 import me.whereareiam.commandant.Pagination;
 import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.commandant.builder.HelpBuilder;
-import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.intercept.model.CommandDefinition;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.model.config.Commands;

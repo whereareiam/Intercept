@@ -5,25 +5,32 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.commandant.Commandant;
-import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.commandant.CommandantKeys;
+import me.whereareiam.commandant.ExceptionHandlerRegistrar;
+import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.commandant.model.message.ExceptionMessages;
-import me.whereareiam.commandant.registration.CommandRegistrar;
 import me.whereareiam.intercept.CommandService;
+import me.whereareiam.intercept.command.definition.CommandDefinitionAdapter;
 import me.whereareiam.intercept.command.executor.*;
 import me.whereareiam.intercept.command.executor.locale.LocaleCommand;
 import me.whereareiam.intercept.command.executor.locale.LocaleTargetCommand;
 import me.whereareiam.intercept.command.suggestion.LocaleSuggestionProvider;
 import me.whereareiam.intercept.command.suggestion.PlayerSuggestionProvider;
+import me.whereareiam.intercept.model.CommandDefinition;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
-import me.whereareiam.keystone.Player;
 import me.whereareiam.keystone.serializer.SerializerEngine;
+import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.internal.CommandRegistrationHandler;
+import org.incendo.cloud.parser.ParserRegistry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -61,16 +68,30 @@ public class DefaultCommandService implements CommandService {
 		
 		// Register suggestion providers first using the real command manager
 		registerSuggestionProviders(commandManager);
-		
-		CommandRegistrar<Actor> registrar = Commandant.createAnnotationRegistrar(
-				commandManager,
-				this::resolveCooldownKey,
-				Actor.class,
-				definitionLookup
-		);
 
-		registrar.setRootCommand(resolveRootCommand(definitionLookup));
-		registerCommands(registrar);
+		String rootCommand = resolveRootCommand(definitionLookup);
+		CommandDefinitionAdapter definitionAdapter = new CommandDefinitionAdapter();
+		AnnotationParser<Actor> parser = createCommandAnnotationParser(commandManager);
+		Collection<Command<Actor>> parsedCommands = parseCommands(parser);
+
+		for (Command<Actor> command : parsedCommands) {
+			String definitionId = command.commandMeta()
+					.optional(CommandantKeys.DEFINITION_ID)
+					.orElse(null);
+			CommandDefinition definition = definitionId != null ? definitionLookup.apply(definitionId) : null;
+			CommandDefinition effectiveDefinition = definition;
+
+			if (definition != null && isSubcommand(definition, rootCommand) && definition.getAliases() != null) {
+				effectiveDefinition = definition.toBuilder()
+						.aliases(prefixAliases(definition.getAliases(), rootCommand))
+						.build();
+			}
+
+			Commandant.process(command, commandManager)
+					.withDefinition(effectiveDefinition, definitionAdapter)
+					.register();
+		}
+
 		registerExceptionHandlers(commandManager);
 	}
 
@@ -79,19 +100,35 @@ public class DefaultCommandService implements CommandService {
 		return commands.getCommands().get(key);
 	}
 
-	private @NotNull UUID resolveCooldownKey(@NotNull Actor actor) {
-		if (actor instanceof Player player) {
-			return player.getUniqueId();
-		}
-		return UUID.nameUUIDFromBytes(actor.getClass().getName().getBytes());
-	}
-
 	private @NotNull String resolveRootCommand(@NotNull Function<String, CommandDefinition> definitionLookup) {
 		CommandDefinition definition = definitionLookup.apply("main");
 		if (definition == null || definition.getAliases() == null || definition.getAliases().isEmpty())
 			return "intercept";
 
 		return definition.getAliases().getFirst();
+	}
+
+	private boolean isSubcommand(@NotNull CommandDefinition definition, @NotNull String rootCommand) {
+		String usage = definition.getUsage();
+		return !rootCommand.isBlank() && usage != null && usage.contains("{command}");
+	}
+
+	private @NotNull List<String> prefixAliases(@NotNull List<String> aliases, @NotNull String rootCommand) {
+		if (rootCommand.isBlank()) return aliases;
+
+		return aliases.stream()
+				.filter(alias -> alias != null && !alias.isBlank())
+				.map(alias -> {
+					String trimmed = alias.trim();
+					String prefix = rootCommand.trim();
+					String lowerTrimmed = trimmed.toLowerCase();
+					String lowerPrefix = prefix.toLowerCase();
+					if (lowerTrimmed.equals(lowerPrefix) || lowerTrimmed.startsWith(lowerPrefix + " ")) {
+						return trimmed;
+					}
+					return prefix + " " + trimmed;
+				})
+				.toList();
 	}
 
 	/**
@@ -106,8 +143,8 @@ public class DefaultCommandService implements CommandService {
 		);
 	}
 
-	private void registerCommands(@NotNull CommandRegistrar<Actor> registrar) {
-		registrar.register(
+	private @NotNull Collection<Command<Actor>> parseCommands(@NotNull AnnotationParser<Actor> parser) {
+		return parser.parse(
 				injector.getInstance(MainCommand.class),
 				injector.getInstance(HelpCommand.class),
 				injector.getInstance(ReloadCommand.class),
@@ -124,11 +161,41 @@ public class DefaultCommandService implements CommandService {
 				? messagesProvider.get().getCommands().getExceptions()
 				: new ExceptionMessages();
 
-		Commandant.registerExceptionHandler(
-				exceptionMessages,
-				serializer,
-				commandManager,
-				Actor::getAudience
+		ExceptionHandlerRegistrar.register(commandManager, exceptionMessages, serializer, Actor::getAudience);
+	}
+
+	private @NotNull AnnotationParser<Actor> createCommandAnnotationParser(
+			@NotNull CommandManager<Actor> commandManager
+	) {
+		AnnotationParser<Actor> parser = new AnnotationParser<>(
+				new RecordingCommandManager<>(commandManager),
+				Actor.class
 		);
+
+		parser.registerBuilderModifier(
+				Definition.class,
+				(annotation, builder) -> builder.meta(CommandantKeys.DEFINITION_ID, annotation.value())
+		);
+
+		return parser;
+	}
+
+	private static final class RecordingCommandManager<C> extends CommandManager<C> {
+		private final CommandManager<C> realManager;
+
+		RecordingCommandManager(@NotNull CommandManager<C> realManager) {
+			super(ExecutionCoordinator.simpleCoordinator(), CommandRegistrationHandler.nullCommandRegistrationHandler());
+			this.realManager = realManager;
+		}
+
+		@Override
+		public boolean hasPermission(@NotNull C sender, @NotNull String permission) {
+			return true;
+		}
+
+		@Override
+		public @NotNull ParserRegistry<C> parserRegistry() {
+			return realManager.parserRegistry();
+		}
 	}
 }

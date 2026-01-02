@@ -10,7 +10,6 @@ import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.keystone.Actor;
-import me.whereareiam.keystone.Player;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotations.Command;
 import org.jetbrains.annotations.NotNull;
@@ -46,13 +45,8 @@ public class InspectCommand {
 	 */
 	@Nullable
 	private InterceptPlayer getInterceptPlayer(@NotNull Actor sender) {
-		if (!(sender instanceof Player player)) {
+		if (!(sender instanceof InterceptPlayer interceptPlayer)) {
 			sendErrorMessage(sender, "This command can only be used by players.");
-			return null;
-		}
-
-		if (!(player instanceof InterceptPlayer interceptPlayer)) {
-			sendErrorMessage(sender, "Unable to get player UUID.");
 			return null;
 		}
 
