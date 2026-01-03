@@ -3,18 +3,10 @@ package me.whereareiam.intercept.common.messaging.persistence;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
-import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
-import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
-import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
-import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.intercept.util.LocaleUtil;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
@@ -34,25 +26,17 @@ import java.util.*;
 public class DefaultMessageFileLoader implements MessageFileLoader {
 	private static final String LOCALES_KEY = "locales";
 	private static final String TEXT_KEY = "text";
-	private static final String INTERCEPTION_KEY = "interception";
-	private static final String PATTERNS_KEY = "patterns";
 
-	private final MessageRegistry registry;
-	private final InterceptionRegistry interceptionRegistry;
 	private final TextProcessor textProcessor;
 	private final TranslationService<Locale> translationService;
 	private final Provider<Settings> settingsProvider;
 
 	@Inject
 	public DefaultMessageFileLoader(
-			MessageRegistry registry,
-			InterceptionRegistry interceptionRegistry,
 			TextProcessor textProcessor,
 			TranslationService<Locale> translationService,
 			Provider<Settings> settingsProvider
 	) {
-		this.registry = registry;
-		this.interceptionRegistry = interceptionRegistry;
 		this.textProcessor = textProcessor;
 		this.translationService = translationService;
 		this.settingsProvider = settingsProvider;
@@ -67,12 +51,6 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 
 		Map<String, TranslationEntry> translations = new HashMap<>();
 		for (ParsedEntry entry : parsedEntries.values()) {
-			CompiledMessageEntry compiled = toCompiledEntry(entry);
-			registry.register(entry.key(), compiled);
-			if (!entry.regexPatterns().isEmpty()) {
-				interceptionRegistry.register(entry.key(), entry.regexPatterns());
-			}
-
 			TranslationEntry translationEntry = toTranslationEntry(entry);
 			if (translationEntry != null)
 				translations.put(entry.key(), translationEntry);
@@ -96,34 +74,35 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 			String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
 
 			if (value instanceof MessageDocumentEntry entryData) {
-				ParsedEntry parsed = parseEntry(fullKey, entryData.getText(), entryData.getLocales(), entryData.getInterception());
-				if (parsed != null) entries.put(fullKey, parsed);
+				ParsedEntry parsed = parseEntry(fullKey, entryData.getText(), entryData.getLocales());
+				entries.put(fullKey, parsed);
 				continue;
 			}
 
 			if (value instanceof Map<?, ?> mapValue) {
 				Map<String, Object> map = castMap(mapValue);
 				if (isEntryMap(map)) {
-					ParsedEntry parsed = parseEntry(fullKey, map.get(TEXT_KEY), map.get(LOCALES_KEY), map.get(INTERCEPTION_KEY));
-					if (parsed != null) entries.put(fullKey, parsed);
-				} else {
-					parseEntries(fullKey, map, entries);
+					ParsedEntry parsed = parseEntry(fullKey, map.get(TEXT_KEY), map.get(LOCALES_KEY));
+					entries.put(fullKey, parsed);
+					continue;
 				}
+
+				parseEntries(fullKey, map, entries);
 				continue;
 			}
 
 			if (value != null) {
-				ParsedEntry parsed = parseEntry(fullKey, value, null, null);
-				if (parsed != null) entries.put(fullKey, parsed);
+				ParsedEntry parsed = parseEntry(fullKey, value, null);
+				entries.put(fullKey, parsed);
 			}
 		}
 	}
 
 	private boolean isEntryMap(Map<String, Object> map) {
-		return map.containsKey(TEXT_KEY) || map.containsKey(LOCALES_KEY) || map.containsKey(INTERCEPTION_KEY);
+		return map.containsKey(TEXT_KEY) || map.containsKey(LOCALES_KEY);
 	}
 
-	private ParsedEntry parseEntry(String key, Object textRaw, Object localesRaw, Object interceptionRaw) {
+	private ParsedEntry parseEntry(String key, Object textRaw, Object localesRaw) {
 		boolean localized = localesRaw != null;
 		if (textRaw != null && localized) {
 			throw new IllegalArgumentException("Entry '" + key + "' cannot have both 'text' and 'locales'");
@@ -131,7 +110,6 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 
 		LocaleBlock locales = localized ? parseLocales(key, localesRaw) : LocaleBlock.empty();
 		String text = localized ? null : parseText(textRaw);
-		List<CompiledRegexPattern> regexPatterns = parseInterception(key, interceptionRaw);
 
 		if (!localized && (text == null || text.isEmpty())) {
 			throw new IllegalArgumentException("Entry '" + key + "' must define 'text'");
@@ -146,8 +124,7 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 				localized,
 				text,
 				locales.defaultText(),
-				locales.translations(),
-				regexPatterns
+				locales.translations()
 		);
 	}
 
@@ -179,95 +156,6 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 		return new LocaleBlock(defaultText, translations);
 	}
 
-	private List<CompiledRegexPattern> parseInterception(String key, Object raw) {
-		if (raw == null) return List.of();
-
-		if (raw instanceof MessageDocumentInterception interception) {
-			return compileRegexPatterns(interception.getPatterns());
-		}
-
-		if (raw instanceof Map<?, ?> mapValue) {
-			Map<String, Object> interception = castMap(mapValue);
-			Object patternsRaw = interception.get(PATTERNS_KEY);
-			return compileRegexPatterns(patternsRaw);
-		}
-
-		Logger.warn("[Intercept] Ignoring invalid interception section for key '%s'", key);
-		return List.of();
-	}
-
-	private List<CompiledRegexPattern> compileRegexPatterns(Object patternsRaw) {
-		if (patternsRaw == null) return List.of();
-
-		if (patternsRaw instanceof List<?> list) {
-			List<CompiledRegexPattern> compiled = new ArrayList<>();
-			for (Object item : list) {
-				MessageDocumentRegex regex = toDocumentRegex(item);
-				if (regex == null) continue;
-				addCompiledRegex(compiled, regex);
-			}
-			return compiled;
-		}
-
-		if (patternsRaw instanceof MessageDocumentRegex regex) {
-			List<CompiledRegexPattern> compiled = new ArrayList<>();
-			addCompiledRegex(compiled, regex);
-			return compiled;
-		}
-
-		Logger.warn("[Intercept] Invalid interception patterns format: %s", patternsRaw.getClass().getSimpleName());
-		return List.of();
-	}
-
-	private MessageDocumentRegex toDocumentRegex(Object raw) {
-		if (raw instanceof MessageDocumentRegex regex) return regex;
-		if (!(raw instanceof Map<?, ?> mapValue)) return null;
-
-		Map<String, Object> map = castMap(mapValue);
-		Object patternRaw = map.get("pattern");
-		if (!(patternRaw instanceof String pattern) || pattern.isEmpty()) return null;
-
-		MessageDocumentRegex regex = new MessageDocumentRegex();
-		regex.setPattern(pattern);
-
-		Object priorityRaw = map.get("priority");
-		if (priorityRaw instanceof Number number) {
-			regex.setPriority(number.intValue());
-		}
-
-		Object replaceMatchedRaw = map.get("replaceMatched");
-		if (replaceMatchedRaw instanceof Boolean flag) {
-			regex.setReplaceMatched(flag);
-		}
-
-		Object placeholdersRaw = map.get("placeholders");
-		if (placeholdersRaw instanceof Map<?, ?> placeholdersMap) {
-			Map<String, String> placeholders = new LinkedHashMap<>();
-			for (Map.Entry<?, ?> entry : placeholdersMap.entrySet()) {
-				String key = String.valueOf(entry.getKey());
-				String value = entry.getValue() != null ? String.valueOf(entry.getValue()) : null;
-				if (value != null) placeholders.put(key, value);
-			}
-			regex.setPlaceholders(placeholders);
-		}
-
-		return regex;
-	}
-
-	private void addCompiledRegex(List<CompiledRegexPattern> compiled, MessageDocumentRegex patternData) {
-		try {
-			compiled.add(new CompiledRegexPattern(
-					patternData.getPattern(),
-					patternData.getPlaceholders(),
-					patternData.getPriority(),
-					patternData.isReplaceMatched()
-			));
-		} catch (Exception e) {
-			Logger.severe("[Intercept] Failed to compile regex pattern: " + patternData.getPattern());
-			e.printStackTrace();
-		}
-	}
-
 	private Locale parseLocale(String localeString) {
 		if (localeString == null || localeString.isEmpty())
 			return Locale.getDefault();
@@ -276,20 +164,6 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 			return new Locale.Builder().setLanguage("default").build();
 
 		return LocaleUtil.parseLocale(localeString);
-	}
-
-	private CompiledMessageEntry toCompiledEntry(ParsedEntry entry) {
-		List<CompiledRegexPattern> regexPatterns = entry.regexPatterns();
-
-		if (entry.localized()) {
-			Map<Locale, String> translations = new LinkedHashMap<>(entry.locales());
-			if (entry.defaultText() != null) {
-				translations.put(parseLocale("default"), entry.defaultText());
-			}
-			return new CompiledMessageEntry(MessageType.MESSAGE, translations, regexPatterns);
-		}
-
-		return new CompiledMessageEntry(MessageType.TEMPLATE, entry.text(), regexPatterns);
 	}
 
 	private TranslationEntry toTranslationEntry(ParsedEntry entry) {
@@ -308,22 +182,16 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 				translations.putIfAbsent(defaultTranslationLocale, defaultText);
 			}
 
-			if (!translations.isEmpty()) {
+			if (!translations.isEmpty())
 				return new LocalizedEntry(translations);
-			}
 
-			if (defaultText != null) {
-				return new TemplateEntry(defaultText);
-			}
-
-			return null;
+			return defaultText != null ? new TemplateEntry(defaultText) : null;
 		}
 
 		String text = entry.text();
 		return text != null ? new TemplateEntry(text) : null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, Object> castMap(Map<?, ?> raw) {
 		Map<String, Object> casted = new LinkedHashMap<>();
 		for (Map.Entry<?, ?> entry : raw.entrySet()) {
@@ -347,9 +215,7 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 			boolean localized,
 			String text,
 			String defaultText,
-			Map<Locale, String> locales,
-			List<CompiledRegexPattern> regexPatterns
+			Map<Locale, String> locales
 	) {
 	}
-}
 }

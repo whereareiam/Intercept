@@ -6,15 +6,15 @@ import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.adapter.database.entity.message.*;
 import me.whereareiam.intercept.adapter.database.repository.message.*;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
-import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.intercept.util.LocaleUtil;
+import me.whereareiam.semantica.model.SemanticLocale;
+import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
+import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.base.TranslationLocale;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -34,7 +34,7 @@ public class MessageDownloadCoordinator {
 		List<MessageFileEntity> files = fileRepository.findAll();
 		if (files.isEmpty()) return new MessageSnapshot(Map.of(), Map.of());
 
-		Map<String, CompiledMessageEntry> entrySnapshot = new LinkedHashMap<>();
+		Map<String, TranslationEntry> entrySnapshot = new LinkedHashMap<>();
 		Map<String, Path> fileSnapshot = new LinkedHashMap<>();
 
 		for (MessageFileEntity fileEntity : files) {
@@ -50,7 +50,7 @@ public class MessageDownloadCoordinator {
 	private AssemblyResult assemble(MessageFileEntity fileEntity) {
 		List<MessageEntryEntity> entryEntities = entryRepository.findAllByFileId(fileEntity.getId());
 		Map<String, Object> fileItems = new LinkedHashMap<>();
-		Map<String, CompiledMessageEntry> snapshotEntries = new LinkedHashMap<>();
+		Map<String, TranslationEntry> snapshotEntries = new LinkedHashMap<>();
 
 		for (MessageEntryEntity entryEntity : entryEntities) {
 			EntryAssembly entryAssembly = assembleEntry(fileEntity.getKeyPrefix(), entryEntity);
@@ -71,22 +71,20 @@ public class MessageDownloadCoordinator {
 
 		TranslationAssembly translations = loadTranslations(entryEntity.getId());
 
-		MessageDocumentEntry fileData = new MessageDocumentEntry();
+		Map<String, Object> fileData = new LinkedHashMap<>();
 		Map<String, Object> locales = toDocumentLocales(translations);
 		if (locales != null && !locales.isEmpty()) {
-			fileData.setLocales(locales);
+			fileData.put("locales", locales);
 		} else {
-			fileData.setText(translations.defaultText());
+			fileData.put("text", translations.defaultText());
 		}
 
-		RegexAssemblyResult regexAssembly = assembleRegex(entryEntity.getId());
-		fileData.setInterception(regexAssembly.fileInterception());
+		Map<String, Object> interception = assembleRegex(entryEntity.getId());
+		if (interception != null && !interception.isEmpty()) {
+			fileData.put("interception", interception);
+		}
 
-		CompiledMessageEntry snapshotEntry = buildSnapshotEntry(
-				entryType,
-				translations,
-				regexAssembly.snapshotRegex()
-		);
+		TranslationEntry snapshotEntry = buildSnapshotEntry(entryType, translations);
 
 		return new EntryAssembly(fullKey, snapshotEntry, fileData, entryType);
 	}
@@ -133,12 +131,11 @@ public class MessageDownloadCoordinator {
 		return documentLocales;
 	}
 
-	private RegexAssemblyResult assembleRegex(long entryId) {
+	private Map<String, Object> assembleRegex(long entryId) {
 		List<MessageRegexPatternEntity> patternEntities = patternRepository.findAllByEntryId(entryId);
-		if (patternEntities.isEmpty()) return new RegexAssemblyResult(null, List.of());
+		if (patternEntities.isEmpty()) return Map.of();
 
-		List<CompiledRegexPattern> snapshotPatterns = new ArrayList<>();
-		List<MessageDocumentRegex> fileRegex = new ArrayList<>();
+		List<Map<String, Object>> fileRegex = new ArrayList<>();
 
 		for (MessageRegexPatternEntity patternEntity : patternEntities) {
 			Map<String, String> placeholders = placeholderRepository.findAllByPatternId(patternEntity.getId())
@@ -150,55 +147,45 @@ public class MessageDownloadCoordinator {
 							LinkedHashMap::new
 					));
 
-			CompiledRegexPattern snapshotPattern = new CompiledRegexPattern(
-					patternEntity.getPattern(),
-					placeholders,
-					patternEntity.getPriority(),
-					patternEntity.isReplaceMatched()
-			);
-
-			MessageDocumentRegex fileRegexEntry = new MessageDocumentRegex();
-			fileRegexEntry.setPattern(patternEntity.getPattern());
-			fileRegexEntry.setPriority(patternEntity.getPriority());
-			fileRegexEntry.setReplaceMatched(patternEntity.isReplaceMatched());
-			fileRegexEntry.setPlaceholders(placeholders);
-
-			snapshotPatterns.add(snapshotPattern);
+			Map<String, Object> fileRegexEntry = new LinkedHashMap<>();
+			fileRegexEntry.put("pattern", patternEntity.getPattern());
+			fileRegexEntry.put("priority", patternEntity.getPriority());
+			fileRegexEntry.put("replaceMatched", patternEntity.isReplaceMatched());
+			if (!placeholders.isEmpty()) {
+				fileRegexEntry.put("placeholders", placeholders);
+			}
 			fileRegex.add(fileRegexEntry);
 		}
 
-		MessageDocumentInterception interception = new MessageDocumentInterception();
-		interception.setPatterns(fileRegex);
-		return new RegexAssemblyResult(interception, snapshotPatterns);
+		Map<String, Object> interception = new LinkedHashMap<>();
+		interception.put("patterns", fileRegex);
+		return interception;
 	}
 
 	private String buildFullKey(String keyPrefix, String entryKey) {
 		return keyPrefix == null || keyPrefix.isBlank() ? entryKey : keyPrefix + "." + entryKey;
 	}
 
-	private CompiledMessageEntry buildSnapshotEntry(
-			MessageType entryType, TranslationAssembly translations, List<CompiledRegexPattern> regexPatterns
+	private TranslationEntry buildSnapshotEntry(
+			MessageType entryType, TranslationAssembly translations
 	) {
-		MessageType resolvedType = entryType;
-		if (resolvedType == null) {
-			resolvedType = translations.translations() != null && !translations.translations().isEmpty()
-					? MessageType.MESSAGE
-					: MessageType.TEMPLATE;
+		if (translations.translations() != null && !translations.translations().isEmpty()) {
+			Map<TranslationLocale, String> map = new LinkedHashMap<>();
+			for (Map.Entry<Locale, String> entry : translations.translations().entrySet()) {
+				Locale locale = entry.getKey();
+				map.put(SemanticLocale.wrap(locale), entry.getValue());
+			}
+			return new LocalizedEntry(map);
 		}
 
-		if (translations.translations() != null && !translations.translations().isEmpty())
-			return new CompiledMessageEntry(resolvedType, translations.translations(), regexPatterns);
-
-		return new CompiledMessageEntry(resolvedType, translations.defaultText(), regexPatterns);
+		String text = translations.defaultText();
+		return text != null ? new TemplateEntry(text) : null;
 	}
 
-	private record AssemblyResult(MessageDocument fileData, Map<String, CompiledMessageEntry> snapshotEntries) {}
+	private record AssemblyResult(MessageDocument fileData, Map<String, TranslationEntry> snapshotEntries) {}
 
-	private record EntryAssembly(String fullKey, CompiledMessageEntry snapshotEntry, MessageDocumentEntry fileData,
+	private record EntryAssembly(String fullKey, TranslationEntry snapshotEntry, Map<String, Object> fileData,
 	                             MessageType entryType) {}
-
-	private record RegexAssemblyResult(MessageDocumentInterception fileInterception,
-	                                   List<CompiledRegexPattern> snapshotRegex) {}
 
 	private record TranslationAssembly(String defaultText, Map<Locale, String> translations) {}
 }

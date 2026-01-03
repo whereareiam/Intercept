@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;
@@ -13,6 +12,7 @@ import me.whereareiam.semantica.model.RebuildMetrics;
 import me.whereareiam.semantica.translation.TranslationService;
 
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Service that orchestrates message file loading.
@@ -23,20 +23,20 @@ public class MessageLifecycleService implements Reloadable {
 	private final MessageDataService messageDataService;
 	private final Provider<Settings> settingsProvider;
 	private final TranslationService<Locale> translationService;
-	private final InterceptionRegistry interceptionRegistry;
+	private final Set<MessageLifecycleHook> lifecycleHooks;
 
 	@Inject
 	public MessageLifecycleService(
 			MessageDataService messageDataService,
 			Provider<Settings> settingsProvider,
 			TranslationService<Locale> translationService,
-			InterceptionRegistry interceptionRegistry,
+			Set<MessageLifecycleHook> lifecycleHooks,
 			Registry<Reloadable> reloadableRegistry
 	) {
 		this.messageDataService = messageDataService;
 		this.settingsProvider = settingsProvider;
 		this.translationService = translationService;
-		this.interceptionRegistry = interceptionRegistry;
+		this.lifecycleHooks = lifecycleHooks;
 
 		reloadableRegistry.register(this);
 	}
@@ -46,20 +46,22 @@ public class MessageLifecycleService implements Reloadable {
 	 */
 	public void initialize() {
 		translationService.unregisterByPrefix("");
-		interceptionRegistry.clear();
+		runBeforeLoad();
 
 		// Use MessageDataService to load all files
 		messageDataService.initialize();
 
 		applyPostLoadOptimizations();
+		runAfterLoad();
 	}
 
 	@Override
 	public void reload() {
 		translationService.unregisterByPrefix("");
-		interceptionRegistry.clear();
+		runBeforeLoad();
 		messageDataService.reload();
 		applyPostLoadOptimizations();
+		runAfterLoad();
 	}
 
 	private void applyPostLoadOptimizations() {
@@ -75,6 +77,20 @@ public class MessageLifecycleService implements Reloadable {
 			if (stats.getCircularDependencies() > 0)
 				Logger.warn("Detected %d circular dependencies", stats.getCircularDependencies());
 			Logger.debug("Pre-rendered %d static messages", stats.getPrerenderedEntries());
+		}
+	}
+
+	private void runBeforeLoad() {
+		if (lifecycleHooks == null || lifecycleHooks.isEmpty()) return;
+		for (MessageLifecycleHook hook : lifecycleHooks) {
+			hook.beforeLoad();
+		}
+	}
+
+	private void runAfterLoad() {
+		if (lifecycleHooks == null || lifecycleHooks.isEmpty()) return;
+		for (MessageLifecycleHook hook : lifecycleHooks) {
+			hook.afterLoad();
 		}
 	}
 }

@@ -6,7 +6,6 @@ import me.whereareiam.commandant.model.message.HelpMessages;
 import me.whereareiam.commandant.model.message.PaginationMessages;
 import me.whereareiam.configura.TemplateProvider;
 import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -138,14 +137,14 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		fallback.setDefaultFormat(defaultFormat);
 
 		// Source-specific formats
-		Map<ComponentType, Messages.Fallback.SourceFormat> formats = new HashMap<>();
+		Map<String, Messages.Fallback.SourceFormat> formats = new HashMap<>();
 
 		// CHAT - Simple bracket notation for missing chat messages
 		Messages.Fallback.SourceFormat chatFormat = new Messages.Fallback.SourceFormat();
 		chatFormat.setEnabled(true);
 		chatFormat.setFormat("<dark_gray>{key}</dark_gray>");
 		chatFormat.setLogMissing(true);
-		formats.put(ComponentType.CHAT, chatFormat);
+		formats.put("CHAT", chatFormat);
 
 		fallback.setFormats(formats);
 		messages.setFallback(fallback);

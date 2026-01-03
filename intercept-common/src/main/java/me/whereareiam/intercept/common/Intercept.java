@@ -6,12 +6,12 @@ import me.whereareiam.intercept.CommandService;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.InterceptAPI;
 import me.whereareiam.intercept.PlatformInteractor;
-import me.whereareiam.intercept.common.interceptor.InterceptorService;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
 import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
 import me.whereareiam.intercept.common.updater.UpdateScheduler;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.event.base.EventOrder;
 import me.whereareiam.intercept.event.base.IntercepticEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptBootstrappedEvent;
 import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
@@ -40,26 +40,26 @@ public class Intercept implements EventListener {
 		Constants.SERVER_VERSION = injector.getInstance(PlatformInteractor.class).getServerVersion();
 		Logger.init(injector.getInstance(LoggingHelper.class));
 
-		// Load settings early - this will trigger @PostProcess which initializes InterceptionHelper
+		// Load settings early so dependent modules can initialize based on config
 		injector.getInstance(Settings.class);
 
 		// Initialize the public API for external plugins
 		InterceptAPI.initialize(injector);
 	}
 
-	@IntercepticEvent
+	@IntercepticEvent(EventOrder.LOW)
 	public void onReady(InterceptReadyEvent event) {
 		injector.getInstance(ListenerRegistrar.class).registerListeners();
 
 		// Initialize messages system
 		injector.getInstance(MessageLifecycleService.class).initialize();
 
-		// Initialize interceptors (providers registered by platform classes)
-		injector.getInstance(InterceptorService.class).initialize();
-
 		// Initialize commands
 		injector.getInstance(CommandService.class);
+	}
 
+	@IntercepticEvent(EventOrder.HIGHEST)
+	public void onReadyFinal(InterceptReadyEvent event) {
 		injector.getInstance(WelcomeBannerPrinter.class).print();
 		injector.getInstance(UpdateScheduler.class).start();
 
@@ -69,8 +69,6 @@ public class Intercept implements EventListener {
 
 	@IntercepticEvent
 	public void onShutdown(InterceptShutdownEvent event) {
-		injector.getInstance(InterceptorService.class).shutdown();
-
 		// Shutdown the public API
 		InterceptAPI.shutdown();
 	}

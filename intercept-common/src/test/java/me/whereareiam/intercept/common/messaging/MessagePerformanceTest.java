@@ -2,9 +2,8 @@ package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.base.Registry;
-import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,8 @@ class MessagePerformanceTest {
 	@BeforeEach
 	void setUp() {
 		Registry<Reloadable> registryMock = mock(Registry.class);
-		registry = new DefaultMessageRegistry(registryMock);
+		InterceptTranslationRegistry translationRegistry = new InterceptTranslationRegistry();
+		registry = new DefaultMessageRegistry(translationRegistry, registryMock);
 
 		// Create settings with cache enabled
 		Settings settings = new Settings();
@@ -51,13 +51,13 @@ class MessagePerformanceTest {
 
 		settings.setPerformance(performance);
 
-		service = SemanticaTestHelper.createService(settings);
+		service = SemanticaTestHelper.createService(settings, translationRegistry);
 	}
 
 	@Test
 	void staticMessageShouldResolveUnder10Microseconds() {
 		// Setup
-		registerMessage("static", new CompiledMessageEntry(MessageType.MESSAGE, "Static text"));
+		registerMessage("static", SemanticaTestHelper.template("Static text"));
 
 		// Warm up JVM and cache (multiple iterations)
 		for (int i = 0; i < 1000; i++) {
@@ -76,15 +76,15 @@ class MessagePerformanceTest {
 		}
 
 		long avgDuration = totalDuration / iterations;
-		assertTrue(avgDuration < 10_000, "Static cached message should average under 10µs, was: " + avgDuration + "ns");
+		assertTrue(avgDuration < 10_000, "Static cached message should average under 10æs, was: " + avgDuration + "ns");
 	}
 
 	@Test
 	void semiStaticMessageShouldResolveUnder100Microseconds() {
 		// Setup
-		registerMessage("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[App]"));
-		registerMessage("semi", new CompiledMessageEntry(MessageType.MESSAGE,
-				"<m:prefix> <if enabled==true>Enabled<else>Disabled</if>"));
+		registerMessage("prefix", SemanticaTestHelper.template("[App]"));
+		registerMessage("semi", SemanticaTestHelper.template(
+				"<ref:prefix> <if enabled==true>Enabled<else>Disabled</if>"));
 
 		// Warm up JVM and cache
 		for (int i = 0; i < 100; i++) {
@@ -103,14 +103,13 @@ class MessagePerformanceTest {
 		}
 
 		long avgDuration = totalDuration / iterations;
-		assertTrue(avgDuration < 100_000, "Semi-static cached message should average under 100µs, was: " + avgDuration + "ns");
+		assertTrue(avgDuration < 100_000, "Semi-static cached message should average under 100æs, was: " + avgDuration + "ns");
 	}
 
 	@Test
 	void simpleDynamicMessageShouldResolveUnder100Microseconds() {
 		// Setup
-		registerMessage("dynamic", new CompiledMessageEntry(MessageType.MESSAGE,
-				"Hello, <p:name>!"));
+		registerMessage("dynamic", SemanticaTestHelper.template("Hello, <p:name>!"));
 
 		// Warm up JVM
 		for (int i = 0; i < 100; i++) {
@@ -129,17 +128,17 @@ class MessagePerformanceTest {
 		}
 
 		long avgDuration = totalDuration / iterations;
-		assertTrue(avgDuration < 100_000, "Simple dynamic message should average under 100µs, was: " + avgDuration + "ns");
+		assertTrue(avgDuration < 100_000, "Simple dynamic message should average under 100æs, was: " + avgDuration + "ns");
 	}
 
 	@Test
 	void complexDynamicMessageShouldResolveUnder500Microseconds() {
 		// Setup complex message with all features
-		registerMessage("color", new CompiledMessageEntry(MessageType.TEMPLATE, "<red>"));
-		registerMessage("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:color>[App]"));
-		registerMessage("player-name", new CompiledMessageEntry(MessageType.TEMPLATE, "<p:name>"));
-		registerMessage("complex", new CompiledMessageEntry(MessageType.MESSAGE,
-				"<m:prefix> <m:player-name name='<p:player>'> <if online==true>is online<else>is offline</if> on <p:server>"));
+		registerMessage("color", SemanticaTestHelper.template("<red>"));
+		registerMessage("prefix", SemanticaTestHelper.template("<ref:color>[App]"));
+		registerMessage("player-name", SemanticaTestHelper.template("<p:name>"));
+		registerMessage("complex", SemanticaTestHelper.template(
+				"<ref:prefix> <ref:player-name name='<p:player>'> <if online==true>is online<else>is offline</if> on <p:server>"));
 
 		// Warm up JVM
 		for (int i = 0; i < 100; i++) {
@@ -160,15 +159,14 @@ class MessagePerformanceTest {
 		}
 
 		long avgDuration = totalDuration / iterations;
-		assertTrue(avgDuration < 500_000, "Complex dynamic message should average under 500µs, was: " + avgDuration + "ns");
+		assertTrue(avgDuration < 500_000, "Complex dynamic message should average under 500æs, was: " + avgDuration + "ns");
 	}
 
 	@Test
 	void concurrentAccessShouldHandleLoad() throws InterruptedException {
 		// Setup
-		registerMessage("prefix", new CompiledMessageEntry(MessageType.TEMPLATE, "[App]"));
-		registerMessage("msg", new CompiledMessageEntry(MessageType.MESSAGE,
-				"<m:prefix> Player <p:name> joined"));
+		registerMessage("prefix", SemanticaTestHelper.template("[App]"));
+		registerMessage("msg", SemanticaTestHelper.template("<ref:prefix> Player <p:name> joined"));
 
 		int threadCount = 50;
 		int requestsPerThread = 20;
@@ -199,7 +197,7 @@ class MessagePerformanceTest {
 	@Test
 	void cacheHitRateShouldBeHigh() {
 		// Setup
-		registerMessage("static", new CompiledMessageEntry(MessageType.MESSAGE, "Static text"));
+		registerMessage("static", SemanticaTestHelper.template("Static text"));
 
 		// First call - cache miss
 		service.resolve("static", Locale.US);
@@ -217,12 +215,12 @@ class MessagePerformanceTest {
 	@Test
 	void nestedResolutionShouldStayFast() {
 		// Setup deep nesting
-		registerMessage("a", new CompiledMessageEntry(MessageType.TEMPLATE, "A"));
-		registerMessage("b", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:a>B"));
-		registerMessage("c", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:b>C"));
-		registerMessage("d", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:c>D"));
-		registerMessage("e", new CompiledMessageEntry(MessageType.TEMPLATE, "<m:d>E"));
-		registerMessage("final", new CompiledMessageEntry(MessageType.MESSAGE, "Result: <m:e>"));
+		registerMessage("a", SemanticaTestHelper.template("A"));
+		registerMessage("b", SemanticaTestHelper.template("<ref:a>B"));
+		registerMessage("c", SemanticaTestHelper.template("<ref:b>C"));
+		registerMessage("d", SemanticaTestHelper.template("<ref:c>D"));
+		registerMessage("e", SemanticaTestHelper.template("<ref:d>E"));
+		registerMessage("final", SemanticaTestHelper.template("Result: <ref:e>"));
 
 		// Warm up
 		for (int i = 0; i < 100; i++) {
@@ -241,14 +239,14 @@ class MessagePerformanceTest {
 		}
 
 		long avgDuration = totalDuration / iterations;
-		assertTrue(avgDuration < 200_000, "5-level nesting should average under 200µs, was: " + avgDuration + "ns");
+		assertTrue(avgDuration < 200_000, "5-level nesting should average under 200æs, was: " + avgDuration + "ns");
 	}
 
 	@Test
 	void batchResolutionShouldBeEfficient() {
 		// Setup
 		for (int i = 0; i < 100; i++) {
-			registerMessage("msg" + i, new CompiledMessageEntry(MessageType.MESSAGE,
+			registerMessage("msg" + i, SemanticaTestHelper.template(
 					"Message " + i + ": <p:value>"));
 		}
 
@@ -257,21 +255,21 @@ class MessagePerformanceTest {
 		for (int i = 0; i < 100; i++) {
 			service.resolve("msg" + i, Locale.US, Map.of("value", "test"));
 		}
-		long duration = (System.nanoTime() - start) / 1_000; // Convert to µs
+		long duration = (System.nanoTime() - start) / 1_000; // Convert to æs
 
-		assertTrue(duration < 10_000, "100 resolutions should complete under 10ms, was: " + duration + "µs");
+		assertTrue(duration < 10_000, "100 resolutions should complete under 10ms, was: " + duration + "æs");
 	}
 
 	@Test
 	void multiLocaleResolutionShouldBeFast() {
 		// Setup
 		Locale esLocale = Locale.forLanguageTag("es-ES");
-		registerMessage("welcome", new CompiledMessageEntry(MessageType.MESSAGE,
+		registerMessage("welcome", SemanticaTestHelper.localized(
 				Map.of(
 						Locale.US, "Welcome!",
-						Locale.GERMAN, "Willkommen!",
+						Locale.GERMANY, "Willkommen!",
 						Locale.FRANCE, "Bienvenue!",
-						esLocale, "¡Bienvenido!",
+						esLocale, "­Bienvenido!",
 						Locale.ITALY, "Benvenuto!"
 				)));
 
@@ -293,15 +291,14 @@ class MessagePerformanceTest {
 			service.resolve("welcome", esLocale);
 			service.resolve("welcome", Locale.ITALY);
 		}
-		long duration = (System.nanoTime() - start) / 1_000; // Convert to µs
+		long duration = (System.nanoTime() - start) / 1_000; // Convert to æs
 
 		long avgPer5Locales = duration / 100;
-		assertTrue(avgPer5Locales < 500, "5 locale resolutions should average under 500µs, was: " + avgPer5Locales + "µs");
+		assertTrue(avgPer5Locales < 500, "5 locale resolutions should average under 500æs, was: " + avgPer5Locales + "æs");
 	}
 
-	private void registerMessage(String key, CompiledMessageEntry entry) {
+	private void registerMessage(String key, TranslationEntry entry) {
 		registry.register(key, entry);
 		SemanticaTestHelper.register(service, key, entry);
 	}
 }
-

@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import lombok.Getter;
 import me.whereareiam.intercept.event.EventManager;
+import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.semantica.translation.TranslationService;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import java.util.Locale;
  * Main API access point for the Intercept plugin.
  *
  * <p>External plugins should use this class to access Intercept services.
- * All services become available after the {@link me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent}
+ * All services become available after the {@link InterceptStartedEvent}
  * is fired.</p>
  *
  * <p><b>Example usage:</b></p>
@@ -33,7 +34,7 @@ import java.util.Locale;
  * }</pre>
  *
  * <p><b>Important:</b> Always check {@link #isInitialized()} before accessing services,
- * or wait for {@link me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent}.</p>
+ * or wait for {@link InterceptStartedEvent}.</p>
  */
 public final class InterceptAPI {
 	private static volatile Injector injector;

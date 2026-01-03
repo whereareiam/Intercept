@@ -1,0 +1,15 @@
+package me.whereareiam.intercept.platform.interception.bukkit.common.util;
+
+import org.bukkit.event.EventPriority;
+
+public class BukkitUtil {
+	public static EventPriority of(me.whereareiam.intercept.type.EventPriority priority) {
+		return switch (priority) {
+			case LOWEST -> EventPriority.LOWEST;
+			case LOW -> EventPriority.LOW;
+			case NORMAL -> EventPriority.NORMAL;
+			case HIGH -> EventPriority.HIGH;
+			case HIGHEST -> EventPriority.HIGHEST;
+		};
+	}
+}

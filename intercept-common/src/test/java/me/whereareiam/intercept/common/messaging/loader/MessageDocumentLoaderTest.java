@@ -2,17 +2,18 @@ package me.whereareiam.intercept.common.messaging.loader;
 
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.InterceptTranslationRegistry;
 import me.whereareiam.intercept.common.messaging.SemanticaTestHelper;
-import me.whereareiam.intercept.common.messaging.interception.DefaultInterceptionRegistry;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
 import me.whereareiam.intercept.registry.base.Registry;
-import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
+import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,16 +29,15 @@ import static org.mockito.Mockito.mock;
 class MessageDocumentLoaderTest {
 	private MessageFileLoader loader;
 	private DefaultMessageRegistry registry;
+	private TranslationService<Locale> translationService;
 
 	@BeforeEach
 	void setUp() {
-		registry = new DefaultMessageRegistry(mock(Registry.class));
+		InterceptTranslationRegistry translationRegistry = new InterceptTranslationRegistry();
+		registry = new DefaultMessageRegistry(translationRegistry, mock(Registry.class));
 		Settings settings = new SettingsTemplate().supply(new Settings());
-		TranslationService<Locale> translationService = SemanticaTestHelper.createService(settings);
-		InterceptionRegistry interceptionRegistry = new DefaultInterceptionRegistry();
+		translationService = SemanticaTestHelper.createService(settings, translationRegistry);
 		loader = new DefaultMessageFileLoader(
-				registry,
-				interceptionRegistry,
 				new TextProcessor(),
 				translationService,
 				() -> settings
@@ -52,7 +52,9 @@ class MessageDocumentLoaderTest {
 		loader.loadFromData("test", fileData);
 
 		assertTrue(registry.exists("test.welcome"));
-		assertEquals("Welcome!", registry.get("test.welcome").getText());
+		assertEquals("Welcome!", translationService.resolve("test.welcome", Locale.US));
+		TranslationEntry entry = registry.get("test.welcome");
+		assertTrue(entry instanceof TemplateEntry);
 	}
 
 	@Test
@@ -68,8 +70,10 @@ class MessageDocumentLoaderTest {
 		loader.loadFromData("test", fileData);
 
 		assertTrue(registry.exists("test.welcome"));
-		assertEquals("Welcome!", registry.get("test.welcome").getText(Locale.US));
-		assertEquals("Willkommen!", registry.get("test.welcome").getText(Locale.GERMANY));
+		assertEquals("Welcome!", translationService.resolve("test.welcome", Locale.US));
+		assertEquals("Willkommen!", translationService.resolve("test.welcome", Locale.GERMANY));
+		TranslationEntry stored = registry.get("test.welcome");
+		assertTrue(stored instanceof LocalizedEntry);
 	}
 
 	@Test
@@ -80,7 +84,7 @@ class MessageDocumentLoaderTest {
 		loader.loadFromData("templates", fileData);
 
 		assertTrue(registry.exists("templates.prefix"));
-		assertEquals(MessageType.TEMPLATE, registry.get("templates.prefix").getType());
+		assertTrue(registry.get("templates.prefix") instanceof TemplateEntry);
 	}
 
 	@Test
@@ -90,8 +94,7 @@ class MessageDocumentLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		String text = registry.get("test.banner").getText();
-		assertEquals("Line 1\nLine 2\nLine 3", text);
+		assertEquals("Line 1\nLine 2\nLine 3", translationService.resolve("test.banner", Locale.US));
 	}
 
 	@Test
@@ -106,8 +109,8 @@ class MessageDocumentLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals("Line 1\nLine 2", registry.get("test.banner").getText(Locale.US));
-		assertEquals("Zeile 1\nZeile 2", registry.get("test.banner").getText(Locale.GERMANY));
+		assertEquals("Line 1\nLine 2", translationService.resolve("test.banner", Locale.US));
+		assertEquals("Zeile 1\nZeile 2", translationService.resolve("test.banner", Locale.GERMANY));
 	}
 
 	@Test
@@ -121,7 +124,7 @@ class MessageDocumentLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals(MessageType.MESSAGE, registry.get("test.msg").getType());
+		assertTrue(registry.get("test.msg") instanceof LocalizedEntry);
 	}
 
 	@Test
@@ -132,7 +135,7 @@ class MessageDocumentLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals(MessageType.TEMPLATE, registry.get("test.tpl").getType());
+		assertTrue(registry.get("test.tpl") instanceof TemplateEntry);
 	}
 
 	@Test
@@ -147,8 +150,8 @@ class MessageDocumentLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals("Hello", registry.get("test.greeting").getText(Locale.US));
-		assertEquals("Hallo", registry.get("test.greeting").getText(Locale.GERMANY));
+		assertEquals("Hello", translationService.resolve("test.greeting", Locale.US));
+		assertEquals("Hallo", translationService.resolve("test.greeting", Locale.GERMANY));
 	}
 
 	@Test
@@ -160,6 +163,6 @@ class MessageDocumentLoaderTest {
 
 		loader.loadFromData("test", fileData);
 
-		assertEquals(3, registry.getKeysByPrefix("test").size());
+		assertEquals(3, registry.getKeys("test").size());
 	}
 }

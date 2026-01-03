@@ -165,4 +165,3 @@ public abstract class CommonDependencyResolver implements DependencyResolver {
 		libraries.clear();
 	}
 }
-

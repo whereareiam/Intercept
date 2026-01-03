@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
+import me.whereareiam.configura.annotation.Field;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Map;
  */
 @Getter
 public class MessageDocument {
+	@Field(dynamic = true)
 	private final Map<String, Object> entries = new LinkedHashMap<>();
 
 	public void putEntry(String key, Object value) {

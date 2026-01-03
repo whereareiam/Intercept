@@ -4,13 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.TranslationRegistry;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Default implementation of MessageRegistry.
@@ -18,47 +17,59 @@ import java.util.stream.Collectors;
  */
 @Singleton
 public class DefaultMessageRegistry implements MessageRegistry, Reloadable {
-	private final Map<String, CompiledMessageEntry> entries = new ConcurrentHashMap<>();
+	private final TranslationRegistry registry;
 
 	@Inject
-	public DefaultMessageRegistry(Registry<Reloadable> reloadableRegistry) {
+	public DefaultMessageRegistry(
+			TranslationRegistry registry,
+			Registry<Reloadable> reloadableRegistry
+	) {
+		this.registry = registry;
 		reloadableRegistry.register(this);
 	}
 
 	@Override
-	public void register(String key, CompiledMessageEntry entry) {
-		entries.put(key, entry);
+	public void register(String key, TranslationEntry entry) {
+		registry.register(key, entry);
 	}
 
 	@Override
-	public CompiledMessageEntry get(String key) {
-		return entries.get(key);
+	public void unregister(String key) {
+		registry.unregister(key);
+	}
+
+	@Override
+	public TranslationEntry get(String key) {
+		return registry.get(key);
 	}
 
 	@Override
 	public Set<String> getKeys() {
-		return Set.copyOf(entries.keySet());
+		return registry.getKeys();
 	}
 
 	@Override
-	public Set<String> getKeysByPrefix(String prefix) {
-		return entries.keySet().stream()
-				.filter(key -> key.startsWith(prefix))
-				.collect(Collectors.toSet());
+	public Set<String> getKeys(String prefix) {
+		return registry.getKeys(prefix);
 	}
 
 	@Override
 	public boolean exists(String key) {
-		return entries.containsKey(key);
+		return registry.exists(key);
 	}
 
 	@Override
-	public Map<String, CompiledMessageEntry> getAllEntries() {
-		return Map.copyOf(entries);
+	public Map<String, TranslationEntry> getAllEntries() {
+		return registry.getAllEntries();
+	}
+
+	@Override
+	public void clear() {
+		registry.clear();
 	}
 
 	@Override
 	public void reload() {
-		entries.clear();
+		registry.clear();
 	}
 }

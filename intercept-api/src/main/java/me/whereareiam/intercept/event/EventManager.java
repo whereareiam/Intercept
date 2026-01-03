@@ -3,6 +3,7 @@ package me.whereareiam.intercept.event;
 
 import me.whereareiam.intercept.event.base.Event;
 import me.whereareiam.intercept.event.base.EventOrder;
+import me.whereareiam.intercept.event.base.SynchronousEvent;
 
 import java.lang.reflect.Method;
 
@@ -45,7 +46,7 @@ public interface EventManager {
 	 * Calls an event, triggering all registered handlers for that event type.
 	 * Handlers are called in order according to their {@link EventOrder}.
 	 * <p>
-	 * Events implementing {@link me.whereareiam.intercept.event.base.SynchronousEvent}
+	 * Events implementing {@link SynchronousEvent}
 	 * will be processed synchronously on the current thread. All other events
 	 * will be processed asynchronously.
 	 *

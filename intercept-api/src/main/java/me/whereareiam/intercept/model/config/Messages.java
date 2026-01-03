@@ -6,7 +6,6 @@ import lombok.ToString;
 import me.whereareiam.commandant.model.message.ExceptionMessages;
 import me.whereareiam.commandant.model.message.HelpMessages;
 import me.whereareiam.commandant.model.message.PaginationMessages;
-import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.List;
 import java.util.Map;
@@ -308,11 +307,11 @@ public class Messages {
 		private boolean warnAdmins;
 
 		/**
-		 * Source-specific fallback formats
-		 * Key: component type (CHAT, ACTION_BAR, etc.)
+		 * Source-specific fallback formats.
+		 * Key: source identifier (e.g., "CHAT", "ACTION_BAR")
 		 * Value: format configuration for that source
 		 */
-		private Map<ComponentType, SourceFormat> formats;
+		private Map<String, SourceFormat> formats;
 
 		/**
 		 * Default fallback format when source is not specified or no specific format exists

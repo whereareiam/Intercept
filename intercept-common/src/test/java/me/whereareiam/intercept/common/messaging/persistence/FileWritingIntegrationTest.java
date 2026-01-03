@@ -4,15 +4,13 @@ import me.whereareiam.configura.Config;
 import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,17 +37,21 @@ class FileWritingIntegrationTest {
 	void shouldWriteDocumentWithNestedPath() {
 		MessageDocument document = new MessageDocument();
 
-		MessageDocumentEntry entry = new MessageDocumentEntry();
-		entry.setText("Welcome!");
+		Map<String, Object> entry = new LinkedHashMap<>();
+		entry.put("text", "Welcome!");
 
-		MessageDocumentRegex regex = new MessageDocumentRegex();
-		regex.setPattern(".*hello.*");
-		regex.setPriority(5);
-		regex.setReplaceMatched(true);
-		regex.setPlaceholders(Map.of("name", "$1"));
-		MessageDocumentInterception interception = new MessageDocumentInterception();
-		interception.setPatterns(List.of(regex));
-		entry.setInterception(interception);
+		Map<String, Object> regex = new LinkedHashMap<>();
+		regex.put("pattern", ".*hello.*");
+		regex.put("priority", 5);
+		regex.put("replaceMatched", true);
+		Map<String, Object> placeholders = new LinkedHashMap<>();
+		placeholders.put("name", "$1");
+		regex.put("placeholders", placeholders);
+		List<Map<String, Object>> patterns = new java.util.ArrayList<>();
+		patterns.add(regex);
+		Map<String, Object> interception = new LinkedHashMap<>();
+		interception.put("patterns", patterns);
+		entry.put("interception", interception);
 
 		document.putEntry("welcome", entry);
 

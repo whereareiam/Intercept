@@ -2,7 +2,6 @@ package me.whereareiam.intercept.event.interception.kick;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.whereareiam.intercept.event.interception.ProcessedEvent;
 import me.whereareiam.intercept.model.interception.kick.KickInterceptionContext;
@@ -17,7 +16,6 @@ import net.kyori.adventure.text.Component;
  */
 @Getter
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class KickProcessedEvent implements ProcessedEvent {
 	/**
 	 * The kick interception context containing player and message information.

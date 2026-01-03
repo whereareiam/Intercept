@@ -50,17 +50,6 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		cache.setDynamicExpireMinutes(5);
 		performance.setCache(cache);
 
-		Settings.Performance.Regex regex = new Settings.Performance.Regex();
-		regex.setEnabled(true);
-		regex.setTimeoutMs(100);
-		regex.setUseLiteralPrefix(true);
-		regex.setCacheResults(true);
-		regex.setCacheSize(1000);
-		regex.setCacheExpireMinutes(10);
-		regex.setMaxPatternComplexity(1000);
-		regex.setWarnSlowPatternsMs(50);
-		performance.setRegex(regex);
-
 		settings.setPerformance(performance);
 
 		// Initialize command settings

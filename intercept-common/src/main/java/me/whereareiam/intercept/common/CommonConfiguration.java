@@ -1,6 +1,12 @@
 package me.whereareiam.intercept.common;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import me.whereareiam.intercept.Reloadable;
@@ -8,40 +14,37 @@ import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.config.ConfiguraBootstrap;
 import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
 import me.whereareiam.intercept.common.event.EventController;
-import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
-import me.whereareiam.intercept.common.interceptor.InterceptorService;
-import me.whereareiam.intercept.common.interceptor.processor.DefaultActionBarInterceptionProcessor;
-import me.whereareiam.intercept.common.interceptor.processor.DefaultChatInterceptionProcessor;
-import me.whereareiam.intercept.common.interceptor.processor.DefaultKickInterceptionProcessor;
-import me.whereareiam.intercept.common.listener.InspectionModeEnhancer;
+import me.whereareiam.intercept.common.logging.BannerContributor;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.InterceptSemanticaLogger;
+import me.whereareiam.intercept.common.messaging.MessageLifecycleHook;
 import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
-import me.whereareiam.intercept.common.messaging.interception.DefaultInterceptionRegistry;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileWriter;
-import me.whereareiam.intercept.common.messaging.regex.DefaultRegexMatchingService;
-import me.whereareiam.intercept.common.messaging.tag.DefaultTagReplacementService;
+import me.whereareiam.intercept.common.messaging.persistence.MessageDocumentProcessor;
 import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
 import me.whereareiam.intercept.common.provider.IntegrationProvider;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.SerializerEngineProvider;
-import me.whereareiam.intercept.common.provider.config.*;
+import me.whereareiam.intercept.common.provider.config.CommandsProvider;
+import me.whereareiam.intercept.common.provider.config.MessagesProvider;
+import me.whereareiam.intercept.common.provider.config.PersistenceProvider;
+import me.whereareiam.intercept.common.provider.config.SettingsProvider;
 import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
 import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
 import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
-import me.whereareiam.intercept.common.util.MessageTags;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.integration.Integration;
-import me.whereareiam.intercept.interceptor.actionbar.ActionBarInterceptionProcessor;
-import me.whereareiam.intercept.interceptor.chat.ChatInterceptionProcessor;
-import me.whereareiam.intercept.interceptor.kick.KickInterceptionProcessor;
-import me.whereareiam.intercept.messaging.*;
+import me.whereareiam.intercept.messaging.MessageDataService;
+import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
-import me.whereareiam.intercept.model.config.*;
+import me.whereareiam.intercept.model.config.Commands;
+import me.whereareiam.intercept.model.config.Messages;
+import me.whereareiam.intercept.model.config.Persistence;
+import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.ProviderType;
@@ -50,10 +53,12 @@ import me.whereareiam.intercept.util.EventUtil;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import me.whereareiam.semantica.Semantica;
 import me.whereareiam.semantica.SemanticaConfiguration;
-import me.whereareiam.semantica.TagConfiguration;
 import me.whereareiam.semantica.SemanticaLogger;
+import me.whereareiam.semantica.TagConfiguration;
+import me.whereareiam.intercept.common.messaging.InterceptTranslationRegistry;
 import me.whereareiam.semantica.locale.LocaleParser;
 import me.whereareiam.semantica.model.SemanticLocale;
+import me.whereareiam.semantica.translation.TranslationRegistry;
 import me.whereareiam.semantica.translation.TranslationService;
 
 import java.io.IOException;
@@ -89,8 +94,6 @@ public class CommonConfiguration extends AbstractModule {
 		bind(Messages.class).toProvider(MessagesProvider.class);
 		bind(CommandsProvider.class).asEagerSingleton();
 		bind(Commands.class).toProvider(CommandsProvider.class);
-		bind(InterceptionProvider.class);
-		bind(Interception.class).toProvider(InterceptionProvider.class);
 
 		// Services
 		bind(SerializerEngine.class).toProvider(SerializerEngineProvider.class);
@@ -103,20 +106,11 @@ public class CommonConfiguration extends AbstractModule {
 
 		// Messages system
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
-		bind(InterceptionRegistry.class).to(DefaultInterceptionRegistry.class).asEagerSingleton();
 		bind(MessageFileLoader.class).to(DefaultMessageFileLoader.class);
 		bind(MessageFileWriter.class).to(DefaultMessageFileWriter.class);
 		bind(MessageDataService.class).to(DefaultMessageDataService.class);
 		bind(MessageLifecycleService.class).asEagerSingleton();
-		bind(TagReplacementService.class).to(DefaultTagReplacementService.class);
-		bind(RegexMatchingService.class).to(DefaultRegexMatchingService.class);
 
-		// Interceptors
-		bind(InterceptorRegistry.class).asEagerSingleton();
-		bind(ChatInterceptionProcessor.class).to(DefaultChatInterceptionProcessor.class).asEagerSingleton();
-		bind(ActionBarInterceptionProcessor.class).to(DefaultActionBarInterceptionProcessor.class).asEagerSingleton();
-		bind(KickInterceptionProcessor.class).to(DefaultKickInterceptionProcessor.class).asEagerSingleton();
-		bind(InterceptorService.class).asEagerSingleton();
 		// Updater
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))
 				.to(ModrinthProvider.class);
@@ -125,11 +119,8 @@ public class CommonConfiguration extends AbstractModule {
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.SPIGOT.toString()))
 				.to(SpigotMCProvider.class);
 
-		// Listeners
-		bind(InspectionModeEnhancer.class).asEagerSingleton();
-
 		// Other
-		bind(new TypeLiteral<me.whereareiam.intercept.registry.base.Registry<Integration>>() {
+		bind(new TypeLiteral<Registry<Integration>>() {
 		}).to(IntegrationProvider.class).asEagerSingleton();
 		bind(new TypeLiteral<Set<Integration>>() {
 		}).toProvider(IntegrationProvider.class).asEagerSingleton();
@@ -138,6 +129,10 @@ public class CommonConfiguration extends AbstractModule {
 		}).to(ReloadableProvider.class).asEagerSingleton();
 		bind(new TypeLiteral<Set<Reloadable>>() {
 		}).annotatedWith(Names.named("reloadables")).toProvider(ReloadableProvider.class).asEagerSingleton();
+
+		Multibinder.newSetBinder(binder(), BannerContributor.class);
+		Multibinder.newSetBinder(binder(), MessageLifecycleHook.class);
+		Multibinder.newSetBinder(binder(), MessageDocumentProcessor.class);
 	}
 
 	@Inject
@@ -192,16 +187,9 @@ public class CommonConfiguration extends AbstractModule {
 		Settings settings = settingsProvider.get();
 		Settings.Performance.Cache cache = settings.getPerformance().getCache();
 
-		TagConfiguration tags = TagConfiguration.builder()
-				.referencePrefix(MessageTags.MESSAGE_REF_PREFIX)
-				.placeholderPrefix(MessageTags.PLACEHOLDER_PREFIX)
-				.conditionalIf(MessageTags.CONDITIONAL_IF)
-				.conditionalElse(MessageTags.CONDITIONAL_ELSE)
-				.build();
-
 		return SemanticaConfiguration.<Locale>builder()
 				.defaultLocale(SemanticLocale.wrap(settings.getLocale()))
-				.tagConfiguration(tags)
+				.tagConfiguration(TagConfiguration.defaults())
 				.performance(SemanticaConfiguration.PerformanceSettings.builder()
 						.cache(SemanticaConfiguration.PerformanceSettings.CacheSettings.builder()
 								.enabled(cache.isEnabled())
@@ -221,10 +209,17 @@ public class CommonConfiguration extends AbstractModule {
 
 	@Provides
 	@Singleton
+	TranslationRegistry provideTranslationRegistry() {
+		return new InterceptTranslationRegistry();
+	}
+
+	@Provides
+	@Singleton
 	TranslationService<Locale> provideTranslationService(
-			SemanticaConfiguration<Locale> configuration
+			SemanticaConfiguration<Locale> configuration,
+			TranslationRegistry registry
 	) {
-		return Semantica.createService(configuration);
+		return Semantica.createService(configuration, registry);
 	}
 
 	private Path ensureDirectory(Path path, String label) {

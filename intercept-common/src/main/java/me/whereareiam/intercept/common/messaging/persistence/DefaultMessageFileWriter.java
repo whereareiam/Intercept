@@ -11,7 +11,6 @@ import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 @Singleton
 public class DefaultMessageFileWriter implements MessageFileWriter {
@@ -31,7 +30,8 @@ public class DefaultMessageFileWriter implements MessageFileWriter {
 			if (parent != null) {
 				Files.createDirectories(parent);
 			}
-			Config.save(target, fileData != null ? fileData.toMap() : Map.of());
+			MessageDocument data = fileData != null ? fileData : new MessageDocument();
+			Config.getDefaultWriter().write(target, data);
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to write message persistence: " + target, e);
 		}

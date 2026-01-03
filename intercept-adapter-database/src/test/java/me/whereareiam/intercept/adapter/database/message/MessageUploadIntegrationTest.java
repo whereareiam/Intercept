@@ -3,10 +3,15 @@ package me.whereareiam.intercept.adapter.database.message;
 import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.entity.message.*;
 import me.whereareiam.intercept.adapter.database.repository.message.*;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.semantica.model.SemanticLocale;
+import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
+import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.base.TranslationLocale;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -25,15 +30,14 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageTranslationRepository translationRepo = translationRepo(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
 		Map<Locale, String> translations = new HashMap<>();
 		translations.put(Locale.US, "No permission");
 		translations.put(Locale.GERMANY, "Keine Berechtigung");
 
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.MESSAGE, translations);
-		entries.put("errors.permissions.no-permission", entry);
+		entries.put("errors.permissions.no-permission", localized(translations));
 		filePaths.put("errors.permissions", resolveFile("errors/permissions.yml"));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
@@ -66,11 +70,10 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageTranslationRepository translationRepo = translationRepo(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.TEMPLATE, "Hello {player}!");
-		entries.put("common.greeting", entry);
+		entries.put("common.greeting", template("Hello {player}!"));
 		filePaths.put("common", resolveFile("common/greeting.yml"));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
@@ -95,15 +98,13 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		DefaultMessagePersistenceService service = service(type);
 		MessageFileRepository fileRepo = fileRepo(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
-		CompiledMessageEntry entry1 = new CompiledMessageEntry(MessageType.MESSAGE, "Error 1");
-		entries.put("errors.file1.error1", entry1);
+		entries.put("errors.file1.error1", template("Error 1"));
 		filePaths.put("errors.file1", resolveFile("errors/file1.yml"));
 
-		CompiledMessageEntry entry2 = new CompiledMessageEntry(MessageType.MESSAGE, "Error 2");
-		entries.put("errors.file2.error2", entry2);
+		entries.put("errors.file2.error2", template("Error 2"));
 		filePaths.put("errors.file2", resolveFile("errors/file2.yml"));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
@@ -128,8 +129,9 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageFileRepository fileRepo = fileRepo(type);
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageRegexPatternRepository patternRepo = patternRepo(type);
+		InterceptionRegistry interceptionRegistry = interceptionRegistry(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
 		Map<String, String> placeholders1 = new HashMap<>();
@@ -142,9 +144,9 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		CompiledRegexPattern pattern2 = new CompiledRegexPattern("^You don't have permission: (.+)$", placeholders2, 5, true);
 
 		List<CompiledRegexPattern> patterns = List.of(pattern1, pattern2);
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.MESSAGE, "Chat message", patterns);
-		entries.put("chat.message", entry);
+		entries.put("chat.message", template("Chat message"));
 		filePaths.put("chat", resolveFile("chat/message.yml"));
+		interceptionRegistry.register("chat.message", patterns);
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
@@ -182,8 +184,9 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageRegexPatternRepository patternRepo = patternRepo(type);
 		MessageRegexPlaceholderRepository placeholderRepo = placeholderRepo(type);
+		InterceptionRegistry interceptionRegistry = interceptionRegistry(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
 		Map<String, String> placeholders = new HashMap<>();
@@ -192,9 +195,9 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		placeholders.put("timestamp", "$3");
 		CompiledRegexPattern pattern = new CompiledRegexPattern("^\\[(.+)\\] <(.+)> (.+)$", placeholders, 15, false);
 
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.MESSAGE, "Formatted chat", List.of(pattern));
-		entries.put("chat.formatted", entry);
+		entries.put("chat.formatted", template("Formatted chat"));
 		filePaths.put("chat", resolveFile("chat/formatted.yml"));
+		interceptionRegistry.register("chat.formatted", List.of(pattern));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
@@ -223,8 +226,9 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageRegexPatternRepository patternRepo = patternRepo(type);
 		MessageRegexPlaceholderRepository placeholderRepo = placeholderRepo(type);
+		InterceptionRegistry interceptionRegistry = interceptionRegistry(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
 		Map<String, String> placeholders1 = new HashMap<>();
@@ -239,13 +243,9 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 		CompiledRegexPattern pattern3 = new CompiledRegexPattern("^System: .+$", null, 5, false);
 
-		CompiledMessageEntry entry = new CompiledMessageEntry(
-				MessageType.MESSAGE,
-				"Multi-pattern entry",
-				List.of(pattern1, pattern2, pattern3)
-		);
-		entries.put("messages.multi", entry);
+		entries.put("messages.multi", template("Multi-pattern entry"));
 		filePaths.put("messages", resolveFile("messages/multi.yml"));
+		interceptionRegistry.register("messages.multi", List.of(pattern1, pattern2, pattern3));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
@@ -284,11 +284,10 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageRegexPatternRepository patternRepo = patternRepo(type);
 
-		Map<String, CompiledMessageEntry> entries = new HashMap<>();
+		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.MESSAGE, "Simple message");
-		entries.put("simple.message", entry);
+		entries.put("simple.message", template("Simple message"));
 		filePaths.put("simple", resolveFile("simple/message.yml"));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
@@ -301,5 +300,17 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 		List<MessageRegexPatternEntity> patternsList = patternRepo.findAllByEntryId(entryEntity.get().getId());
 		assertEquals(0, patternsList.size());
+	}
+
+	private TranslationEntry template(String text) {
+		return new TemplateEntry(text);
+	}
+
+	private TranslationEntry localized(Map<Locale, String> translations) {
+		Map<TranslationLocale, String> mapped = new LinkedHashMap<>();
+		for (Map.Entry<Locale, String> entry : translations.entrySet()) {
+			mapped.put(SemanticLocale.wrap(entry.getKey()), entry.getValue());
+		}
+		return new LocalizedEntry(mapped);
 	}
 }

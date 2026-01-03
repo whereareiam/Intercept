@@ -25,9 +25,28 @@ import java.util.Map;
 @ToString
 public class Interception {
 	/**
+	 * Global regex settings for interception.
+	 */
+	private RegexSettings regex;
+
+	/**
 	 * Map of component type to component configuration.
 	 * Keys are ComponentType enum values (e.g., CHAT).
 	 * Values are InterceptedComponent instances or their extensions.
 	 */
 	private Map<ComponentType, InterceptedComponent> components;
+
+	@Getter
+	@Setter
+	@ToString
+	public static class RegexSettings {
+		private boolean enabled;
+		private int timeoutMs;
+		private boolean useLiteralPrefix;
+		private boolean cacheResults;
+		private int cacheSize;
+		private int cacheExpireMinutes;
+		private int maxPatternComplexity;
+		private int warnSlowPatternsMs;
+	}
 }

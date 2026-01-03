@@ -22,17 +22,7 @@ public class MessageDocumentEntry {
 	 */
 	private Map<String, Object> locales;
 
-	/**
-	 * Optional interception rules for this key.
-	 */
-	private MessageDocumentInterception interception;
-
 	public void setLocales(Map<String, Object> locales) {
 		this.locales = locales == null || locales.isEmpty() ? null : locales;
-	}
-
-	public void setInterception(MessageDocumentInterception interception) {
-		this.interception = interception == null || interception.getPatterns() == null
-				|| interception.getPatterns().isEmpty() ? null : interception;
 	}
 }

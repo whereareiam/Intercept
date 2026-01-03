@@ -7,12 +7,18 @@ import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEnti
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
 import me.whereareiam.intercept.adapter.database.message.MessageKeyResolver;
 import me.whereareiam.intercept.adapter.database.repository.message.*;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
+import me.whereareiam.semantica.model.SemanticLocale;
+import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
+import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.base.TranslationLocale;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -23,6 +29,7 @@ public class MessageUploadCoordinator {
 	private final MessageTranslationRepository translationRepository;
 	private final MessageRegexPatternRepository patternRepository;
 	private final MessageRegexPlaceholderRepository placeholderRepository;
+	private final InterceptionRegistry interceptionRegistry;
 	private final Path messagesPath;
 
 	@Inject
@@ -32,6 +39,7 @@ public class MessageUploadCoordinator {
 			MessageTranslationRepository translationRepository,
 			MessageRegexPatternRepository patternRepository,
 			MessageRegexPlaceholderRepository placeholderRepository,
+			InterceptionRegistry interceptionRegistry,
 			@Named("messagesPath") Path messagesPath
 	) {
 		this.fileRepository = fileRepository;
@@ -39,6 +47,7 @@ public class MessageUploadCoordinator {
 		this.translationRepository = translationRepository;
 		this.patternRepository = patternRepository;
 		this.placeholderRepository = placeholderRepository;
+		this.interceptionRegistry = interceptionRegistry;
 		this.messagesPath = messagesPath;
 	}
 
@@ -77,13 +86,13 @@ public class MessageUploadCoordinator {
 	}
 
 	private void processEntries(
-			Map<String, CompiledMessageEntry> entries,
+			Map<String, TranslationEntry> entries,
 			Map<String, Path> filePaths,
 			Map<String, MessageFileEntity> fileEntities
 	) {
-		for (Map.Entry<String, CompiledMessageEntry> entry : entries.entrySet()) {
+		for (Map.Entry<String, TranslationEntry> entry : entries.entrySet()) {
 			String fullKey = entry.getKey();
-			CompiledMessageEntry messageEntry = entry.getValue();
+			TranslationEntry messageEntry = entry.getValue();
 
 			String keyPrefix = MessageKeyResolver.findKeyPrefix(fullKey, filePaths.keySet());
 			MessageFileEntity fileEntity = fileEntities.get(keyPrefix);
@@ -93,36 +102,36 @@ public class MessageUploadCoordinator {
 			MessageEntryEntity entryEntity = entryRepository.save(MessageEntryEntity.builder()
 					.file(fileEntity)
 					.entryKey(MessageKeyResolver.extractEntryKey(fullKey, keyPrefix))
-					.entryType(messageEntry.getType())
+					.entryType(resolveEntryType(messageEntry))
 					.build());
 
 			processTranslations(entryEntity, messageEntry);
-			processRegexPatterns(entryEntity, messageEntry);
+			processRegexPatterns(entryEntity, fullKey);
 		}
 	}
 
-	private void processTranslations(MessageEntryEntity entryEntity, CompiledMessageEntry messageEntry) {
-		if (messageEntry.hasTranslations()) {
-			for (Locale locale : messageEntry.getLocales()) {
-				String text = messageEntry.getText(locale);
-				if (text == null) continue;
-				translationRepository.insert(entryEntity.getId(), locale, text);
+	private void processTranslations(MessageEntryEntity entryEntity, TranslationEntry messageEntry) {
+		if (messageEntry instanceof LocalizedEntry localizedEntry) {
+			Map<TranslationLocale, String> translations = localizedEntry.getTranslations();
+			Map<Locale, String> resolved = toLocaleMap(translations);
+			for (Map.Entry<Locale, String> translation : resolved.entrySet()) {
+				translationRepository.insert(entryEntity.getId(), translation.getKey(), translation.getValue());
 			}
-
 			return;
 		}
 
-		String text = messageEntry.getText();
-		if (text == null) return;
-
-		translationRepository.insert(entryEntity.getId(), null, text);
+		if (messageEntry instanceof TemplateEntry templateEntry) {
+			String text = templateEntry.getTemplate();
+			if (text == null) return;
+			translationRepository.insert(entryEntity.getId(), null, text);
+		}
 	}
 
-	private void processRegexPatterns(MessageEntryEntity entryEntity, CompiledMessageEntry messageEntry) {
-		if (!messageEntry.hasRegexPatterns()) return;
+	private void processRegexPatterns(MessageEntryEntity entryEntity, String fullKey) {
+		if (interceptionRegistry == null) return;
 
 		int sortOrder = 0;
-		for (CompiledRegexPattern compiledPattern : messageEntry.getRegexPatterns()) {
+		for (CompiledRegexPattern compiledPattern : interceptionRegistry.get(fullKey)) {
 			long patternId = patternRepository.insert(
 					entryEntity.getId(),
 					compiledPattern.getRegex(),
@@ -146,5 +155,34 @@ public class MessageUploadCoordinator {
 
 			placeholderRepository.insert(patternId, placeholderName, captureGroup);
 		}
+	}
+
+	private Map<Locale, String> toLocaleMap(Map<TranslationLocale, String> translations) {
+		Map<Locale, String> resolved = new LinkedHashMap<>();
+		for (Map.Entry<TranslationLocale, String> entry : translations.entrySet()) {
+			Locale locale = toJavaLocale(entry.getKey());
+			resolved.put(locale, entry.getValue());
+		}
+		return resolved;
+	}
+
+	private Locale toJavaLocale(TranslationLocale locale) {
+		if (locale == null) return Locale.getDefault();
+		if (locale instanceof SemanticLocale semanticLocale) return semanticLocale.unwrap();
+
+		Locale.Builder builder = new Locale.Builder().setLanguage(locale.getLanguage());
+		String country = locale.getCountry();
+		if (country != null && !country.isBlank())
+			builder.setRegion(country);
+		String variant = locale.getVariant();
+		if (variant != null && !variant.isBlank())
+			builder.setVariant(variant);
+
+		return builder.build();
+	}
+
+	private me.whereareiam.intercept.type.message.MessageType resolveEntryType(TranslationEntry entry) {
+		if (entry instanceof LocalizedEntry) return me.whereareiam.intercept.type.message.MessageType.MESSAGE;
+		return me.whereareiam.intercept.type.message.MessageType.TEMPLATE;
 	}
 }

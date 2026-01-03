@@ -5,10 +5,9 @@ import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.interception.DefaultInterceptionRegistry;
+import me.whereareiam.intercept.common.messaging.InterceptTranslationRegistry;
 import me.whereareiam.intercept.common.messaging.SemanticaTestHelper;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
@@ -33,7 +32,6 @@ import static org.mockito.Mockito.mock;
 class FileLoadingIntegrationTest {
 	private DefaultMessageRegistry registry;
 	private TranslationService<Locale> service;
-	private InterceptionRegistry interceptionRegistry;
 	private Settings settings;
 	private MessageFileScanner scanner;
 	private MessageFileLoader loader;
@@ -42,18 +40,16 @@ class FileLoadingIntegrationTest {
 	@BeforeEach
 	void setUp() throws URISyntaxException {
 		Registry<Reloadable> registryMock = mock(Registry.class);
-		registry = new DefaultMessageRegistry(registryMock);
+		InterceptTranslationRegistry translationRegistry = new InterceptTranslationRegistry();
+		registry = new DefaultMessageRegistry(translationRegistry, registryMock);
 		settings = new SettingsTemplate().supply(new Settings());
-		interceptionRegistry = new DefaultInterceptionRegistry();
-		service = SemanticaTestHelper.createService(settings);
+		service = SemanticaTestHelper.createService(settings, translationRegistry);
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
 
 		scanner = new MessageFileScanner(Format.YAML);
 		loader = new DefaultMessageFileLoader(
-				registry,
-				interceptionRegistry,
 				new TextProcessor(),
 				service,
 				() -> settings
@@ -76,14 +72,13 @@ class FileLoadingIntegrationTest {
 		Path colorsFile = messagesRoot.resolve("common/colors.yml");
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile);
 
-		@SuppressWarnings("unchecked")
-		Map<String, Object> raw = (Map<String, Object>) Config.load(colorsFile, Map.class);
-		MessageDocument data = MessageDocument.fromRawMap(raw);
+		MessageDocument data = Config.load(colorsFile, MessageDocument.class);
 		loader.loadFromData(keyPrefix, data);
 
 		assertTrue(registry.exists("common.colors.primary"));
 		assertTrue(registry.exists("common.colors.error"));
-		assertEquals("<#5DADE2>", registry.get("common.colors.primary").getText());
+		String text = service.resolve("common.colors.primary", Locale.US);
+		assertEquals("<#5DADE2>", text);
 	}
 
 	@Test
@@ -95,8 +90,8 @@ class FileLoadingIntegrationTest {
 		loadFile(messagesRoot.resolve("common/styles.yml"));
 
 		assertTrue(registry.exists("common.styles.prefix"));
-		assertTrue(registry.exists("common.styles.error-format"));
-		assertTrue(registry.exists("common.styles.error-box"));
+		assertTrue(registry.exists("common.styles.error.format"));
+		assertTrue(registry.exists("common.styles.error.box"));
 	}
 
 	@Test
@@ -107,8 +102,10 @@ class FileLoadingIntegrationTest {
 
 		assertTrue(registry.exists("errors.permissions.no-permission"));
 
-		String enText = registry.get("errors.permissions.no-permission").getText(Locale.US);
-		String deText = registry.get("errors.permissions.no-permission").getText(Locale.GERMANY);
+		String enText = service.resolve("errors.permissions.no-permission", Locale.US,
+				Map.of("permission", "intercept.admin"));
+		String deText = service.resolve("errors.permissions.no-permission", Locale.GERMANY,
+				Map.of("permission", "intercept.admin"));
 
 		assertNotNull(enText);
 		assertNotNull(deText);
@@ -143,8 +140,8 @@ class FileLoadingIntegrationTest {
 
 		assertNotNull(result);
 		assertTrue(result.contains("ADMIN"));
-		assertTrue(result.contains("╔"));
-		assertTrue(result.contains("╚"));
+		assertTrue(result.contains("╔"), () -> "Expected ╔ in box output, got: " + result);
+		assertTrue(result.contains("╚"), () -> "Expected ╚ in box output, got: " + result);
 	}
 
 	@Test
@@ -188,11 +185,13 @@ class FileLoadingIntegrationTest {
 	private void loadFile(Path file) {
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
 
-		@SuppressWarnings("unchecked")
-		Map<String, Object> raw = (Map<String, Object>) Config.load(file, Map.class);
-		MessageDocument data = MessageDocument.fromRawMap(raw);
+		MessageDocument data = Config.load(file, MessageDocument.class);
 
 		loader.loadFromData(keyPrefix, data);
 	}
 }
+
+
+
+
 

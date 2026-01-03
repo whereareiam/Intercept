@@ -10,10 +10,10 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -36,6 +37,7 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	private final MessageRegistry registry;
 	private final MessageFileScanner scanner;
 	private final MessageFileLoader loader;
+	private final Set<MessageDocumentProcessor> documentProcessors;
 
 	// Tracks key prefix -> file path mapping
 	private final Map<String, Path> filePathMap = new HashMap<>();
@@ -45,12 +47,14 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 			@Named("messagesPath") Path messagesPath,
 			MessageRegistry registry,
 			MessageFileLoader loader,
+			Set<MessageDocumentProcessor> documentProcessors,
 			Registry<Reloadable> reloadableRegistry
 	) {
 		this.messagesPath = messagesPath;
 		this.registry = registry;
 		this.scanner = new MessageFileScanner(Config.getDefaultReader().getFormat());
 		this.loader = loader;
+		this.documentProcessors = documentProcessors;
 
 		reloadableRegistry.register(this);
 	}
@@ -93,13 +97,12 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 		// Track the file path for this key prefix
 		filePathMap.put(keyPrefix, file);
 
-		// Read file data with Configura as a raw map (Configura does not expose Jackson annotations)
-		@SuppressWarnings("unchecked")
-		Map<String, Object> raw = (Map<String, Object>) Config.load(file, Map.class);
-		MessageDocument data = MessageDocument.fromRawMap(raw);
+		// Read file data with Configura using dynamic message document mapping
+		MessageDocument data = Config.load(file, MessageDocument.class);
 
 		// Load into registry
 		loader.loadFromData(keyPrefix, data);
+		runDocumentProcessors(keyPrefix, data);
 	}
 
 	/**
@@ -108,7 +111,7 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 * @return map of key to entry
 	 */
 	@Override
-	public Map<String, CompiledMessageEntry> getAllEntries() {
+	public Map<String, TranslationEntry> getAllEntries() {
 		return registry.getAllEntries();
 	}
 
@@ -130,7 +133,7 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 */
 	@Override
 	public MessageSnapshot createSnapshot() {
-		Map<String, CompiledMessageEntry> entries = getAllEntries();
+		Map<String, TranslationEntry> entries = getAllEntries();
 		Map<String, Path> filePaths = getFilePaths();
 		return new MessageSnapshot(entries, filePaths);
 	}
@@ -167,6 +170,13 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to reset messages directory: " + messagesPath, e);
+		}
+	}
+
+	private void runDocumentProcessors(String keyPrefix, MessageDocument data) {
+		if (documentProcessors == null || documentProcessors.isEmpty()) return;
+		for (MessageDocumentProcessor processor : documentProcessors) {
+			processor.process(keyPrefix, data);
 		}
 	}
 }

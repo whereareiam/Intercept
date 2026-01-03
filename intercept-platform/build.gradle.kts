@@ -23,7 +23,7 @@ subprojects {
             null
         }
 
-        if (project.name != "common")
+        if (!project.path.endsWith(":common"))
             destinationDirectory.set(customOutputDir ?: defaultDestination)
     }
 
@@ -33,13 +33,19 @@ subprojects {
     }
 
     dependencies {
+        val interceptionCommonPath = ":intercept-platform:interception:common"
+
         "implementation"(rootProject.libs.attache.common)
-        rootProject.allprojects
-            .filter { it != project && it.parent == rootProject }
-            .forEach { subproject ->
-                if (subproject.name != "intercept-platform" && subproject.name != "intercept-integration")
-                    "implementation"(project(":${subproject.name}"))
-            }
+        "implementation"(project(":intercept-common"))
+
+        if (project.path.contains(":interception:") && project.path != interceptionCommonPath) {
+            "implementation"(project(interceptionCommonPath))
+        }
+
+        if (project.path != interceptionCommonPath) {
+            "implementation"(project(":intercept-adapter-command"))
+            "implementation"(project(":intercept-adapter-database"))
+        }
     }
 
     tasks.named<Jar>("jar") {

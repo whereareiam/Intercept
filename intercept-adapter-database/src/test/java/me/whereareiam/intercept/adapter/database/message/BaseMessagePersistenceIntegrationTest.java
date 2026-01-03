@@ -5,18 +5,20 @@ import me.whereareiam.intercept.adapter.database.BaseTest;
 import me.whereareiam.intercept.adapter.database.message.coordinator.MessageDownloadCoordinator;
 import me.whereareiam.intercept.adapter.database.message.coordinator.MessageUploadCoordinator;
 import me.whereareiam.intercept.adapter.database.repository.message.*;
+import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
+import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
@@ -32,6 +34,8 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 	protected MessageRegexPatternRepository mariaDbPatternRepo;
 	protected MessageRegexPlaceholderRepository postgresPlaceholderRepo;
 	protected MessageRegexPlaceholderRepository mariaDbPlaceholderRepo;
+	protected InterceptionRegistry postgresInterceptionRegistry;
+	protected InterceptionRegistry mariaDbInterceptionRegistry;
 	protected Path messagesPath;
 
 	@BeforeEach
@@ -47,6 +51,9 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		postgresPlaceholderRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageRegexPlaceholderRepository.class);
 		mariaDbPlaceholderRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageRegexPlaceholderRepository.class);
 
+		postgresInterceptionRegistry = new InMemoryInterceptionRegistry();
+		mariaDbInterceptionRegistry = new InMemoryInterceptionRegistry();
+
 		messagesPath = Files.createTempDirectory("messages-test");
 		MessageFileWriter postgresWriter = new TestMessageFileWriter(messagesPath);
 		MessageFileWriter mariaWriter = new TestMessageFileWriter(messagesPath);
@@ -59,6 +66,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				postgresTranslationRepo,
 				postgresPatternRepo,
 				postgresPlaceholderRepo,
+				postgresInterceptionRegistry,
 				messagesPath
 		);
 
@@ -77,6 +85,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				mariaDbTranslationRepo,
 				mariaDbPatternRepo,
 				mariaDbPlaceholderRepo,
+				mariaDbInterceptionRegistry,
 				messagesPath
 		);
 
@@ -131,6 +140,10 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		return type == DatabaseType.POSTGRES ? postgresPlaceholderRepo : mariaDbPlaceholderRepo;
 	}
 
+	protected InterceptionRegistry interceptionRegistry(DatabaseType type) {
+		return type == DatabaseType.POSTGRES ? postgresInterceptionRegistry : mariaDbInterceptionRegistry;
+	}
+
 	protected Path resolveFile(String relative) {
 		return messagesPath.resolve(relative);
 	}
@@ -156,7 +169,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		public void initialize() {}
 
 		@Override
-		public Map<String, CompiledMessageEntry> getAllEntries() {
+		public Map<String, TranslationEntry> getAllEntries() {
 			return Collections.emptyMap();
 		}
 
@@ -209,7 +222,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		}
 
 		@Override
-		public void write(String relativePath, me.whereareiam.intercept.model.messaging.document.MessageDocument fileData) {
+		public void write(String relativePath, MessageDocument fileData) {
 			Path target = resolvePath(relativePath);
 			try {
 				Path parent = target.getParent();
@@ -226,6 +239,41 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		public Path resolvePath(String relativePath) {
 			String normalized = relativePath.replace('\\', '/');
 			return messagesPath.resolve(normalized + ".yml").normalize();
+		}
+	}
+
+	private static class InMemoryInterceptionRegistry implements InterceptionRegistry {
+		private final Map<String, List<CompiledRegexPattern>> patterns = new ConcurrentHashMap<>();
+
+		@Override
+		public void register(String key, List<CompiledRegexPattern> entries) {
+			if (key == null || key.isBlank()) return;
+			if (entries == null || entries.isEmpty()) {
+				patterns.remove(key);
+				return;
+			}
+			patterns.put(key, List.copyOf(entries));
+		}
+
+		@Override
+		public List<CompiledRegexPattern> get(String key) {
+			if (key == null) return List.of();
+			return patterns.getOrDefault(key, List.of());
+		}
+
+		@Override
+		public Set<String> getKeys() {
+			return Set.copyOf(patterns.keySet());
+		}
+
+		@Override
+		public Map<String, List<CompiledRegexPattern>> getAll() {
+			return Map.copyOf(patterns);
+		}
+
+		@Override
+		public void clear() {
+			patterns.clear();
 		}
 	}
 }

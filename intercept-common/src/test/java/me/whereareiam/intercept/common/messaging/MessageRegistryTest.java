@@ -1,9 +1,9 @@
 package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.registry.base.Registry;
-import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,28 +21,28 @@ class MessageRegistryTest {
 	@BeforeEach
 	void setUp() {
 		reloadableRegistry = mock(Registry.class);
-		registry = new DefaultMessageRegistry(reloadableRegistry);
+		registry = new DefaultMessageRegistry(new InterceptTranslationRegistry(), reloadableRegistry);
 	}
 
 	@Test
 	void shouldRegisterAndGetEntry() {
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.MESSAGE, "Test");
+		TranslationEntry entry = SemanticaTestHelper.template("Test");
 		registry.register("test.key", entry);
 
-		CompiledMessageEntry retrieved = registry.get("test.key");
+		TranslationEntry retrieved = registry.get("test.key");
 		assertNotNull(retrieved);
-		assertEquals("Test", retrieved.getText());
+		assertEquals("Test", ((TemplateEntry) retrieved).getTemplate());
 	}
 
 	@Test
 	void shouldReturnNullForNonExistentKey() {
-		CompiledMessageEntry entry = registry.get("nonexistent");
+		TranslationEntry entry = registry.get("nonexistent");
 		assertNull(entry);
 	}
 
 	@Test
 	void shouldCheckIfKeyExists() {
-		CompiledMessageEntry entry = new CompiledMessageEntry(MessageType.MESSAGE, "Test");
+		TranslationEntry entry = SemanticaTestHelper.template("Test");
 		registry.register("test.key", entry);
 
 		assertTrue(registry.exists("test.key"));
@@ -51,9 +51,9 @@ class MessageRegistryTest {
 
 	@Test
 	void shouldGetAllKeys() {
-		registry.register("key1", new CompiledMessageEntry(MessageType.MESSAGE, "1"));
-		registry.register("key2", new CompiledMessageEntry(MessageType.MESSAGE, "2"));
-		registry.register("key3", new CompiledMessageEntry(MessageType.MESSAGE, "3"));
+		registry.register("key1", SemanticaTestHelper.template("1"));
+		registry.register("key2", SemanticaTestHelper.template("2"));
+		registry.register("key3", SemanticaTestHelper.template("3"));
 
 		Set<String> keys = registry.getKeys();
 		assertEquals(3, keys.size());
@@ -64,27 +64,27 @@ class MessageRegistryTest {
 
 	@Test
 	void shouldGetKeysByPrefix() {
-		registry.register("errors.permission1", new CompiledMessageEntry(MessageType.MESSAGE, "1"));
-		registry.register("errors.permission2", new CompiledMessageEntry(MessageType.MESSAGE, "2"));
-		registry.register("errors.database.connection", new CompiledMessageEntry(MessageType.MESSAGE, "3"));
-		registry.register("success.action", new CompiledMessageEntry(MessageType.MESSAGE, "4"));
+		registry.register("errors.permission1", SemanticaTestHelper.template("1"));
+		registry.register("errors.permission2", SemanticaTestHelper.template("2"));
+		registry.register("errors.database.connection", SemanticaTestHelper.template("3"));
+		registry.register("success.action", SemanticaTestHelper.template("4"));
 
-		Set<String> errorKeys = registry.getKeysByPrefix("errors");
+		Set<String> errorKeys = registry.getKeys("errors");
 		assertEquals(3, errorKeys.size());
 
-		Set<String> permissionKeys = registry.getKeysByPrefix("errors.permission");
+		Set<String> permissionKeys = registry.getKeys("errors.permission");
 		assertEquals(2, permissionKeys.size());
 
-		Set<String> databaseKeys = registry.getKeysByPrefix("errors.database");
+		Set<String> databaseKeys = registry.getKeys("errors.database");
 		assertEquals(1, databaseKeys.size());
 	}
 
 	@Test
 	void shouldGetAllEntries() {
-		registry.register("key1", new CompiledMessageEntry(MessageType.MESSAGE, "1"));
-		registry.register("key2", new CompiledMessageEntry(MessageType.TEMPLATE, "2"));
+		registry.register("key1", SemanticaTestHelper.template("1"));
+		registry.register("key2", SemanticaTestHelper.template("2"));
 
-		Map<String, CompiledMessageEntry> entries = registry.getAllEntries();
+		Map<String, TranslationEntry> entries = registry.getAllEntries();
 		assertEquals(2, entries.size());
 		assertNotNull(entries.get("key1"));
 		assertNotNull(entries.get("key2"));
@@ -99,11 +99,11 @@ class MessageRegistryTest {
 
 	@Test
 	void shouldOverwriteExistingKey() {
-		registry.register("key", new CompiledMessageEntry(MessageType.MESSAGE, "First"));
-		registry.register("key", new CompiledMessageEntry(MessageType.MESSAGE, "Second"));
+		registry.register("key", SemanticaTestHelper.template("First"));
+		registry.register("key", SemanticaTestHelper.template("Second"));
 
-		CompiledMessageEntry entry = registry.get("key");
-		assertEquals("Second", entry.getText());
+		TranslationEntry entry = registry.get("key");
+		assertEquals("Second", ((TemplateEntry) entry).getTemplate());
 	}
 
 	@Test
@@ -114,9 +114,9 @@ class MessageRegistryTest {
 	@Test
 	void shouldClearAllEntriesOnReload() {
 		// Register some entries
-		registry.register("key1", new CompiledMessageEntry(MessageType.MESSAGE, "Message 1"));
-		registry.register("key2", new CompiledMessageEntry(MessageType.MESSAGE, "Message 2"));
-		registry.register("key3", new CompiledMessageEntry(MessageType.MESSAGE, "Message 3"));
+		registry.register("key1", SemanticaTestHelper.template("Message 1"));
+		registry.register("key2", SemanticaTestHelper.template("Message 2"));
+		registry.register("key3", SemanticaTestHelper.template("Message 3"));
 
 		assertEquals(3, registry.getKeys().size());
 		assertTrue(registry.exists("key1"));
@@ -136,18 +136,18 @@ class MessageRegistryTest {
 	@Test
 	void shouldAllowReregisteringAfterReload() {
 		// Register initial entries
-		registry.register("key1", new CompiledMessageEntry(MessageType.MESSAGE, "Original"));
-		assertEquals("Original", registry.get("key1").getText());
+		registry.register("key1", SemanticaTestHelper.template("Original"));
+		assertEquals("Original", ((TemplateEntry) registry.get("key1")).getTemplate());
 
 		// Reload
 		registry.reload();
 
 		// Register new entries
-		registry.register("key1", new CompiledMessageEntry(MessageType.MESSAGE, "New"));
-		registry.register("key2", new CompiledMessageEntry(MessageType.MESSAGE, "Additional"));
+		registry.register("key1", SemanticaTestHelper.template("New"));
+		registry.register("key2", SemanticaTestHelper.template("Additional"));
 
-		assertEquals("New", registry.get("key1").getText());
-		assertEquals("Additional", registry.get("key2").getText());
+		assertEquals("New", ((TemplateEntry) registry.get("key1")).getTemplate());
+		assertEquals("Additional", ((TemplateEntry) registry.get("key2")).getTemplate());
 		assertEquals(2, registry.getKeys().size());
 	}
 
@@ -156,7 +156,7 @@ class MessageRegistryTest {
 		assertEquals(0, registry.getKeys().size());
 
 		// Should not throw exception
-		assertDoesNotThrow(() -> registry.reload());
+		assertDoesNotThrow(registry::reload);
 
 		assertEquals(0, registry.getKeys().size());
 	}
@@ -164,7 +164,7 @@ class MessageRegistryTest {
 	@Test
 	void shouldHandleMultipleConsecutiveReloads() {
 		// Add entries
-		registry.register("key1", new CompiledMessageEntry(MessageType.MESSAGE, "Message"));
+		registry.register("key1", SemanticaTestHelper.template("Message"));
 
 		// Multiple reloads
 		registry.reload();
