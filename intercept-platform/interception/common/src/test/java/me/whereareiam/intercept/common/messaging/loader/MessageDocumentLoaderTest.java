@@ -9,7 +9,6 @@ import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.configura.type.MultiValue;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
@@ -40,7 +39,6 @@ class MessageDocumentLoaderTest {
 		translationService = SemanticaTestHelper.createService(settings, translationRegistry);
 		loader = new DefaultMessageFileLoader(
 				new TextProcessor(),
-				translationService,
 				() -> settings
 		);
 	}
@@ -48,9 +46,11 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldLoadSingleLanguageMessage() {
 		MessageDocument fileData = new MessageDocument();
-		fileData.putEntry("welcome", "Welcome!");
+		MessageDocument.Entry entry = new MessageDocument.Entry();
+		entry.setText(MultiValue.of("Welcome!"));
+		fileData.putEntry("welcome", entry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertTrue(registry.exists("test.welcome"));
 		assertEquals("Welcome!", translationService.resolve("test.welcome", Locale.US));
@@ -61,14 +61,14 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldLoadMultiLanguageMessage() {
 		MessageDocument fileData = new MessageDocument();
-		MessageDocumentEntry entry = new MessageDocumentEntry();
+		MessageDocument.Entry entry = new MessageDocument.Entry();
 		entry.setLocales(Map.of(
 				"en_US", MultiValue.of("Welcome!"),
 				"de_DE", MultiValue.of("Willkommen!")
 		));
 		fileData.putEntry("welcome", entry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertTrue(registry.exists("test.welcome"));
 		assertEquals("Welcome!", translationService.resolve("test.welcome", Locale.US));
@@ -80,9 +80,11 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldLoadTemplates() {
 		MessageDocument fileData = new MessageDocument();
-		fileData.putEntry("prefix", "[Prefix]");
+		MessageDocument.Entry entry = new MessageDocument.Entry();
+		entry.setText(MultiValue.of("[Prefix]"));
+		fileData.putEntry("prefix", entry);
 
-		loader.loadFromData("templates", fileData);
+		registerEntries(loader.loadFromData("templates", fileData));
 
 		assertTrue(registry.exists("templates.prefix"));
 		assertTrue(registry.get("templates.prefix") instanceof TemplateEntry);
@@ -91,9 +93,11 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldConvertArrayToMultiLineText() {
 		MessageDocument fileData = new MessageDocument();
-		fileData.putEntry("banner", List.of("Line 1", "Line 2", "Line 3"));
+		MessageDocument.Entry entry = new MessageDocument.Entry();
+		entry.setText(MultiValue.of(List.of("Line 1", "Line 2", "Line 3")));
+		fileData.putEntry("banner", entry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertEquals("Line 1\nLine 2\nLine 3", translationService.resolve("test.banner", Locale.US));
 	}
@@ -101,14 +105,14 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldConvertArrayTranslations() {
 		MessageDocument fileData = new MessageDocument();
-		MessageDocumentEntry entry = new MessageDocumentEntry();
+		MessageDocument.Entry entry = new MessageDocument.Entry();
 		entry.setLocales(Map.of(
 				"en_US", MultiValue.of(List.of("Line 1", "Line 2")),
 				"de_DE", MultiValue.of(List.of("Zeile 1", "Zeile 2"))
 		));
 		fileData.putEntry("banner", entry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertEquals("Line 1\nLine 2", translationService.resolve("test.banner", Locale.US));
 		assertEquals("Zeile 1\nZeile 2", translationService.resolve("test.banner", Locale.GERMANY));
@@ -118,12 +122,12 @@ class MessageDocumentLoaderTest {
 	void shouldDetectMessageTypeFromLocales() {
 		MessageDocument fileData = new MessageDocument();
 
-		MessageDocumentEntry msgEntry = new MessageDocumentEntry();
+		MessageDocument.Entry msgEntry = new MessageDocument.Entry();
 		msgEntry.setLocales(Map.of("en_US", MultiValue.of("Text")));
 
 		fileData.putEntry("msg", msgEntry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertTrue(registry.get("test.msg") instanceof LocalizedEntry);
 	}
@@ -132,9 +136,11 @@ class MessageDocumentLoaderTest {
 	void shouldDetectTemplateTypeFromText() {
 		MessageDocument fileData = new MessageDocument();
 
-		fileData.putEntry("tpl", "Text");
+		MessageDocument.Entry entry = new MessageDocument.Entry();
+		entry.setText(MultiValue.of("Text"));
+		fileData.putEntry("tpl", entry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertTrue(registry.get("test.tpl") instanceof TemplateEntry);
 	}
@@ -142,14 +148,14 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldHandleMultipleTranslations() {
 		MessageDocument fileData = new MessageDocument();
-		MessageDocumentEntry entry = new MessageDocumentEntry();
+		MessageDocument.Entry entry = new MessageDocument.Entry();
 		entry.setLocales(Map.of(
 				"en_US", MultiValue.of("Hello"),
 				"de_DE", MultiValue.of("Hallo")
 		));
 		fileData.putEntry("greeting", entry);
 
-		loader.loadFromData("test", fileData);
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertEquals("Hello", translationService.resolve("test.greeting", Locale.US));
 		assertEquals("Hallo", translationService.resolve("test.greeting", Locale.GERMANY));
@@ -158,12 +164,25 @@ class MessageDocumentLoaderTest {
 	@Test
 	void shouldLoadMultipleEntries() {
 		MessageDocument fileData = new MessageDocument();
-		fileData.putEntry("msg1", "Message 1");
-		fileData.putEntry("msg2", "Message 2");
-		fileData.putEntry("msg3", "Message 3");
+		MessageDocument.Entry entry1 = new MessageDocument.Entry();
+		entry1.setText(MultiValue.of("Message 1"));
+		fileData.putEntry("msg1", entry1);
 
-		loader.loadFromData("test", fileData);
+		MessageDocument.Entry entry2 = new MessageDocument.Entry();
+		entry2.setText(MultiValue.of("Message 2"));
+		fileData.putEntry("msg2", entry2);
+
+		MessageDocument.Entry entry3 = new MessageDocument.Entry();
+		entry3.setText(MultiValue.of("Message 3"));
+		fileData.putEntry("msg3", entry3);
+
+		registerEntries(loader.loadFromData("test", fileData));
 
 		assertEquals(3, registry.getKeys("test").size());
+	}
+
+	private void registerEntries(Map<String, TranslationEntry> entries) {
+		if (entries == null || entries.isEmpty()) return;
+		translationService.register(entries);
 	}
 }

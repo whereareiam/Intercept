@@ -17,9 +17,7 @@ public class MessageFileScanner {
 	private final String[] supportedExtensions;
 
 	public MessageFileScanner(Format format) {
-		this.supportedExtensions = format == Format.JSON
-				? new String[]{".json"}
-				: new String[]{".yml"};
+		this.supportedExtensions = new String[]{format.getExtension()};
 	}
 
 	/**

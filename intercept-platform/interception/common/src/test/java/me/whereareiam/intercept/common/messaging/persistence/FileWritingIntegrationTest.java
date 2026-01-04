@@ -5,9 +5,6 @@ import me.whereareiam.configura.type.Format;
 import me.whereareiam.configura.type.MultiValue;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,6 +30,7 @@ class FileWritingIntegrationTest {
 	void setUp() {
 		Config.setWriter(Config.writer(Format.YAML));
 		Config.setReader(Config.reader(Format.YAML));
+		Config.registerAdapter(MessageDocument.Node.class, new MessageDocumentNodeAdapter());
 		writer = new DefaultMessageFileWriter(tempDir);
 	}
 
@@ -40,16 +38,16 @@ class FileWritingIntegrationTest {
 	void shouldWriteDocumentWithNestedPath() {
 		MessageDocument document = new MessageDocument();
 
-		MessageDocumentEntry entry = new MessageDocumentEntry();
+		MessageDocument.Entry entry = new MessageDocument.Entry();
 		entry.setText(MultiValue.of("Welcome!"));
 
-		MessageDocumentRegex regex = new MessageDocumentRegex();
+		MessageDocument.Regex regex = new MessageDocument.Regex();
 		regex.setPattern(".*hello.*");
 		regex.setPriority(5);
 		regex.setReplaceMatched(true);
 		regex.setPlaceholders(Map.of("name", "$1"));
 
-		MessageDocumentInterception interception = new MessageDocumentInterception();
+		MessageDocument.Interception interception = new MessageDocument.Interception();
 		interception.setPatterns(List.of(regex));
 		entry.setInterception(interception);
 

@@ -1,7 +1,7 @@
 [versions]
 
 # plugins
-shadow = "9.2.2"
+shadow = "9.3.0"
 buildconfig = "5.7.1"
 
 # compile time processing
@@ -10,10 +10,10 @@ lombok = "1.18.42"
 # general
 guice = "7.0.0"
 annotations = "26.0.1"
-configura = "dev-c20e73e"
+configura = "dev-2704ad8"
 attache = "dev-0ac3086"
-keystone = "dev-f6d1cf6"
-commandant = "dev-88866a6"
+keystone = "dev-3dc5c8c"
+commandant = "dev-49c2037"
 semantica = "dev-ffdb76d"
 dialectica = "dev-97e4633"
 junit = "6.0.0"

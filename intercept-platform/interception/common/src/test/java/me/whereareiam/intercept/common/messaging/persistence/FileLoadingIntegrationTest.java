@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.common.messaging.persistence;
 
-import me.whereareiam.configura.Config;
 import me.whereareiam.configura.type.Format;
+import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
@@ -12,6 +12,7 @@ import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,11 +48,11 @@ class FileLoadingIntegrationTest {
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
+		Config.registerAdapter(MessageDocument.Node.class, new MessageDocumentNodeAdapter());
 
 		scanner = new MessageFileScanner(Format.YAML);
 		loader = new DefaultMessageFileLoader(
 				new TextProcessor(),
-				service,
 				() -> settings
 		);
 
@@ -73,7 +74,7 @@ class FileLoadingIntegrationTest {
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile);
 
 		MessageDocument data = Config.load(colorsFile, MessageDocument.class);
-		loader.loadFromData(keyPrefix, data);
+		registerEntries(loader.loadFromData(keyPrefix, data));
 
 		assertTrue(registry.exists("common.colors.primary"));
 		assertTrue(registry.exists("common.colors.error"));
@@ -186,8 +187,12 @@ class FileLoadingIntegrationTest {
 		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
 
 		MessageDocument data = Config.load(file, MessageDocument.class);
+		registerEntries(loader.loadFromData(keyPrefix, data));
+	}
 
-		loader.loadFromData(keyPrefix, data);
+	private void registerEntries(Map<String, TranslationEntry> entries) {
+		if (entries == null || entries.isEmpty()) return;
+		service.register(entries);
 	}
 }
 

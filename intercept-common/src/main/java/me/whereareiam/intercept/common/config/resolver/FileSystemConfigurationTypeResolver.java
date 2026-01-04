@@ -2,8 +2,8 @@ package me.whereareiam.intercept.common.config.resolver;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
-import me.whereareiam.intercept.type.ConfigurationType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +20,7 @@ public class FileSystemConfigurationTypeResolver implements ConfigurationTypeRes
 	}
 
 	@Override
-	public ConfigurationType getConfigurationType() {
+	public Format getConfigurationType() {
 		try (Stream<Path> paths = Files.list(dataPath)) {
 			Optional<Path> configFile = paths
 					.filter(Files::isRegularFile)
@@ -29,10 +29,10 @@ public class FileSystemConfigurationTypeResolver implements ConfigurationTypeRes
 
 			if (configFile.isPresent()) {
 				String[] parts = configFile.get().getFileName().toString().split("=", 2);
-				return ConfigurationType.valueOf(parts[1].toUpperCase());
+				return Format.valueOf(parts[1].toUpperCase());
 			} else {
 				Files.createFile(dataPath.resolve("type=YAML"));
-				return ConfigurationType.YAML;
+				return Format.YAML;
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to get configuration type", e);

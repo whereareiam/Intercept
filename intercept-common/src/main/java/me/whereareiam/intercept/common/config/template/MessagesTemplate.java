@@ -36,11 +36,11 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		// Configure pagination messages
 		PaginationMessages paginationMessages = new PaginationMessages();
 		paginationMessages.setShowPaginationIfOnePage(false);
-		paginationMessages.setFormat("\n {previous}<white>Pagination</white> <gray>[{current}/{max}]</gray>{next} \n");
+		paginationMessages.setFormat("\n <previous><white>Pagination</white> <gray>[<current>/<max>]</gray><next> \n");
 		paginationMessages.setShowPreviousEvenIfFirst(false);
-		paginationMessages.setPreviousTagFormat("<red><click:run_command:/intercept help {previousPage}>«</red> ");
+		paginationMessages.setPreviousTagFormat("<red><click:run_command:/intercept help <previousPage>>«</red> ");
 		paginationMessages.setShowNextEvenIfLast(false);
-		paginationMessages.setNextTagFormat(" <green><click:run_command:/intercept help {nextPage}>»</green>");
+		paginationMessages.setNextTagFormat(" <green><click:run_command:/intercept help <nextPage>>»</green>");
 
 		commands.setPagination(paginationMessages);
 
@@ -50,17 +50,17 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 				" ",
 				"<aqua><bold> Intercept</bold> <white>Command help",
 				" ",
-				"{commands}",
-				"{pagination}"
+				"<commands>",
+				"<pagination>"
 		));
-		helpMessages.setCommandFormat("  <yellow>/{command}{arguments}</yellow> <dark_gray>- <white>{description}");
+		helpMessages.setCommandFormat("  <yellow>/<command><arguments></yellow> <dark_gray>- <white><description>");
 		helpMessages.setNoCommands("  <red>No commands found</red>");
 		helpMessages.setCommandsPerPage(7);
 
 		// Configure argument formatting
 		HelpMessages.Format argumentFormat = new HelpMessages.Format();
-		argumentFormat.setArgument("<gray>[{argument}]</gray>");
-		argumentFormat.setOptionalArgument("<gray>({argument})</gray>");
+		argumentFormat.setArgument("<gray>[<argument>]</gray>");
+		argumentFormat.setOptionalArgument("<gray>(<argument>)</gray>");
 		helpMessages.setArgumentFormat(argumentFormat);
 
 		commands.setHelp(helpMessages);

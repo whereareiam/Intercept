@@ -2,59 +2,44 @@ package me.whereareiam.intercept.common.messaging.persistence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.file.MessageFileLoader;
-import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.intercept.messaging.TranslationData;
+import me.whereareiam.intercept.messaging.TranslationLoader;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.TranslationService;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.Locale;
 
 /**
  * Default implementation of MessageDataService.
  * Central service for message file operations and data access.
- * Handles scanning, loading, and tracking of message files.
+ * Handles loading and tracking of message entries.
  * Provides unified access to message entries and their file paths.
  */
 @Singleton
 public class DefaultMessageDataService implements MessageDataService, Reloadable {
-	private final Path messagesPath;
 	private final MessageRegistry registry;
-	private final MessageFileScanner scanner;
-	private final MessageFileLoader loader;
-	private final Set<MessageDocumentProcessor> documentProcessors;
-
-	// Tracks key prefix -> file path mapping
-	private final Map<String, Path> filePathMap = new HashMap<>();
+	private final TranslationLoader translationLoader;
+	private final TranslationService<Locale> translationService;
+	private volatile TranslationData lastData;
 
 	@Inject
 	public DefaultMessageDataService(
-			@Named("messagesPath") Path messagesPath,
 			MessageRegistry registry,
-			MessageFileLoader loader,
-			Set<MessageDocumentProcessor> documentProcessors,
+			TranslationLoader translationLoader,
+			TranslationService<Locale> translationService,
 			Registry<Reloadable> reloadableRegistry
 	) {
-		this.messagesPath = messagesPath;
 		this.registry = registry;
-		this.scanner = new MessageFileScanner(Config.getDefaultReader().getFormat());
-		this.loader = loader;
-		this.documentProcessors = documentProcessors;
+		this.translationLoader = translationLoader;
+		this.translationService = translationService;
 
 		reloadableRegistry.register(this);
 	}
@@ -63,46 +48,17 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 * Initialize the service by scanning and loading all message files.
 	 */
 	public void initialize() {
-		if (!Files.exists(messagesPath)) {
-			Logger.warn("Messages directory does not exist: %s", messagesPath);
+		TranslationData data = translationLoader.load();
+		if (data == null) {
+			lastData = new MessageSnapshot(Map.of(), Map.of());
 			return;
 		}
 
-		filePathMap.clear();
-
-		// Scan for all message files
-		List<Path> files = scanner.scanDirectory(messagesPath);
-		Logger.debug("Found %d message files", files.size());
-
-		// Load each file and track file paths
-		for (Path file : files) {
-			try {
-				loadFile(file);
-			} catch (Exception e) {
-				Logger.severe("Failed to load message file %s: %s", file, e.getMessage());
-				e.printStackTrace();
-			}
+		lastData = data;
+		Map<String, TranslationEntry> entries = data.getEntries();
+		if (entries != null && !entries.isEmpty()) {
+			translationService.register(entries);
 		}
-	}
-
-	/**
-	 * Load a single message file and track its path.
-	 *
-	 * @param file the file to load
-	 */
-	private void loadFile(Path file) {
-		String keyPrefix = scanner.buildKeyPrefix(messagesPath, file);
-		Logger.debug("Loading file: %s with key prefix: %s", file.getFileName(), keyPrefix);
-
-		// Track the file path for this key prefix
-		filePathMap.put(keyPrefix, file);
-
-		// Read file data with Configura using dynamic message document mapping
-		MessageDocument data = Config.load(file, MessageDocument.class);
-
-		// Load into registry
-		loader.loadFromData(keyPrefix, data);
-		runDocumentProcessors(keyPrefix, data);
 	}
 
 	/**
@@ -122,7 +78,8 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 */
 	@Override
 	public Map<String, Path> getFilePaths() {
-		return Map.copyOf(filePathMap);
+		TranslationData data = lastData;
+		return data == null ? Map.of() : data.getFilePaths();
 	}
 
 	/**
@@ -150,33 +107,6 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 
 	@Override
 	public void resetStorage() {
-		try {
-			if (Files.notExists(messagesPath)) {
-				Files.createDirectories(messagesPath);
-				return;
-			}
-
-			try (Stream<Path> stream = Files.walk(messagesPath)) {
-				stream
-						.sorted(Comparator.reverseOrder())
-						.filter(path -> !path.equals(messagesPath))
-						.forEach(path -> {
-							try {
-								Files.deleteIfExists(path);
-							} catch (IOException e) {
-								throw new IllegalStateException("Failed to delete path: " + path, e);
-							}
-						});
-			}
-		} catch (IOException e) {
-			throw new IllegalStateException("Failed to reset messages directory: " + messagesPath, e);
-		}
-	}
-
-	private void runDocumentProcessors(String keyPrefix, MessageDocument data) {
-		if (documentProcessors == null || documentProcessors.isEmpty()) return;
-		for (MessageDocumentProcessor processor : documentProcessors) {
-			processor.process(keyPrefix, data);
-		}
+		translationLoader.resetStorage();
 	}
 }

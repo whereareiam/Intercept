@@ -1,6 +1,9 @@
 package me.whereareiam.intercept.messaging.file;
 
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+
+import java.util.Map;
 
 /**
  * Loads message files into the messaging system.
@@ -8,10 +11,10 @@ import me.whereareiam.intercept.model.messaging.document.MessageDocument;
  */
 public interface MessageFileLoader {
 	/**
-	 * Load messages from parsed persistence data into the backing stores.
+	 * Load messages from parsed persistence data.
 	 *
 	 * @param keyPrefix the key prefix for this persistence (e.g., "errors.permissions")
 	 * @param fileData  the parsed persistence data
 	 */
-	void loadFromData(String keyPrefix, MessageDocument fileData);
+	Map<String, TranslationEntry> loadFromData(String keyPrefix, MessageDocument fileData);
 }

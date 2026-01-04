@@ -2,17 +2,16 @@ package me.whereareiam.intercept.common.messaging.persistence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import me.whereareiam.configura.type.MultiValue;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
 import me.whereareiam.intercept.util.LocaleUtil;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
-import me.whereareiam.semantica.translation.TranslationService;
 import me.whereareiam.semantica.translation.base.TranslationLocale;
 
 import com.google.inject.Provider;
@@ -24,27 +23,21 @@ import java.util.*;
  */
 @Singleton
 public class DefaultMessageFileLoader implements MessageFileLoader {
-	private static final String LOCALES_KEY = "locales";
-	private static final String TEXT_KEY = "text";
-
 	private final TextProcessor textProcessor;
-	private final TranslationService<Locale> translationService;
 	private final Provider<Settings> settingsProvider;
 
 	@Inject
 	public DefaultMessageFileLoader(
 			TextProcessor textProcessor,
-			TranslationService<Locale> translationService,
 			Provider<Settings> settingsProvider
 	) {
 		this.textProcessor = textProcessor;
-		this.translationService = translationService;
 		this.settingsProvider = settingsProvider;
 	}
 
 	@Override
-	public void loadFromData(String keyPrefix, MessageDocument fileData) {
-		if (fileData == null || fileData.isEmpty()) return;
+	public Map<String, TranslationEntry> loadFromData(String keyPrefix, MessageDocument fileData) {
+		if (fileData == null || fileData.isEmpty()) return Map.of();
 
 		Map<String, ParsedEntry> parsedEntries = new LinkedHashMap<>();
 		parseEntries(normalizePrefix(keyPrefix), fileData.getEntries(), parsedEntries);
@@ -56,8 +49,7 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 				translations.put(entry.key(), translationEntry);
 		}
 
-		if (!translations.isEmpty())
-			translationService.register(translations);
+		return translations.isEmpty() ? Map.of() : Map.copyOf(translations);
 	}
 
 	private String normalizePrefix(String keyPrefix) {
@@ -65,44 +57,30 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 		return keyPrefix.endsWith(".") ? keyPrefix.substring(0, keyPrefix.length() - 1) : keyPrefix;
 	}
 
-	private void parseEntries(String prefix, Map<String, Object> source, Map<String, ParsedEntry> entries) {
+	private void parseEntries(String prefix, Map<String, MessageDocument.Node> source, Map<String, ParsedEntry> entries) {
 		if (source == null || source.isEmpty()) return;
 
-		for (Map.Entry<String, Object> rawEntry : source.entrySet()) {
+		for (Map.Entry<String, MessageDocument.Node> rawEntry : source.entrySet()) {
 			String key = rawEntry.getKey();
-			Object value = rawEntry.getValue();
+			MessageDocument.Node value = rawEntry.getValue();
+			if (value == null) continue;
 			String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
 
-			if (value instanceof MessageDocumentEntry entryData) {
-				ParsedEntry parsed = parseEntry(fullKey, entryData.getText(), entryData.getLocales());
+			if (value instanceof MessageDocument.Entry entryData) {
+				ParsedEntry parsed = parseEntry(fullKey, entryData);
 				entries.put(fullKey, parsed);
 				continue;
 			}
 
-			if (value instanceof Map<?, ?> mapValue) {
-				Map<String, Object> map = castMap(mapValue);
-				if (isEntryMap(map)) {
-					ParsedEntry parsed = parseEntry(fullKey, map.get(TEXT_KEY), map.get(LOCALES_KEY));
-					entries.put(fullKey, parsed);
-					continue;
-				}
-
-				parseEntries(fullKey, map, entries);
-				continue;
-			}
-
-			if (value != null) {
-				ParsedEntry parsed = parseEntry(fullKey, value, null);
-				entries.put(fullKey, parsed);
+			if (value instanceof MessageDocument.Section section) {
+				parseEntries(fullKey, section.getEntries(), entries);
 			}
 		}
 	}
 
-	private boolean isEntryMap(Map<String, Object> map) {
-		return map.containsKey(TEXT_KEY) || map.containsKey(LOCALES_KEY);
-	}
-
-	private ParsedEntry parseEntry(String key, Object textRaw, Object localesRaw) {
+	private ParsedEntry parseEntry(String key, MessageDocument.Entry entry) {
+		MultiValue<String> textRaw = entry.getText();
+		Map<String, MultiValue<String>> localesRaw = entry.getLocales();
 		boolean localized = localesRaw != null;
 		if (textRaw != null && localized) {
 			throw new IllegalArgumentException("Entry '" + key + "' cannot have both 'text' and 'locales'");
@@ -128,21 +106,20 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 		);
 	}
 
-	private String parseText(Object raw) {
+	private String parseText(MultiValue<String> raw) {
 		if (raw == null) return null;
 		return textProcessor.process(raw);
 	}
 
-	private LocaleBlock parseLocales(String key, Object raw) {
-		if (!(raw instanceof Map<?, ?> mapValue)) {
+	private LocaleBlock parseLocales(String key, Map<String, MultiValue<String>> localesMap) {
+		if (localesMap == null) {
 			throw new IllegalArgumentException("Entry '" + key + "' locales must be a map");
 		}
 
-		Map<String, Object> localesMap = castMap(mapValue);
 		String defaultText = null;
 		Map<Locale, String> translations = new LinkedHashMap<>();
 
-		for (Map.Entry<String, Object> localeEntry : localesMap.entrySet()) {
+		for (Map.Entry<String, MultiValue<String>> localeEntry : localesMap.entrySet()) {
 			String localeKey = localeEntry.getKey();
 			String text = textProcessor.process(localeEntry.getValue());
 			if ("default".equalsIgnoreCase(localeKey)) {
@@ -190,14 +167,6 @@ public class DefaultMessageFileLoader implements MessageFileLoader {
 
 		String text = entry.text();
 		return text != null ? new TemplateEntry(text) : null;
-	}
-
-	private Map<String, Object> castMap(Map<?, ?> raw) {
-		Map<String, Object> casted = new LinkedHashMap<>();
-		for (Map.Entry<?, ?> entry : raw.entrySet()) {
-			casted.put(String.valueOf(entry.getKey()), entry.getValue());
-		}
-		return casted;
 	}
 
 	private record LocaleBlock(String defaultText, Map<Locale, String> translations) {

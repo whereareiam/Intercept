@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.commandant.Help;
-import me.whereareiam.commandant.Pagination;
 import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.commandant.builder.HelpBuilder;
 import me.whereareiam.intercept.model.CommandDefinition;
@@ -14,6 +13,7 @@ import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.keystone.Actor;
+import me.whereareiam.keystone.model.SerializerOptions;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotation.specifier.Range;
@@ -67,14 +67,14 @@ public class HelpCommand implements Reloadable {
 	private HelpBuilder<Actor> getHelpBuilder() {
 		if (helpBuilder == null) {
 			Messages messages = messagesProvider.get();
+			SerializerOptions.PlaceholderFormat placeholderFormat = Serializer.getEngine().getPlaceholderFormat();
 
-			helpBuilder = Help.create(
-					messages.getCommands().getHelp(),
-					collectArgumentDescriptions(),
-					Pagination.create(messages.getCommands().getPagination()),
-					messages.getCommands().getHelp().getCommandsPerPage(),
-					true
-			);
+			helpBuilder = Help.<Actor>builder(messages.getCommands().getHelp())
+					.customArgumentNames(collectArgumentDescriptions())
+					.paginationMessages(messages.getCommands().getPagination())
+					.sortAlphabetically(true)
+					.placeholderFormat(placeholderFormat)
+					.build();
 		}
 		return helpBuilder;
 	}

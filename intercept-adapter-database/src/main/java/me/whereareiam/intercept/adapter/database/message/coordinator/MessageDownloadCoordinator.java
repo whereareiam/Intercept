@@ -7,9 +7,6 @@ import me.whereareiam.intercept.adapter.database.entity.message.*;
 import me.whereareiam.intercept.adapter.database.repository.message.*;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
-import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.intercept.util.LocaleUtil;
@@ -53,7 +50,7 @@ public class MessageDownloadCoordinator {
 
 	private AssemblyResult assemble(MessageFileEntity fileEntity) {
 		List<MessageEntryEntity> entryEntities = entryRepository.findAllByFileId(fileEntity.getId());
-		Map<String, Object> fileItems = new LinkedHashMap<>();
+		Map<String, MessageDocument.Node> fileItems = new LinkedHashMap<>();
 		Map<String, TranslationEntry> snapshotEntries = new LinkedHashMap<>();
 
 		for (MessageEntryEntity entryEntity : entryEntities) {
@@ -75,7 +72,7 @@ public class MessageDownloadCoordinator {
 
 		TranslationAssembly translations = loadTranslations(entryEntity.getId());
 
-		MessageDocumentEntry fileData = new MessageDocumentEntry();
+		MessageDocument.Entry fileData = new MessageDocument.Entry();
 		Map<String, MultiValue<String>> locales = toDocumentLocales(translations);
 		if (locales != null && !locales.isEmpty()) {
 			fileData.setLocales(locales);
@@ -83,7 +80,7 @@ public class MessageDownloadCoordinator {
 			fileData.setText(MultiValue.of(translations.defaultText()));
 		}
 
-		MessageDocumentInterception interception = assembleRegex(entryEntity.getId());
+		MessageDocument.Interception interception = assembleRegex(entryEntity.getId());
 		if (interception != null && interception.getPatterns() != null && !interception.getPatterns().isEmpty()) {
 			fileData.setInterception(interception);
 		}
@@ -135,11 +132,11 @@ public class MessageDownloadCoordinator {
 		return documentLocales;
 	}
 
-	private MessageDocumentInterception assembleRegex(long entryId) {
+	private MessageDocument.Interception assembleRegex(long entryId) {
 		List<MessageRegexPatternEntity> patternEntities = patternRepository.findAllByEntryId(entryId);
 		if (patternEntities.isEmpty()) return null;
 
-		List<MessageDocumentRegex> fileRegex = new ArrayList<>();
+		List<MessageDocument.Regex> fileRegex = new ArrayList<>();
 
 		for (MessageRegexPatternEntity patternEntity : patternEntities) {
 			Map<String, String> placeholders = placeholderRepository.findAllByPatternId(patternEntity.getId())
@@ -151,7 +148,7 @@ public class MessageDownloadCoordinator {
 							LinkedHashMap::new
 					));
 
-			MessageDocumentRegex fileRegexEntry = new MessageDocumentRegex();
+			MessageDocument.Regex fileRegexEntry = new MessageDocument.Regex();
 			fileRegexEntry.setPattern(patternEntity.getPattern());
 			fileRegexEntry.setPriority(patternEntity.getPriority());
 			fileRegexEntry.setReplaceMatched(patternEntity.isReplaceMatched());
@@ -161,7 +158,7 @@ public class MessageDownloadCoordinator {
 			fileRegex.add(fileRegexEntry);
 		}
 
-		MessageDocumentInterception interception = new MessageDocumentInterception();
+		MessageDocument.Interception interception = new MessageDocument.Interception();
 		interception.setPatterns(fileRegex);
 		return interception;
 	}
@@ -188,7 +185,7 @@ public class MessageDownloadCoordinator {
 
 	private record AssemblyResult(MessageDocument fileData, Map<String, TranslationEntry> snapshotEntries) {}
 
-	private record EntryAssembly(String fullKey, TranslationEntry snapshotEntry, MessageDocumentEntry fileData,
+	private record EntryAssembly(String fullKey, TranslationEntry snapshotEntry, MessageDocument.Entry fileData,
 	                             MessageType entryType) {}
 
 	private record TranslationAssembly(String defaultText, Map<Locale, String> translations) {}

@@ -41,7 +41,6 @@ public class DefaultMessageFileWriter implements MessageFileWriter {
 	public Path resolvePath(String relativePath) {
 		String normalized = relativePath.replace('\\', '/');
 		Format format = Config.getDefaultWriter().getFormat();
-		String extension = format == Format.JSON ? ".json" : ".yml";
-		return messagesPath.resolve(normalized + extension).normalize();
+		return messagesPath.resolve(normalized + format.getExtension()).normalize();
 	}
 }

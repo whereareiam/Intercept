@@ -7,6 +7,7 @@ import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
+import me.whereareiam.intercept.common.messaging.persistence.MessageDocumentNodeAdapter;
 import me.whereareiam.intercept.common.messaging.persistence.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
@@ -43,6 +44,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,6 +88,7 @@ class RegexIntegrationTest {
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
+		Config.registerAdapter(MessageDocument.Node.class, new MessageDocumentNodeAdapter());
 
 		// Load test message files
 		loadTestMessages();
@@ -107,16 +110,20 @@ class RegexIntegrationTest {
 		TextProcessor textProcessor = new TextProcessor();
 		MessageFileLoader loader = new DefaultMessageFileLoader(
 				textProcessor,
-				translationService,
 				() -> settings
 		);
 
 		for (Path file : files) {
 			String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
 			MessageDocument fileData = Config.load(file, MessageDocument.class);
-			loader.loadFromData(keyPrefix, fileData);
+			registerEntries(loader.loadFromData(keyPrefix, fileData));
 			documentProcessor.process(keyPrefix, fileData);
 		}
+	}
+
+	private void registerEntries(Map<String, TranslationEntry> entries) {
+		if (entries == null || entries.isEmpty()) return;
+		translationService.register(entries);
 	}
 
 	@Test

@@ -7,11 +7,15 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.Serializer;
-import me.whereareiam.intercept.common.config.ConfiguraBootstrap;
+import me.whereareiam.configura.Config;
+import me.whereareiam.configura.reader.ConfigReader;
+import me.whereareiam.configura.type.Format;
+import me.whereareiam.configura.writer.ConfigWriter;
 import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
 import me.whereareiam.intercept.common.event.EventController;
 import me.whereareiam.intercept.common.logging.BannerContributor;
@@ -19,10 +23,8 @@ import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.InterceptSemanticaLogger;
 import me.whereareiam.intercept.common.messaging.MessageLifecycleHook;
 import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
+import me.whereareiam.intercept.common.messaging.NoopTranslationLoader;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
-import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
-import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileWriter;
-import me.whereareiam.intercept.common.messaging.persistence.MessageDocumentProcessor;
 import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
 import me.whereareiam.intercept.common.provider.IntegrationProvider;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
@@ -39,8 +41,7 @@ import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.integration.Integration;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.file.MessageFileLoader;
-import me.whereareiam.intercept.messaging.file.MessageFileWriter;
+import me.whereareiam.intercept.messaging.TranslationLoader;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Persistence;
@@ -83,7 +84,6 @@ public class CommonConfiguration extends AbstractModule {
 		bind(ConfigurationTypeResolver.class)
 				.to(FileSystemConfigurationTypeResolver.class)
 				.asEagerSingleton();
-		bind(ConfiguraBootstrap.class).asEagerSingleton();
 
 		// Configs
 		bind(SettingsProvider.class).asEagerSingleton();
@@ -96,7 +96,8 @@ public class CommonConfiguration extends AbstractModule {
 		bind(Commands.class).toProvider(CommandsProvider.class);
 
 		// Services
-		bind(SerializerEngine.class).toProvider(SerializerEngineProvider.class);
+		OptionalBinder.newOptionalBinder(binder(), SerializerEngine.class)
+				.setDefault().toProvider(SerializerEngineProvider.class);
 		bind(EventManager.class).to(EventController.class);
 		bind(EventUtil.class).asEagerSingleton();
 		bind(PlayerRegistry.class).to(DefaultPlayerRegistry.class);
@@ -106,8 +107,8 @@ public class CommonConfiguration extends AbstractModule {
 
 		// Messages system
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
-		bind(MessageFileLoader.class).to(DefaultMessageFileLoader.class);
-		bind(MessageFileWriter.class).to(DefaultMessageFileWriter.class);
+		OptionalBinder.newOptionalBinder(binder(), TranslationLoader.class)
+				.setDefault().to(NoopTranslationLoader.class);
 		bind(MessageDataService.class).to(DefaultMessageDataService.class);
 		bind(MessageLifecycleService.class).asEagerSingleton();
 
@@ -132,12 +133,20 @@ public class CommonConfiguration extends AbstractModule {
 
 		Multibinder.newSetBinder(binder(), BannerContributor.class);
 		Multibinder.newSetBinder(binder(), MessageLifecycleHook.class);
-		Multibinder.newSetBinder(binder(), MessageDocumentProcessor.class);
 	}
 
 	@Inject
 	void initializeSerializationHelper(Provider<SerializerEngine> serializerProvider) {
 		Serializer.initialize(serializerProvider);
+	}
+
+	@Inject
+	void initializeConfigura(ConfigurationTypeResolver resolver) {
+		Format format = resolver.getConfigurationType();
+		ConfigReader reader = Config.reader(format);
+		ConfigWriter writer = Config.writer(format);
+		Config.setReader(reader);
+		Config.setWriter(writer);
 	}
 
 	@Inject

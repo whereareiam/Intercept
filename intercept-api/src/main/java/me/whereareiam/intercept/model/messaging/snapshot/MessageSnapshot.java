@@ -2,6 +2,7 @@ package me.whereareiam.intercept.model.messaging.snapshot;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import me.whereareiam.intercept.messaging.TranslationData;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 
 import java.nio.file.Path;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 @Getter
 @RequiredArgsConstructor
-public class MessageSnapshot {
+public class MessageSnapshot implements TranslationData {
 	private final Map<String, TranslationEntry> entries;
 	private final Map<String, Path> filePaths;
 }

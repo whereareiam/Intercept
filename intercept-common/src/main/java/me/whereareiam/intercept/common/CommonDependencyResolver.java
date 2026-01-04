@@ -16,7 +16,7 @@ public abstract class CommonDependencyResolver implements DependencyResolver {
 
 	@Override
 	public void resolveDependencies() {
-		libraryManager.setVerbosityMode(VerbosityMode.QUIET);
+		libraryManager.setVerbosityMode(VerbosityMode.SUMMARY);
 
 		libraryManager.addMavenCentral();
 		libraryManager.addRepository("https://maven.whereareiam.me/development");
