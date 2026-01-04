@@ -23,13 +23,13 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		// Configure command exception messages
 		ExceptionMessages exceptionMessages = new ExceptionMessages();
-		exceptionMessages.setNoPermission("{prefix}<white>You don't have \"<gray>{content}</gray>\" permission to use this command.</white>");
-		exceptionMessages.setExecutionError("{prefix}<white>An error occurred while executing the command:</white> <gray>{content}</gray>");
-		exceptionMessages.setInvalidSyntax("{prefix}<white>Invalid syntax, please use:</white> <gray>/{content}</gray>");
-		exceptionMessages.setInvalidSyntaxBoolean("{prefix}<white>You tried to use <gray>{content}</gray> as a boolean, but it's not a valid value, please use <green>true</green> or <red>false</red>.</white>");
-		exceptionMessages.setInvalidSyntaxNumber("{prefix}<white>You tried to use <gray>{content}</gray> as a number, but it's not a valid value, please use a valid number.</white>");
-		exceptionMessages.setInvalidSyntaxString("{prefix}<white>You tried to use <gray>{content}</gray> as a string, but it's not a valid value, please use a valid string.</white>");
-		exceptionMessages.setInvalidSender("{prefix}<white>You cannot execute this command from this context.</white>");
+		exceptionMessages.setNoPermission("<prefix><white>You don't have \"<gray><content></gray>\" permission to use this command.</white>");
+		exceptionMessages.setExecutionError("<prefix><white>An error occurred while executing the command:</white> <gray><content></gray>");
+		exceptionMessages.setInvalidSyntax("<prefix><white>Invalid syntax, please use:</white> <gray>/<content></gray>");
+		exceptionMessages.setInvalidSyntaxBoolean("<prefix><white>You tried to use <gray><content></gray> as a boolean, but it's not a valid value, please use <green>true</green> or <red>false</red>.</white>");
+		exceptionMessages.setInvalidSyntaxNumber("<prefix><white>You tried to use <gray><content></gray> as a number, but it's not a valid value, please use a valid number.</white>");
+		exceptionMessages.setInvalidSyntaxString("<prefix><white>You tried to use <gray><content></gray> as a string, but it's not a valid value, please use a valid string.</white>");
+		exceptionMessages.setInvalidSender("<prefix><white>You cannot execute this command from this context.</white>");
 
 		commands.setExceptions(exceptionMessages);
 
@@ -67,20 +67,20 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		// Configure reload command messages
 		Messages.Commands.Reload reload = new Messages.Commands.Reload();
-		reload.setSuccess("{prefix}<white>Configuration reloaded <green>successfully</green>!");
-		reload.setError("{prefix}<white>An <red>error occurred</red> while reloading: <gray>{error}</gray>");
+		reload.setSuccess("<prefix><white>Configuration reloaded <green>successfully</green>!");
+		reload.setError("<prefix><white>An <red>error occurred</red> while reloading: <gray><error></gray>");
 		commands.setReload(reload);
 
 		// Configure inspect command messages
 		Messages.Commands.Inspect inspect = new Messages.Commands.Inspect();
-		inspect.setEnabled("{prefix}<white>Inspection mode <green>enabled</green>. Click on chat messages to get regex patterns.");
-		inspect.setDisabled("{prefix}<white>Inspection mode <red>disabled</red>.");
+		inspect.setEnabled("<prefix><white>Inspection mode <green>enabled</green>. Click on chat messages to get regex patterns.");
+		inspect.setDisabled("<prefix><white>Inspection mode <red>disabled</red>.");
 
 		Messages.Commands.Inspect.Hover hover = new Messages.Commands.Inspect.Hover();
 		hover.setFormat(List.of(
 				"",
 				"<white> Regex Pattern:</white>   ",
-				"<aqua>  {pattern}{truncated}</aqua>   ",
+				"<aqua>  <pattern><truncated></aqua>   ",
 				"",
 				"<green>Click to copy pattern!</green>   "
 		));
@@ -92,13 +92,13 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		// Configure locale command messages
 		Messages.Commands.LocaleCommand locale = new Messages.Commands.LocaleCommand();
-		locale.setPlayerOnly("{prefix}<white>Only players can use this command.</white>");
-		locale.setMissingLocaleArgument("{prefix}<white>Usage:</white> <gray>/locale <locale></gray>");
-		locale.setMissingTargetArguments("{prefix}<white>Usage:</white> <gray>/locale <player> <locale></gray>");
-		locale.setInvalidLocale("{prefix}<white>\"<gray>{locale}</gray>\" is not a valid locale.</white>");
-		locale.setPlayerNotFound("{prefix}<white>Unable to find player <gray>{player}</gray>.</white>");
-		locale.setSelfUpdated("{prefix}<white>Your preferred locale is now <green>{locale}</green>.</white>");
-		locale.setTargetUpdated("{prefix}<white>Set <green>{player}</green>'s locale to <green>{locale}</green>.</white>");
+		locale.setPlayerOnly("<prefix><white>Only players can use this command.</white>");
+		locale.setMissingLocaleArgument("<prefix><white>Usage:</white> <gray>/locale <locale></gray>");
+		locale.setMissingTargetArguments("<prefix><white>Usage:</white> <gray>/locale <player> <locale></gray>");
+		locale.setInvalidLocale("<prefix><white>\"<gray><locale></gray>\" is not a valid locale.</white>");
+		locale.setPlayerNotFound("<prefix><white>Unable to find player <gray><player></gray>.</white>");
+		locale.setSelfUpdated("<prefix><white>Your preferred locale is now <green><locale></green>.</white>");
+		locale.setTargetUpdated("<prefix><white>Set <green><player></green>'s locale to <green><locale></green>.</white>");
 		commands.setLocale(locale);
 
 		// Configure database command messages
@@ -106,18 +106,18 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 
 		// Configure database upload command messages
 		Messages.Commands.Database.Upload upload = new Messages.Commands.Database.Upload();
-		upload.setNoMessages("{prefix}<white>No messages to upload.");
-		upload.setUploading("{prefix}<white>Uploading <green>{entries} entries</green> from <green>{files}</green> files...");
-		upload.setSuccess("{prefix}<white>Successfully uploaded <green>{entries} entries</green> to the database <gray>[{time}ms]</gray>");
-		upload.setError("{prefix}<white>An <red>error occurred</red> while uploading: <gray>{error}</gray>");
+		upload.setNoMessages("<prefix><white>No messages to upload.");
+		upload.setUploading("<prefix><white>Uploading <green><entries> entries</green> from <green><files></green> files...");
+		upload.setSuccess("<prefix><white>Successfully uploaded <green><entries> entries</green> to the database <gray>[<time>ms]</gray>");
+		upload.setError("<prefix><white>An <red>error occurred</red> while uploading: <gray><error></gray>");
 		database.setUpload(upload);
 
 		// Configure database download command messages
 		Messages.Commands.Database.Download download = new Messages.Commands.Database.Download();
-		download.setPreparing("{prefix}<white>Preparing to download messages from the database...");
-		download.setNoEntries("{prefix}<white>No messages found in the database.");
-		download.setSuccess("{prefix}<white>Downloaded <green>{files} files</green> with <green>{entries} entries</green> <gray>[{time}ms]</gray>");
-		download.setError("{prefix}<white>An <red>error occurred</red> while downloading: <gray>{error}</gray>");
+		download.setPreparing("<prefix><white>Preparing to download messages from the database...");
+		download.setNoEntries("<prefix><white>No messages found in the database.");
+		download.setSuccess("<prefix><white>Downloaded <green><files> files</green> with <green><entries> entries</green> <gray>[<time>ms]</gray>");
+		download.setError("<prefix><white>An <red>error occurred</red> while downloading: <gray><error></gray>");
 		database.setDownload(download);
 
 		commands.setDatabase(database);
@@ -132,7 +132,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		// Default fallback format - just show the key
 		Messages.Fallback.SourceFormat defaultFormat = new Messages.Fallback.SourceFormat();
 		defaultFormat.setEnabled(true);
-		defaultFormat.setFormat("<dark_gray>{key}</dark_gray>");
+		defaultFormat.setFormat("<dark_gray><key></dark_gray>");
 		defaultFormat.setLogMissing(true);
 		fallback.setDefaultFormat(defaultFormat);
 
@@ -142,7 +142,7 @@ public class MessagesTemplate implements TemplateProvider<Messages> {
 		// CHAT - Simple bracket notation for missing chat messages
 		Messages.Fallback.SourceFormat chatFormat = new Messages.Fallback.SourceFormat();
 		chatFormat.setEnabled(true);
-		chatFormat.setFormat("<dark_gray>{key}</dark_gray>");
+		chatFormat.setFormat("<dark_gray><key></dark_gray>");
 		chatFormat.setLogMissing(true);
 		formats.put("CHAT", chatFormat);
 

@@ -2,6 +2,8 @@ package me.whereareiam.intercept.platform.interception.interceptor;
 
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.platform.interception.interceptor.base.Interceptor;
+import me.whereareiam.intercept.platform.interception.interceptor.base.InterceptorProvider;
 import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.*;

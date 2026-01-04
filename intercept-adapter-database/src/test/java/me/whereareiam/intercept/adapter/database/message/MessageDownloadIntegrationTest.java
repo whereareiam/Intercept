@@ -64,7 +64,7 @@ class MessageDownloadIntegrationTest extends BaseMessagePersistenceIntegrationTe
 		Map<String, Path> filePaths = new HashMap<>();
 
 		entries.put("errors.permissions.no-permission", new TemplateEntry("No permission"));
-		entries.put("common.greeting", new TemplateEntry("Hello {player}!"));
+		entries.put("common.greeting", new TemplateEntry("Hello <player>!"));
 		filePaths.put("errors.permissions", resolveFile("errors/permissions.yml"));
 		filePaths.put("common", resolveFile("common/greeting.yml"));
 

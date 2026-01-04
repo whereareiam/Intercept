@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.platform.interception.interceptor.actionbar;
 
-import me.whereareiam.intercept.platform.interception.interceptor.Interceptor;
+import me.whereareiam.intercept.platform.interception.interceptor.base.Interceptor;
 
 /**
  * Interceptor for action bar components.

@@ -6,6 +6,9 @@ import me.whereareiam.intercept.common.messaging.persistence.MessageDocumentProc
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
+import me.whereareiam.intercept.model.messaging.document.MessageDocumentInterception;
+import me.whereareiam.intercept.model.messaging.document.MessageDocumentRegex;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 
 import java.util.ArrayList;
@@ -43,6 +46,11 @@ public class InterceptionMessageDocumentProcessor implements MessageDocumentProc
 			Object value = rawEntry.getValue();
 			String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
 
+			if (value instanceof MessageDocumentEntry entryData) {
+				parseInterception(fullKey, entryData.getInterception());
+				continue;
+			}
+
 			if (value instanceof Map<?, ?> mapValue) {
 				Map<String, Object> map = castMap(mapValue);
 				if (isEntryMap(map)) {
@@ -77,6 +85,19 @@ public class InterceptionMessageDocumentProcessor implements MessageDocumentProc
 			registry.register(key, compiled);
 	}
 
+	private void parseInterception(String key, MessageDocumentInterception interception) {
+		if (interception == null || interception.getPatterns() == null) return;
+
+		List<CompiledRegexPattern> compiled = new ArrayList<>();
+		for (MessageDocumentRegex regex : interception.getPatterns()) {
+			CompiledRegexPattern pattern = compilePattern(key, regex);
+			if (pattern != null) compiled.add(pattern);
+		}
+
+		if (!compiled.isEmpty())
+			registry.register(key, compiled);
+	}
+
 	private CompiledRegexPattern compilePattern(String key, Map<String, Object> patternMap) {
 		String regex = readString(patternMap.get("pattern"));
 		if (regex == null || regex.isBlank()) return null;
@@ -87,6 +108,22 @@ public class InterceptionMessageDocumentProcessor implements MessageDocumentProc
 
 		try {
 			return new CompiledRegexPattern(regex, placeholders, priority, replaceMatched);
+		} catch (Exception e) {
+			Logger.warn("Failed to compile regex for key '%s': %s", key, e.getMessage());
+			return null;
+		}
+	}
+
+	private CompiledRegexPattern compilePattern(String key, MessageDocumentRegex regex) {
+		if (regex == null || regex.getPattern() == null || regex.getPattern().isBlank()) return null;
+
+		try {
+			return new CompiledRegexPattern(
+					regex.getPattern(),
+					regex.getPlaceholders(),
+					regex.getPriority(),
+					regex.isReplaceMatched()
+			);
 		} catch (Exception e) {
 			Logger.warn("Failed to compile regex for key '%s': %s", key, e.getMessage());
 			return null;

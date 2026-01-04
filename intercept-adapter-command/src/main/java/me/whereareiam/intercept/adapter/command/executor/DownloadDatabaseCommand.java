@@ -70,9 +70,9 @@ public class DownloadDatabaseCommand {
 						.receiver(sender)
 						.message(download.getSuccess())
 						.placeholders(Map.of(
-								"{files}", String.valueOf(snapshot.getFilePaths().size()),
-								"{entries}", String.valueOf(snapshot.getEntries().size()),
-								"{time}", String.valueOf(duration)
+								"files", String.valueOf(snapshot.getFilePaths().size()),
+								"entries", String.valueOf(snapshot.getEntries().size()),
+								"time", String.valueOf(duration)
 						))
 						.build());
 				sender.sendMessage(success);
@@ -83,7 +83,7 @@ public class DownloadDatabaseCommand {
 				Component error = Serializer.serialize(SerializerContent.builder()
 						.receiver(sender)
 						.message(download.getError())
-						.placeholder("{error}", e.getMessage())
+						.placeholder("error", e.getMessage())
 						.build());
 				sender.sendMessage(error);
 			}

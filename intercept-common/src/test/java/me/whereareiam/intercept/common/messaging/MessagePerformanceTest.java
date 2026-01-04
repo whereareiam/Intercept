@@ -1,6 +1,7 @@
 package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.common.SemanticaTestHelper;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;

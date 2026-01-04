@@ -1,5 +1,5 @@
 name: @projectName@
-main: paper.platform.me.whereareiam.intercept.platform.interception.PaperIntercept
+main: me.whereareiam.intercept.platform.bukkit.PaperIntercept
 version: '@projectVersion@'
 api-version: '1.20'
 folia-supported: true

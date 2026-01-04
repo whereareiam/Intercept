@@ -52,8 +52,8 @@ public class UploadDatabaseCommand {
 					.receiver(sender)
 					.message(upload.getUploading())
 					.placeholders(Map.of(
-							"{entries}", String.valueOf(snapshot.getEntries().size()),
-							"{files}", String.valueOf(snapshot.getFilePaths().size())
+							"entries", String.valueOf(snapshot.getEntries().size()),
+							"files", String.valueOf(snapshot.getFilePaths().size())
 					))
 					.build());
 			sender.sendMessage(uploadComponent);
@@ -72,8 +72,8 @@ public class UploadDatabaseCommand {
 							.receiver(sender)
 							.message(upload.getSuccess())
 							.placeholders(Map.of(
-									"{entries}", String.valueOf(snapshot.getEntries().size()),
-									"{time}", String.valueOf(duration)
+									"entries", String.valueOf(snapshot.getEntries().size()),
+									"time", String.valueOf(duration)
 							))
 							.build())
 			);
@@ -85,7 +85,7 @@ public class UploadDatabaseCommand {
 					Serializer.serialize(SerializerContent.builder()
 							.receiver(sender)
 							.message(upload.getError())
-							.placeholder("{error}", e.getMessage())
+							.placeholder("error", e.getMessage())
 							.build())
 			);
 			Logger.severe("Failed to upload messages to database: %s", e.getMessage());

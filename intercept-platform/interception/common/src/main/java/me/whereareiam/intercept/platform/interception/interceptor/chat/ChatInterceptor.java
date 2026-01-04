@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.platform.interception.interceptor.chat;
 
-import me.whereareiam.intercept.platform.interception.interceptor.Interceptor;
+import me.whereareiam.intercept.platform.interception.interceptor.base.Interceptor;
 
 /**
  * Interceptor for chat components.

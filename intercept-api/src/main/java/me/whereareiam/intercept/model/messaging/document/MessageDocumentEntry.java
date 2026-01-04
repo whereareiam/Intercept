@@ -2,6 +2,8 @@ package me.whereareiam.intercept.model.messaging.document;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.whereareiam.configura.type.MultiValue;
+
 import java.util.Map;
 
 /**
@@ -11,18 +13,28 @@ import java.util.Map;
 @Setter
 public class MessageDocumentEntry {
 	/**
-	 * Single text (String or List&lt;String&gt;).
+	 * Single text (string or list).
 	 * Used for templates or non-localized messages.
 	 */
-	private Object text;
+	private MultiValue<String> text;
 
 	/**
 	 * Locale translations grouped under "locales".
 	 * Keys are locale strings or "default".
 	 */
-	private Map<String, Object> locales;
+	private Map<String, MultiValue<String>> locales;
 
-	public void setLocales(Map<String, Object> locales) {
+	/**
+	 * Interception rules for this entry.
+	 */
+	private MessageDocumentInterception interception;
+
+	public void setLocales(Map<String, MultiValue<String>> locales) {
 		this.locales = locales == null || locales.isEmpty() ? null : locales;
+	}
+
+	public void setInterception(MessageDocumentInterception interception) {
+		this.interception = (interception == null || interception.getPatterns() == null
+				|| interception.getPatterns().isEmpty()) ? null : interception;
 	}
 }

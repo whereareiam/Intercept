@@ -3,6 +3,7 @@ package me.whereareiam.intercept.platform.interception.tag;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Messages;
@@ -13,13 +14,9 @@ import java.util.Locale;
 import java.util.Map;
 
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class FallbackMessageFormatter {
 	private final Provider<Messages> messagesProvider;
-
-	@Inject
-	public FallbackMessageFormatter(Provider<Messages> messagesProvider) {
-		this.messagesProvider = messagesProvider;
-	}
 
 	public Component formatFallbackComponent(String key, Locale locale, ComponentType source) {
 		String formatted = formatFallbackText(key, locale, source);
@@ -49,9 +46,9 @@ public class FallbackMessageFormatter {
 		String sourceValue = source != null ? source.name() : ComponentType.UNKNOWN.name();
 
 		return template
-				.replace("{key}", key)
-				.replace("{locale}", localeValue)
-				.replace("{source}", sourceValue);
+				.replace("<key>", key)
+				.replace("<locale>", localeValue)
+				.replace("<source>", sourceValue);
 	}
 
 	private Messages.Fallback.SourceFormat resolveFormat(ComponentType source) {

@@ -3,7 +3,7 @@ package me.whereareiam.intercept.common.messaging.loader;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.messaging.InterceptTranslationRegistry;
-import me.whereareiam.intercept.common.messaging.SemanticaTestHelper;
+import me.whereareiam.intercept.common.SemanticaTestHelper;
 import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.file.MessageFileLoader;
@@ -11,6 +11,7 @@ import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.messaging.document.MessageDocumentEntry;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.configura.type.MultiValue;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
@@ -62,8 +63,8 @@ class MessageDocumentLoaderTest {
 		MessageDocument fileData = new MessageDocument();
 		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setLocales(Map.of(
-				"en_US", "Welcome!",
-				"de_DE", "Willkommen!"
+				"en_US", MultiValue.of("Welcome!"),
+				"de_DE", MultiValue.of("Willkommen!")
 		));
 		fileData.putEntry("welcome", entry);
 
@@ -102,8 +103,8 @@ class MessageDocumentLoaderTest {
 		MessageDocument fileData = new MessageDocument();
 		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setLocales(Map.of(
-				"en_US", List.of("Line 1", "Line 2"),
-				"de_DE", List.of("Zeile 1", "Zeile 2")
+				"en_US", MultiValue.of(List.of("Line 1", "Line 2")),
+				"de_DE", MultiValue.of(List.of("Zeile 1", "Zeile 2"))
 		));
 		fileData.putEntry("banner", entry);
 
@@ -118,7 +119,7 @@ class MessageDocumentLoaderTest {
 		MessageDocument fileData = new MessageDocument();
 
 		MessageDocumentEntry msgEntry = new MessageDocumentEntry();
-		msgEntry.setLocales(Map.of("en_US", "Text"));
+		msgEntry.setLocales(Map.of("en_US", MultiValue.of("Text")));
 
 		fileData.putEntry("msg", msgEntry);
 
@@ -143,8 +144,8 @@ class MessageDocumentLoaderTest {
 		MessageDocument fileData = new MessageDocument();
 		MessageDocumentEntry entry = new MessageDocumentEntry();
 		entry.setLocales(Map.of(
-				"en_US", "Hello",
-				"de_DE", "Hallo"
+				"en_US", MultiValue.of("Hello"),
+				"de_DE", MultiValue.of("Hallo")
 		));
 		fileData.putEntry("greeting", entry);
 

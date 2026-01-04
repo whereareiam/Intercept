@@ -10,7 +10,7 @@ import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.keystone.Serializers;
 import me.whereareiam.keystone.model.SerializerOptions;
 import me.whereareiam.keystone.serializer.SerializerEngine;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNull; 
 
 /**
  * Guice Provider for SerializerEngine instances.
@@ -56,6 +56,7 @@ public class SerializerEngineProvider implements Provider<SerializerEngine>, Rel
 					.prefixSupplier(messages::getPrefix)
 					.enableLegacyColors(enableLegacyColors)
 					.enablePlayerNamePlaceholder(true)
+					.placeholderFormat(SerializerOptions.PlaceholderFormat.custom("<", ">"))
 					.build();
 
 			engine = Serializers.createEngine(options);

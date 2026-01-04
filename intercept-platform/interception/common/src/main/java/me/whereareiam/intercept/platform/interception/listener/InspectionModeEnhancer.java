@@ -136,9 +136,9 @@ public class InspectionModeEnhancer implements EventListener {
 		return Serializer.serialize(SerializerContent.builder()
 				.message(String.join("\n", formatLines))
 				.placeholders(Map.of(
-						"{pattern}", displayPattern,
-						"{fullPattern}", fullPattern,
-						"{truncated}", truncated
+						"pattern", displayPattern,
+						"fullPattern", fullPattern,
+						"truncated", truncated
 				))
 				.build());
 	}

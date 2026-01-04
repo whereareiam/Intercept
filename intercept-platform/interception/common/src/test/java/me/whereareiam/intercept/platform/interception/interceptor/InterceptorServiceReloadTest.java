@@ -6,6 +6,8 @@ import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
+import me.whereareiam.intercept.platform.interception.interceptor.base.Interceptor;
+import me.whereareiam.intercept.platform.interception.interceptor.base.InterceptorProvider;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.intercept.type.ComponentType;
 import org.junit.jupiter.api.BeforeAll;

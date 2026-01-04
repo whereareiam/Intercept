@@ -84,15 +84,15 @@ public class Messages {
 			/**
 			 * Success message when reload completes successfully.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
+			 * - <prefix>: The global message prefix
 			 */
 			private String success;
 
 			/**
 			 * Error message when reload fails.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
-			 * - {error}: The error message
+			 * - <prefix>: The global message prefix
+			 * - <error>: The error message
 			 */
 			private String error;
 		}
@@ -107,14 +107,14 @@ public class Messages {
 			/**
 			 * Message shown when inspection mode is enabled.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
+			 * - <prefix>: The global message prefix
 			 */
 			private String enabled;
 
 			/**
 			 * Message shown when inspection mode is disabled.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
+			 * - <prefix>: The global message prefix
 			 */
 			private String disabled;
 
@@ -134,15 +134,15 @@ public class Messages {
 				 * Hover text format shown when hovering over messages in inspection mode.
 				 * Each string in the list represents a line of the hover text.
 				 * Placeholders:
-				 * - {pattern}: The regex pattern (may be truncated if maxPatternLength is set)
-				 * - {fullPattern}: The full regex pattern (always complete, even if truncated in display)
-				 * - {truncated}: The truncation indicator if pattern was truncated, empty string otherwise
+				 * - <pattern>: The regex pattern (may be truncated if maxPatternLength is set)
+				 * - <fullPattern>: The full regex pattern (always complete, even if truncated in display)
+				 * - <truncated>: The truncation indicator if pattern was truncated, empty string otherwise
 				 */
 				private List<String> format;
 
 				/**
 				 * Text to append when the pattern is truncated.
-				 * This value is used as the {truncated} placeholder in format.
+				 * This value is used as the <truncated> placeholder in format.
 				 */
 				private String truncationFormat;
 
@@ -222,32 +222,32 @@ public class Messages {
 				/**
 				 * Message shown when there are no messages to upload.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
+				 * - <prefix>: The global message prefix
 				 */
 				private String noMessages;
 
 				/**
 				 * Message shown when starting the upload process.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
-				 * - {entries}: The number of entries being uploaded
-				 * - {files}: The number of files being uploaded
+				 * - <prefix>: The global message prefix
+				 * - <entries>: The number of entries being uploaded
+				 * - <files>: The number of files being uploaded
 				 */
 				private String uploading;
 
 				/**
 				 * Success message when upload completes successfully.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
-				 * - {entries}: The number of entries uploaded
+				 * - <prefix>: The global message prefix
+				 * - <entries>: The number of entries uploaded
 				 */
 				private String success;
 
 				/**
 				 * Error message when upload fails.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
-				 * - {error}: The error message
+				 * - <prefix>: The global message prefix
+				 * - <error>: The error message
 				 */
 				private String error;
 			}
@@ -272,16 +272,16 @@ public class Messages {
 				/**
 				 * Success message when download completes successfully.
 				 * Placeholders:
-				 * - {files}: Number of files written
-				 * - {entries}: Number of entries written
-				 * - {time}: Total time in milliseconds
+				 * - <files>: Number of files written
+				 * - <entries>: Number of entries written
+				 * - <time>: Total time in milliseconds
 				 */
 				private String success;
 
 				/**
 				 * Error message when download fails.
 				 * Placeholders:
-				 * - {error}: The error message/reason
+				 * - <error>: The error message/reason
 				 */
 				private String error;
 			}
@@ -333,12 +333,12 @@ public class Messages {
 			/**
 			 * Format template for missing translations.
 			 * Placeholders:
-			 * - {key}: The message key that was not found
-			 * - {locale}: The requested locale
-			 * - {source}: The source of the message
+			 * - <key>: The message key that was not found
+			 * - <locale>: The requested locale
+			 * - <source>: The source of the message
 			 * <p>
-			 * Example: "<red>[Missing: {key}]</red>"
-			 * Example: "[{source}] {key}"
+			 * Example: "<red>[Missing: <key>]</red>"
+			 * Example: "[<source>] <key>"
 			 */
 			private String format;
 

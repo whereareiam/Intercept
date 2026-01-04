@@ -11,7 +11,7 @@ import me.whereareiam.intercept.common.messaging.persistence.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.messaging.RegexMatchingService;
-import me.whereareiam.intercept.messaging.SemanticaTestHelper;
+import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
 import me.whereareiam.intercept.platform.interception.config.template.InterceptionConfigTemplate;
 import me.whereareiam.intercept.platform.interception.messaging.DefaultInterceptionRegistry;
 import me.whereareiam.intercept.platform.interception.messaging.InterceptionMessageDocumentProcessor;
@@ -43,7 +43,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

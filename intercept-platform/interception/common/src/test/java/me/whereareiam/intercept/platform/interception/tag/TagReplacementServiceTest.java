@@ -6,7 +6,7 @@ import me.whereareiam.intercept.Serializer;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.messaging.SemanticaTestHelper;
+import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
 import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
@@ -281,7 +281,7 @@ class TagReplacementServiceTest {
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
-		// Default chat format: "<gray>[</gray><red>Missing: {key}</red><gray>]</gray>"
+		// Default chat format: "<gray>[</gray><red>Missing: <key></red><gray>]</gray>"
 		assertTrue(plainText.contains("Missing: missing.chat.message") || plainText.contains("missing.chat.message"),
 				"Should contain fallback text, got: " + plainText);
 	}
@@ -294,7 +294,7 @@ class TagReplacementServiceTest {
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.UNKNOWN);
 
 		String plainText = extractPlainText(result);
-		// Default format: "{key}" - no colors, just the key
+		// Default format: "<key>" - no colors, just the key
 		assertTrue(plainText.contains("missing.unknown.message"),
 				"Should contain the key, got: " + plainText);
 	}
@@ -353,7 +353,7 @@ class TagReplacementServiceTest {
 
 		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
 
-		// The fallback format (<dark_gray>{key}</dark_gray>) should be applied
+		// The fallback format (<dark_gray><key></dark_gray>) should be applied
 		// Original component styling (BLUE + BOLD) is replaced by fallback styling
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.formatted"), "Should contain the key");

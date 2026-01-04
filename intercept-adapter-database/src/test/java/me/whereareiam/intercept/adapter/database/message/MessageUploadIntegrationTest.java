@@ -73,7 +73,7 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
 
-		entries.put("common.greeting", template("Hello {player}!"));
+		entries.put("common.greeting", template("Hello <player>!"));
 		filePaths.put("common", resolveFile("common/greeting.yml"));
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
@@ -88,7 +88,7 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		List<MessageTranslationEntity> translations = translationRepo.findAllByEntryId(entryEntity.get().getId());
 		assertEquals(1, translations.size());
 		MessageTranslationEntity translation = translations.get(0);
-		assertEquals("Hello {player}!", translation.getText());
+		assertEquals("Hello <player>!", translation.getText());
 		assertNull(translation.getLocale());
 	}
 
