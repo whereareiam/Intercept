@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.platform.interception.tag;
+package me.whereareiam.intercept.common.tag;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -75,3 +75,4 @@ public class FallbackMessageFormatter {
 		return null;
 	}
 }
+

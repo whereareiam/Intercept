@@ -1,12 +1,14 @@
-package me.whereareiam.intercept.platform.interception.tag;
+package me.whereareiam.intercept.common.tag;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
+import me.whereareiam.intercept.common.util.TagParser;
+import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.type.ComponentType;
-import me.whereareiam.intercept.platform.interception.util.ComponentHelper;
-import me.whereareiam.intercept.platform.interception.util.TagParser;
+import me.whereareiam.intercept.common.util.ComponentHelper;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
@@ -14,14 +16,18 @@ import java.util.Map;
 
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class TagReplacementService {
+public class DefaultTagReplacementService implements TagReplacementService {
 	private final TagReplacementBuilder replacementBuilder;
 
-	public Component replaceTags(Component component, String tagFormat, Locale locale) {
+	@Override
+	@NotNull
+	public Component replaceTags(@NotNull Component component, @NotNull String tagFormat, @NotNull Locale locale) {
 		return replaceTags(component, tagFormat, locale, ComponentType.UNKNOWN);
 	}
 
-	public Component replaceTags(Component component, String tagFormat, Locale locale, ComponentType source) {
+	@Override
+	@NotNull
+	public Component replaceTags(@NotNull Component component, @NotNull String tagFormat, @NotNull Locale locale, @NotNull ComponentType source) {
 		String plainText = ComponentHelper.extractPlainText(component);
 
 		List<TagParser.TagData> tags = TagParser.extractTags(plainText, tagFormat);
@@ -31,9 +37,11 @@ public class TagReplacementService {
 		return ComponentHelper.replaceTextWithComponents(component, replacements);
 	}
 
-	public boolean containsTags(Component component, String tagFormat) {
+	@Override
+	public boolean containsTags(@NotNull Component component, @NotNull String tagFormat) {
 		String plainText = ComponentHelper.extractPlainText(component);
 		return TagParser.containsTag(plainText, tagFormat);
 	}
 }
+
 

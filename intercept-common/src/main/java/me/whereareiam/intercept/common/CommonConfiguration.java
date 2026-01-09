@@ -13,6 +13,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
+import me.whereareiam.intercept.common.tag.DefaultTagReplacementService;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.reader.ConfigReader;
@@ -107,6 +108,9 @@ public class CommonConfiguration extends AbstractModule {
 		bind(Intercept.class).asEagerSingleton();
 
 		// Messages system
+		bind(me.whereareiam.intercept.messaging.TagReplacementService.class)
+				.to(DefaultTagReplacementService.class)
+				.in(Singleton.class);
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
 		OptionalBinder.newOptionalBinder(binder(), TranslationLoader.class)
 				.setDefault().to(NoopTranslationLoader.class);

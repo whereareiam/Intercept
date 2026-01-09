@@ -15,7 +15,7 @@ import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
 import me.whereareiam.intercept.platform.interception.config.template.InterceptionConfigTemplate;
 import me.whereareiam.intercept.platform.interception.messaging.DefaultInterceptionRegistry;
 import me.whereareiam.intercept.platform.interception.messaging.InterceptionMessageDocumentProcessor;
-import me.whereareiam.intercept.platform.interception.util.ComponentHelper;
+import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.platform.interception.messaging.file.MessageFileLoader;
