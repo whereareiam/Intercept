@@ -14,6 +14,7 @@ import me.whereareiam.intercept.adapter.command.definition.CommandDefinitionAdap
 import me.whereareiam.intercept.adapter.command.executor.*;
 import me.whereareiam.intercept.adapter.command.executor.locale.LocaleCommand;
 import me.whereareiam.intercept.adapter.command.executor.locale.LocaleTargetCommand;
+import me.whereareiam.intercept.adapter.command.resolver.CommandManagerResolver;
 import me.whereareiam.intercept.adapter.command.suggestion.LocaleSuggestionProvider;
 import me.whereareiam.intercept.adapter.command.suggestion.PlayerSuggestionProvider;
 import me.whereareiam.intercept.model.CommandDefinition;
@@ -42,7 +43,7 @@ public class DefaultCommandService implements CommandService {
 	private final SerializerEngine serializer;
 	private final Provider<Messages> messagesProvider;
 	private final Provider<Commands> commandsProvider;
-	private final Provider<CommandManager<Actor>> commandManagerProvider;
+	private final CommandManagerResolver<Actor> commandManagerResolver;
 	private final Injector injector;
 
 	@Inject
@@ -50,20 +51,20 @@ public class DefaultCommandService implements CommandService {
 			@NotNull SerializerEngine serializer,
 			@NotNull Provider<Messages> messagesProvider,
 			@NotNull Provider<Commands> commandsProvider,
-			@NotNull Provider<CommandManager<Actor>> commandManagerProvider,
+			@NotNull CommandManagerResolver<Actor> commandManagerResolver,
 			@NotNull Injector injector
 	) {
 		this.messagesProvider = messagesProvider;
 		this.commandsProvider = commandsProvider;
 		this.serializer = serializer;
-		this.commandManagerProvider = commandManagerProvider;
+		this.commandManagerResolver = commandManagerResolver;
 		this.injector = injector;
 
 		initialize();
 	}
 
 	public void initialize() {
-		CommandManager<Actor> commandManager = commandManagerProvider.get();
+		CommandManager<Actor> commandManager = commandManagerResolver.resolve();
 		Function<String, CommandDefinition> definitionLookup = this::lookupDefinition;
 		
 		// Register suggestion providers first using the real command manager

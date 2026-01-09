@@ -6,26 +6,29 @@ import me.whereareiam.intercept.registry.base.Registry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ConfigProviderReloadTest {
+	@Mock
+	private Registry<Reloadable> registry;
 
 	@TempDir
 	Path tempDir;
 
-	private Registry<Reloadable> mockRegistry;
 	private TestConfigProvider provider;
 
 	@BeforeEach
 	void setUp() {
-		mockRegistry = mock(Registry.class);
-		provider = new TestConfigProvider(tempDir, mockRegistry);
+		provider = new TestConfigProvider(tempDir, registry);
 	}
 
 	@Test
@@ -47,24 +50,11 @@ class ConfigProviderReloadTest {
 		assertEquals(2, provider.getLoadCount(), "Load should be called again after reload");
 	}
 
-	@Test
-	void shouldRegisterTemplateOnlyOnce() {
-		// First get
-		provider.get();
-		assertEquals(1, provider.getTemplateRegistrationCount(), "Template should be registered once");
 
-		// Second get
-		provider.get();
-		assertEquals(1, provider.getTemplateRegistrationCount(), "Template should still be registered only once");
-
-		// Reload
-		provider.reload();
-		assertEquals(1, provider.getTemplateRegistrationCount(), "Template should not be re-registered on reload");
-	}
 
 	@Test
 	void shouldRegisterAsReloadable() {
-		verify(mockRegistry).register(provider);
+		verify(registry).register(provider);
 	}
 
 	@Test
@@ -93,7 +83,6 @@ class ConfigProviderReloadTest {
 	private static class TestConfigProvider extends DefaultConfigProvider<String> {
 		private String nextValue = "initial";
 		private int loadCount = 0;
-		private int templateRegistrationCount = 0;
 
 		public TestConfigProvider(Path basePath, Registry<Reloadable> registry) {
 			super(basePath, registry);
@@ -105,21 +94,12 @@ class ConfigProviderReloadTest {
 			return nextValue;
 		}
 
-		@Override
-		protected void registerTemplate() {
-			templateRegistrationCount++;
-		}
-
 		public void setNextValue(String value) {
 			this.nextValue = value;
 		}
 
 		public int getLoadCount() {
 			return loadCount;
-		}
-
-		public int getTemplateRegistrationCount() {
-			return templateRegistrationCount;
 		}
 	}
 }

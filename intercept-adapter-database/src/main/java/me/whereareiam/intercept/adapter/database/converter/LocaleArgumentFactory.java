@@ -10,7 +10,7 @@ import java.util.Optional;
 
 /**
  * Argument factory for converting Locale objects to database VARCHAR strings.
- * Handles null Locale (for single-language entries) and regular Locale objects.
+ * Stores null for null locales (representing use of client locale).
  */
 public class LocaleArgumentFactory implements ArgumentFactory {
 	@Override
@@ -19,9 +19,9 @@ public class LocaleArgumentFactory implements ArgumentFactory {
 
 		Locale locale = (Locale) value;
 		return Optional.of((position, statement, ctx) -> {
+			// Null means use client locale
 			if (locale == null) {
-				// Null Locale -> empty string for single-language entries
-				statement.setString(position, "");
+				statement.setNull(position, java.sql.Types.VARCHAR);
 				return;
 			}
 

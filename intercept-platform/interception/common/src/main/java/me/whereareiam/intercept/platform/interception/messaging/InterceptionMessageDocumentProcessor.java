@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
-import me.whereareiam.intercept.model.messaging.document.MessageDocument;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ public class InterceptionMessageDocumentProcessor {
 	private final InterceptionRegistry registry;
 
 	public void process(String keyPrefix, MessageDocument document) {
-		if (document == null || document.isEmpty()) return;
+		if (document == null || document.getEntries().isEmpty()) return;
 
 		String normalizedPrefix = normalizePrefix(keyPrefix);
 		parseEntries(normalizedPrefix, document.getEntries());
@@ -31,16 +30,22 @@ public class InterceptionMessageDocumentProcessor {
 			String key = rawEntry.getKey();
 			MessageDocument.Node value = rawEntry.getValue();
 			if (value == null) continue;
-			String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
+			String fullKey;
+			if (prefix == null || prefix.isEmpty()) {
+				fullKey = key;
+			} else if (prefix.endsWith(":")) {
+				fullKey = prefix + key;
+			} else {
+				fullKey = prefix + "." + key;
+			}
 
 			if (value instanceof MessageDocument.Entry entryData) {
 				parseInterception(fullKey, entryData.getInterception());
 				continue;
 			}
 
-			if (value instanceof MessageDocument.Section section) {
+			if (value instanceof MessageDocument.Section section)
 				parseEntries(fullKey, section.getEntries());
-			}
 		}
 	}
 

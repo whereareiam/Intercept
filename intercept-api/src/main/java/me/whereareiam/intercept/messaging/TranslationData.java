@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.messaging;
 
+import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 
 import java.nio.file.Path;
@@ -23,4 +24,13 @@ public interface TranslationData {
 	 * @return map of key prefix to file path
 	 */
 	Map<String, Path> getFilePaths();
+
+	/**
+	 * Optional extension payloads by full translation key.
+	 *
+	 * @return map of full key to extensions
+	 */
+	default Map<String, MessageExtensions> getExtensions() {
+		return Map.of();
+	}
 }

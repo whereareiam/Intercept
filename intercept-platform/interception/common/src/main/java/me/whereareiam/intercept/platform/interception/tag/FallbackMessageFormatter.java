@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.type.ComponentType;

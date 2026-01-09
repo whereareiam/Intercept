@@ -2,6 +2,7 @@ package me.whereareiam.intercept.adapter.command.suggestion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.util.LocaleUtil;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.semantica.model.SemanticLocale;
@@ -24,17 +25,16 @@ import java.util.stream.Collectors;
  * Can be used by any command that needs to suggest locale codes.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class LocaleSuggestionProvider {
 	private final TranslationService<Locale> translationService;
 
-	@Inject
-	public LocaleSuggestionProvider(@NotNull TranslationService<Locale> translationService) {
-		this.translationService = translationService;
-	}
-
 	/**
 	 * Provides locale code suggestions filtered by input.
-	 * Returns all locales that are available in the messaging system.
+	 * Returns locales from the translation system if messages exist, otherwise falls back to system locales.
+	 * <p>
+	 * Note: Cloud command framework does not call suggestions on empty input by default.
+	 * Users must start typing to see suggestions.
 	 *
 	 * @param context the command context
 	 * @param input   the current input string
@@ -54,22 +54,31 @@ public class LocaleSuggestionProvider {
 			});
 		}
 
+		// If no message locales found, fall back to system locales
+		if (availableLocales.isEmpty()) {
+			for (Locale locale : Locale.getAvailableLocales()) {
+				String localeString = LocaleUtil.formatLocale(locale);
+				if (!localeString.isEmpty()) availableLocales.add(localeString);
+			}
+		}
+
 		String lowerInput = input.toLowerCase();
 		return availableLocales.stream()
-				.filter(locale -> locale.toLowerCase().startsWith(lowerInput))
+				.filter(locale -> lowerInput.isEmpty() || locale.toLowerCase().startsWith(lowerInput))
 				.map(Suggestion::suggestion)
 				.collect(Collectors.toList());
 	}
 
 	private String formatLocale(TranslationLocale locale) {
-		if (locale instanceof SemanticLocale semanticLocale) {
+		if (locale instanceof SemanticLocale semanticLocale)
 			return LocaleUtil.formatLocale(semanticLocale.unwrap());
-		}
 
 		String language = locale.getLanguage();
 		if (language == null || language.isEmpty()) return "";
+
 		String country = locale.getCountry();
 		if (country == null || country.isEmpty()) return language;
+
 		return language + "_" + country;
 	}
 }

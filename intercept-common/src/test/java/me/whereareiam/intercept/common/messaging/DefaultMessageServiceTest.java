@@ -3,6 +3,8 @@ package me.whereareiam.intercept.common.messaging;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.SemanticaTestHelper;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
+import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.SemanticLocale;
@@ -10,22 +12,27 @@ import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class DefaultMessageServiceTest {
+	@Mock
+	private Registry<Reloadable> reloadableRegistry;
+
 	private DefaultMessageRegistry registry;
 	private TranslationService<Locale> service;
 
 	@BeforeEach
 	void setUp() {
-		Registry<Reloadable> mockRegistry = mock(Registry.class);
 		InterceptTranslationRegistry translationRegistry = new InterceptTranslationRegistry();
-		registry = new DefaultMessageRegistry(translationRegistry, mockRegistry);
+		registry = new DefaultMessageRegistry(translationRegistry, reloadableRegistry);
 		Settings settings = new SettingsTemplate().supply(new Settings());
 		service = SemanticaTestHelper.createService(settings, translationRegistry);
 	}

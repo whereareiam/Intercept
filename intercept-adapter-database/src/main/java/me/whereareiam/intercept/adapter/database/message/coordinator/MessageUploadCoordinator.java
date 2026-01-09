@@ -3,13 +3,22 @@ package me.whereareiam.intercept.adapter.database.message.coordinator;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
+import me.whereareiam.intercept.adapter.database.message.MessageExtensionCodec;
 import me.whereareiam.intercept.adapter.database.message.MessageKeyResolver;
-import me.whereareiam.intercept.adapter.database.repository.message.*;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageExtensionRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
+import me.whereareiam.intercept.util.NamespaceUtil;
+import me.whereareiam.intercept.model.messaging.file.MapMessageExtensionPayload;
+import me.whereareiam.intercept.model.messaging.file.MessageExtensionPayload;
+import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
-import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
@@ -21,15 +30,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 @Singleton
 public class MessageUploadCoordinator {
 	private final MessageFileRepository fileRepository;
 	private final MessageEntryRepository entryRepository;
 	private final MessageTranslationRepository translationRepository;
-	private final MessageRegexPatternRepository patternRepository;
-	private final MessageRegexPlaceholderRepository placeholderRepository;
-	private final InterceptionRegistry interceptionRegistry;
+	private final MessageTemplateRepository templateRepository;
+	private final MessageExtensionRepository extensionRepository;
 	private final Path messagesPath;
 
 	@Inject
@@ -37,29 +47,25 @@ public class MessageUploadCoordinator {
 			MessageFileRepository fileRepository,
 			MessageEntryRepository entryRepository,
 			MessageTranslationRepository translationRepository,
-			MessageRegexPatternRepository patternRepository,
-			MessageRegexPlaceholderRepository placeholderRepository,
-			InterceptionRegistry interceptionRegistry,
+			MessageTemplateRepository templateRepository,
+			MessageExtensionRepository extensionRepository,
 			@Named("messagesPath") Path messagesPath
 	) {
 		this.fileRepository = fileRepository;
 		this.entryRepository = entryRepository;
 		this.translationRepository = translationRepository;
-		this.patternRepository = patternRepository;
-		this.placeholderRepository = placeholderRepository;
-		this.interceptionRegistry = interceptionRegistry;
+		this.templateRepository = templateRepository;
+		this.extensionRepository = extensionRepository;
 		this.messagesPath = messagesPath;
 	}
 
 	public void upload(MessageSnapshot snapshot) {
-		placeholderRepository.truncateAll();
-		patternRepository.truncateAll();
-		translationRepository.truncateAll();
-		entryRepository.truncateAll();
-		fileRepository.truncateAll();
+		Set<String> namespaces = resolveNamespaces(snapshot.getFilePaths());
+		for (String namespace : namespaces)
+			fileRepository.deleteByNamespace(namespace);
 
 		Map<String, MessageFileEntity> fileEntities = createFileEntities(snapshot.getFilePaths());
-		processEntries(snapshot.getEntries(), snapshot.getFilePaths(), fileEntities);
+		processEntries(snapshot.getEntries(), fileEntities, snapshot.getExtensions());
 	}
 
 	private Map<String, MessageFileEntity> createFileEntities(Map<String, Path> filePaths) {
@@ -67,6 +73,13 @@ public class MessageUploadCoordinator {
 
 		for (Map.Entry<String, Path> fileEntry : filePaths.entrySet()) {
 			String keyPrefix = fileEntry.getKey();
+			String namespace = NamespaceUtil.getNamespace(keyPrefix);
+			String rawPrefix = NamespaceUtil.stripNamespace(keyPrefix);
+			if (namespace == null || namespace.isBlank()) {
+				namespace = Constants.Namespace.INTERNAL;
+				keyPrefix = NamespaceUtil.qualify(namespace, rawPrefix);
+			}
+
 			Path filePath = fileEntry.getValue();
 
 			Path relativePath = messagesPath.relativize(filePath);
@@ -76,6 +89,7 @@ public class MessageUploadCoordinator {
 			if (lastDot > 0) relativePathString = relativePathString.substring(0, lastDot);
 
 			MessageFileEntity newFile = new MessageFileEntity();
+			newFile.setNamespace(namespace);
 			newFile.setFilePath(relativePathString);
 			MessageFileEntity savedFile = fileRepository.save(newFile);
 
@@ -87,73 +101,78 @@ public class MessageUploadCoordinator {
 
 	private void processEntries(
 			Map<String, TranslationEntry> entries,
-			Map<String, Path> filePaths,
-			Map<String, MessageFileEntity> fileEntities
+			Map<String, MessageFileEntity> fileEntities,
+			Map<String, MessageExtensions> extensions
 	) {
 		for (Map.Entry<String, TranslationEntry> entry : entries.entrySet()) {
 			String fullKey = entry.getKey();
+			if (!NamespaceUtil.hasNamespace(fullKey))
+				fullKey = NamespaceUtil.qualify(Constants.Namespace.INTERNAL, fullKey);
+
 			TranslationEntry messageEntry = entry.getValue();
 
-			String keyPrefix = MessageKeyResolver.findKeyPrefix(fullKey, filePaths.keySet());
+			String keyPrefix = MessageKeyResolver.findKeyPrefix(fullKey, fileEntities.keySet());
 			MessageFileEntity fileEntity = fileEntities.get(keyPrefix);
 
 			if (fileEntity == null) continue;
 
+			String entryKeyRaw = MessageKeyResolver.extractEntryKey(fullKey, keyPrefix);
+			String entryKey = unescapeEntryKey(entryKeyRaw);
+
 			MessageEntryEntity entryEntity = entryRepository.save(MessageEntryEntity.builder()
 					.file(fileEntity)
-					.entryKey(MessageKeyResolver.extractEntryKey(fullKey, keyPrefix))
+					.entryKey(entryKey)
+					.entryKeyRaw(entryKeyRaw)
 					.entryType(resolveEntryType(messageEntry))
 					.build());
 
 			processTranslations(entryEntity, messageEntry);
-			processRegexPatterns(entryEntity, fullKey);
+			processExtensions(entryEntity, fullKey, extensions);
 		}
 	}
 
 	private void processTranslations(MessageEntryEntity entryEntity, TranslationEntry messageEntry) {
 		if (messageEntry instanceof LocalizedEntry localizedEntry) {
+			if (translationRepository == null) return;
+
 			Map<TranslationLocale, String> translations = localizedEntry.getTranslations();
 			Map<Locale, String> resolved = toLocaleMap(translations);
 			for (Map.Entry<Locale, String> translation : resolved.entrySet()) {
 				translationRepository.insert(entryEntity.getId(), translation.getKey(), translation.getValue());
 			}
+
 			return;
 		}
 
 		if (messageEntry instanceof TemplateEntry templateEntry) {
+			if (templateRepository == null) return;
+
 			String text = templateEntry.getTemplate();
 			if (text == null) return;
-			translationRepository.insert(entryEntity.getId(), null, text);
+
+			templateRepository.insert(entryEntity.getId(), text);
 		}
 	}
 
-	private void processRegexPatterns(MessageEntryEntity entryEntity, String fullKey) {
-		if (interceptionRegistry == null) return;
+	private void processExtensions(
+			MessageEntryEntity entryEntity,
+			String fullKey,
+			Map<String, MessageExtensions> extensionData
+	) {
+		if (extensionRepository == null || extensionData == null || extensionData.isEmpty()) return;
 
-		int sortOrder = 0;
-		for (CompiledRegexPattern compiledPattern : interceptionRegistry.get(fullKey)) {
-			long patternId = patternRepository.insert(
-					entryEntity.getId(),
-					compiledPattern.getRegex(),
-					compiledPattern.getPriority(),
-					compiledPattern.isReplaceMatched(),
-					sortOrder++
-			);
+		MessageExtensions extensions = extensionData.get(fullKey);
+		if (extensions == null && NamespaceUtil.hasNamespace(fullKey))
+			extensions = extensionData.get(NamespaceUtil.stripNamespace(fullKey));
 
-			processPlaceholders(patternId, compiledPattern);
-		}
-	}
+		if (extensions == null || extensions.isEmpty()) return;
 
-	private void processPlaceholders(long patternId, CompiledRegexPattern compiledPattern) {
-		Map<String, String> placeholders = compiledPattern.getPlaceholders();
-		if (placeholders == null || placeholders.isEmpty()) return;
+		for (MessageExtensionPayload payload : extensions.entries().values()) {
+			if (!(payload instanceof MapMessageExtensionPayload mapPayload)) continue;
+			String payloadData = MessageExtensionCodec.encode(mapPayload.data());
 
-		for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-			String placeholderName = entry.getKey();
-			String captureGroup = entry.getValue();
-			if (placeholderName == null || captureGroup == null) continue;
-
-			placeholderRepository.insert(patternId, placeholderName, captureGroup);
+			if (payloadData == null) continue;
+			extensionRepository.insert(entryEntity.getId(), mapPayload.id(), payloadData);
 		}
 	}
 
@@ -163,6 +182,7 @@ public class MessageUploadCoordinator {
 			Locale locale = toJavaLocale(entry.getKey());
 			resolved.put(locale, entry.getValue());
 		}
+
 		return resolved;
 	}
 
@@ -181,8 +201,50 @@ public class MessageUploadCoordinator {
 		return builder.build();
 	}
 
-	private me.whereareiam.intercept.type.message.MessageType resolveEntryType(TranslationEntry entry) {
-		if (entry instanceof LocalizedEntry) return me.whereareiam.intercept.type.message.MessageType.MESSAGE;
-		return me.whereareiam.intercept.type.message.MessageType.TEMPLATE;
+	private MessageType resolveEntryType(TranslationEntry entry) {
+		if (entry instanceof LocalizedEntry)
+			return MessageType.MESSAGE;
+
+		return MessageType.TEMPLATE;
 	}
+
+	private String unescapeEntryKey(String entryKey) {
+		if (entryKey == null || entryKey.isEmpty()) return entryKey;
+		StringBuilder builder = new StringBuilder();
+		boolean escape = false;
+		for (int i = 0; i < entryKey.length(); i++) {
+			char c = entryKey.charAt(i);
+			if (escape) {
+				builder.append(c);
+				escape = false;
+				continue;
+			}
+
+			if (c == '\\') {
+				escape = true;
+				continue;
+			}
+
+			builder.append(c);
+		}
+
+		if (escape) builder.append('\\');
+		return builder.toString();
+	}
+
+	private Set<String> resolveNamespaces(Map<String, Path> filePaths) {
+		Set<String> namespaces = new HashSet<>();
+		for (String keyPrefix : filePaths.keySet()) {
+			String namespace = NamespaceUtil.getNamespace(keyPrefix);
+			if (namespace != null && !namespace.isBlank())
+				namespaces.add(namespace);
+		}
+
+		if (namespaces.isEmpty()) {
+			namespaces.add(Constants.Namespace.INTERNAL);
+		}
+
+		return namespaces;
+	}
+
 }

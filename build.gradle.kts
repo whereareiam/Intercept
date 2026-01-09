@@ -52,6 +52,10 @@ subprojects {
         "testRuntimeOnly"(rootProject.libs.junit.platform)
     }
 
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
     extensions.configure<PublishingExtension> {
         repositories {
             maven {

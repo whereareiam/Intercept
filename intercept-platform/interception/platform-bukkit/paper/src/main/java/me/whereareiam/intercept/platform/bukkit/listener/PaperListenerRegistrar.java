@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.common.CommonListenerRegistrar;
 import me.whereareiam.intercept.listener.DynamicListener;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.platform.interception.bukkit.common.CommonListenerRegistrar;
+import me.whereareiam.intercept.platform.interception.bukkit.common.config.PlatformSettings;
 import me.whereareiam.intercept.platform.interception.bukkit.common.util.BukkitUtil;
 import me.whereareiam.intercept.platform.bukkit.listener.connection.PlayerQuitListener;
 import org.bukkit.event.Event;
@@ -25,11 +25,11 @@ public class PaperListenerRegistrar extends CommonListenerRegistrar {
 	@Inject
 	public PaperListenerRegistrar(
 			Injector injector,
-			Provider<Settings> settingsProvider,
+			Provider<PlatformSettings> platformSettingsProvider,
 			Plugin plugin,
 			PluginManager pluginManager
 	) {
-		super(settingsProvider);
+		super(platformSettingsProvider);
 		this.injector = injector;
 		this.plugin = plugin;
 		this.pluginManager = pluginManager;
@@ -43,8 +43,10 @@ public class PaperListenerRegistrar extends CommonListenerRegistrar {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> void registerListener(Class<T> eventClass, DynamicListener<T> listener) {
-		if (settings.get().getListeners().getEvents().get(eventClass.getName()) == null
-				|| !settings.get().getListeners().getEvents().get(eventClass.getName()).isRegister()) return;
+		PlatformSettings.Listeners listeners = settings.get().getListeners();
+		if (listeners == null || listeners.getEvents() == null
+				|| listeners.getEvents().get(eventClass.getName()) == null
+				|| !listeners.getEvents().get(eventClass.getName()).isRegister()) return;
 		Logger.debug("Registering listener for event " + eventClass.getName());
 
 		pluginManager.registerEvent(

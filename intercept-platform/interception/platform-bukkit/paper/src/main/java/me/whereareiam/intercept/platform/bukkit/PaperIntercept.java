@@ -2,7 +2,7 @@ package me.whereareiam.intercept.platform.bukkit;
 
 import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.attache.platform.paper.PaperLibraryManager;
-import me.whereareiam.intercept.DependencyResolver;
+import me.whereareiam.intercept.dependency.DependencyResolver;
 import me.whereareiam.intercept.platform.interception.bukkit.common.BukkitLoggingHelper;
 import me.whereareiam.intercept.platform.interception.bukkit.common.interceptor.packetevents.PacketEventsInterceptorProvider;
 import me.whereareiam.intercept.platform.interception.interceptor.InterceptorRegistry;
@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
+@SuppressWarnings("unused")
 public class PaperIntercept extends JavaPlugin {
 	private final Path dataPath = getDataFolder().toPath();
 	private final Logger logger = getLogger();

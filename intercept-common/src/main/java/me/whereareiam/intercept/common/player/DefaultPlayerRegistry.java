@@ -69,8 +69,7 @@ public class DefaultPlayerRegistry implements PlayerRegistry {
 			if (stored == player) return stored;
 
 			// Preserve the canonical inspection state when new wrappers are created.
-			player.setInspectionMode(stored.isInspectionMode());
-			player.setLocale(stored.getLocale());
+			player.syncDataFrom(stored.isInspectionMode(), stored.getCustomLocale());
 			return player;
 		});
 	}

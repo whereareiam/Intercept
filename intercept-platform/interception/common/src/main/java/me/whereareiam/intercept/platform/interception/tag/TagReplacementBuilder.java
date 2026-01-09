@@ -2,7 +2,7 @@ package me.whereareiam.intercept.platform.interception.tag;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.platform.interception.util.TagParser;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.semantica.translation.TranslationService;

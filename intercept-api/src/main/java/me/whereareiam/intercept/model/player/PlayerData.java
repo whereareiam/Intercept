@@ -28,7 +28,8 @@ public class PlayerData {
 	private boolean inspectionMode;
 
 	/**
-	 * The player's preferred locale.
+	 * The player's custom locale override.
+	 * If null, the player's client locale from Minecraft will be used.
 	 */
 	private Locale locale;
 }

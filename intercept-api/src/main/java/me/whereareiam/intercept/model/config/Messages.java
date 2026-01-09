@@ -105,14 +105,14 @@ public class Messages {
 		@ToString
 		public static class Inspect {
 			/**
-			 * Message shown when inspection mode is enabled.
+			 * Namespace shown when inspection mode is enabled.
 			 * Placeholders:
 			 * - <prefix>: The global message prefix
 			 */
 			private String enabled;
 
 			/**
-			 * Message shown when inspection mode is disabled.
+			 * Namespace shown when inspection mode is disabled.
 			 * Placeholders:
 			 * - <prefix>: The global message prefix
 			 */
@@ -163,37 +163,37 @@ public class Messages {
 		@ToString
 		public static class LocaleCommand {
 			/**
-			 * Message shown when the executor is not a player.
+			 * Namespace shown when the executor is not a player.
 			 */
 			private String playerOnly;
 
 			/**
-			 * Message shown when a locale argument is missing.
+			 * Namespace shown when a locale argument is missing.
 			 */
 			private String missingLocaleArgument;
 
 			/**
-			 * Message shown when target-specific arguments are missing.
+			 * Namespace shown when target-specific arguments are missing.
 			 */
 			private String missingTargetArguments;
 
 			/**
-			 * Message shown when the supplied locale cannot be parsed.
+			 * Namespace shown when the supplied locale cannot be parsed.
 			 */
 			private String invalidLocale;
 
 			/**
-			 * Message shown when a target player cannot be found.
+			 * Namespace shown when a target player cannot be found.
 			 */
 			private String playerNotFound;
 
 			/**
-			 * Message shown after a player updates their own locale.
+			 * Namespace shown after a player updates their own locale.
 			 */
 			private String selfUpdated;
 
 			/**
-			 * Message shown after updating someone else's locale.
+			 * Namespace shown after updating someone else's locale.
 			 */
 			private String targetUpdated;
 		}
@@ -220,14 +220,14 @@ public class Messages {
 			@ToString
 			public static class Upload {
 				/**
-				 * Message shown when there are no messages to upload.
+				 * Namespace shown when there are no messages to upload.
 				 * Placeholders:
 				 * - <prefix>: The global message prefix
 				 */
 				private String noMessages;
 
 				/**
-				 * Message shown when starting the upload process.
+				 * Namespace shown when starting the upload process.
 				 * Placeholders:
 				 * - <prefix>: The global message prefix
 				 * - <entries>: The number of entries being uploaded
@@ -260,12 +260,12 @@ public class Messages {
 			@ToString
 			public static class Download {
 				/**
-				 * Message shown when starting the download process.
+				 * Namespace shown when starting the download process.
 				 */
 				private String preparing;
 
 				/**
-				 * Message shown when there are no entries/files in the database.
+				 * Namespace shown when there are no entries/files in the database.
 				 */
 				private String noEntries;
 

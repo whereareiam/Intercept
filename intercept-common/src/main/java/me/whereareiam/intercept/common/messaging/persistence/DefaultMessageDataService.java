@@ -2,20 +2,22 @@ package me.whereareiam.intercept.common.messaging.persistence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.NamespacedTranslationService;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.MessageRegistry;
 import me.whereareiam.intercept.messaging.TranslationData;
 import me.whereareiam.intercept.messaging.TranslationLoader;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
+import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
-import me.whereareiam.semantica.translation.TranslationService;
 
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Locale;
 
 /**
  * Default implementation of MessageDataService.
@@ -27,14 +29,14 @@ import java.util.Locale;
 public class DefaultMessageDataService implements MessageDataService, Reloadable {
 	private final MessageRegistry registry;
 	private final TranslationLoader translationLoader;
-	private final TranslationService<Locale> translationService;
+	private final NamespacedTranslationService translationService;
 	private volatile TranslationData lastData;
 
 	@Inject
 	public DefaultMessageDataService(
 			MessageRegistry registry,
 			TranslationLoader translationLoader,
-			TranslationService<Locale> translationService,
+			NamespacedTranslationService translationService,
 			Registry<Reloadable> reloadableRegistry
 	) {
 		this.registry = registry;
@@ -57,7 +59,7 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 		lastData = data;
 		Map<String, TranslationEntry> entries = data.getEntries();
 		if (entries != null && !entries.isEmpty()) {
-			translationService.register(entries);
+			translationService.register(unescapeEntries(entries));
 		}
 	}
 
@@ -90,13 +92,64 @@ public class DefaultMessageDataService implements MessageDataService, Reloadable
 	 */
 	@Override
 	public MessageSnapshot createSnapshot() {
-		Map<String, TranslationEntry> entries = getAllEntries();
+		TranslationData data = lastData;
+		Map<String, TranslationEntry> entries = data == null
+				? Map.of()
+				: data.getEntries();
+
 		Map<String, Path> filePaths = getFilePaths();
-		return new MessageSnapshot(entries, filePaths);
+		Map<String, MessageExtensions> extensions = data == null
+				? Map.of()
+				: data.getExtensions();
+
+		return new MessageSnapshot(entries, filePaths, extensions);
+	}
+
+	private Map<String, TranslationEntry> unescapeEntries(Map<String, TranslationEntry> entries) {
+		if (entries == null || entries.isEmpty()) return Map.of();
+
+		Map<String, TranslationEntry> resolved = new LinkedHashMap<>();
+		for (Map.Entry<String, TranslationEntry> entry : entries.entrySet()) {
+			String key = entry.getKey();
+			TranslationEntry value = entry.getValue();
+
+			if (key == null || value == null) continue;
+			resolved.put(unescapeKey(key), value);
+		}
+
+		return resolved;
+	}
+
+	private String unescapeKey(String key) {
+		if (key == null || key.isEmpty()) return key;
+
+		StringBuilder builder = new StringBuilder();
+		boolean escape = false;
+
+		for (int i = 0; i < key.length(); i++) {
+			char c = key.charAt(i);
+			if (escape) {
+				builder.append(c);
+				escape = false;
+				continue;
+			}
+			if (c == '\\') {
+				escape = true;
+				continue;
+			}
+			builder.append(c);
+		}
+
+		if (escape) builder.append('\\');
+
+		return builder.toString();
 	}
 
 	@Override
 	public void reload() {
+		// Clear namespace from translation service
+		translationService.unregisterByNamespace(Constants.Namespace.INTERNAL);
+
 		// Clear registry (if it supports clearing)
 		if (registry instanceof DefaultMessageRegistry)
 			((DefaultMessageRegistry) registry).reload();

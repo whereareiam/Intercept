@@ -1,0 +1,6 @@
+{
+  "id": "@projectName@",
+  "name": "@projectName@",
+  "version": "@projectVersion@",
+  "dependencies": []
+}

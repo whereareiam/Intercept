@@ -71,8 +71,8 @@ public abstract class BaseTest {
 				.registerEntity(MessageFileEntity.class)
 				.registerEntity(MessageEntryEntity.class)
 				.registerEntity(MessageTranslationEntity.class)
-				.registerEntity(MessageRegexPatternEntity.class)
-				.registerEntity(MessageRegexPlaceholderEntity.class);
+				.registerEntity(MessageTemplateEntity.class)
+				.registerEntity(MessageExtensionEntity.class);
 		postgresSchemaManager.initialize();
 
 		SchemaManager mariaDbSchemaManager = Dialectica.schema(mariaDbJdbi)
@@ -80,8 +80,8 @@ public abstract class BaseTest {
 				.registerEntity(MessageFileEntity.class)
 				.registerEntity(MessageEntryEntity.class)
 				.registerEntity(MessageTranslationEntity.class)
-				.registerEntity(MessageRegexPatternEntity.class)
-				.registerEntity(MessageRegexPlaceholderEntity.class);
+				.registerEntity(MessageTemplateEntity.class)
+				.registerEntity(MessageExtensionEntity.class);
 		mariaDbSchemaManager.initialize();
 	}
 

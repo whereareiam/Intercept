@@ -11,15 +11,14 @@ import me.whereareiam.intercept.adapter.database.player.DummyPlayerPersistenceSe
 import me.whereareiam.intercept.adapter.database.player.PlayerDatabaseBridge;
 import me.whereareiam.intercept.adapter.database.provider.JdbiProvider;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageExtensionRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPatternRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageRegexPlaceholderRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
 import me.whereareiam.intercept.adapter.database.repository.player.PlayerRepository;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.database.PlayerPersistenceService;
-import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.model.config.Persistence;
 import org.jdbi.v3.core.Jdbi;
 
@@ -66,17 +65,6 @@ public class DatabaseConfiguration extends AbstractModule {
 
 	@Provides
 	@Singleton
-	public PlayerDatabaseBridge providePlayerDatabaseBridge(
-			PlayerPersistenceService persistenceService,
-			DatabaseService databaseService,
-			EventManager eventManager
-	) {
-		// Always create the bridge - it checks databaseService.isInitialized() before operations
-		return new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
-	}
-
-	@Provides
-	@Singleton
 	public MessageFileRepository provideMessageFileRepository(Jdbi jdbi, Persistence persistence) {
 		return persistence.isEnabled() ? jdbi.onDemand(MessageFileRepository.class) : null;
 	}
@@ -95,19 +83,30 @@ public class DatabaseConfiguration extends AbstractModule {
 
 	@Provides
 	@Singleton
-	public MessageRegexPatternRepository provideMessageRegexPatternRepository(Jdbi jdbi, Persistence persistence) {
-		return persistence.isEnabled() ? jdbi.onDemand(MessageRegexPatternRepository.class) : null;
+	public MessageTemplateRepository provideMessageTemplateRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageTemplateRepository.class) : null;
 	}
 
 	@Provides
 	@Singleton
-	public MessageRegexPlaceholderRepository provideMessageRegexPlaceholderRepository(Jdbi jdbi, Persistence persistence) {
-		return persistence.isEnabled() ? jdbi.onDemand(MessageRegexPlaceholderRepository.class) : null;
+	public MessageExtensionRepository provideMessageExtensionRepository(Jdbi jdbi, Persistence persistence) {
+		return persistence.isEnabled() ? jdbi.onDemand(MessageExtensionRepository.class) : null;
 	}
 
 	@Provides
 	@Singleton
 	public PlayerRepository providePlayerRepository(Jdbi jdbi, Persistence persistence) {
 		return persistence.isEnabled() ? jdbi.onDemand(PlayerRepository.class) : null;
+	}
+
+	@Provides
+	@Singleton
+	public PlayerDatabaseBridge providePlayerDatabaseBridge(
+			PlayerPersistenceService persistenceService,
+			Provider<DatabaseService> databaseServiceProvider,
+			me.whereareiam.intercept.event.EventManager eventManager,
+			Persistence persistence
+	) {
+		return persistence.isEnabled() ? new PlayerDatabaseBridge(persistenceService, databaseServiceProvider, eventManager) : null;
 	}
 }

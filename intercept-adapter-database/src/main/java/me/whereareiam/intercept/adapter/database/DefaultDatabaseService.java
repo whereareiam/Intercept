@@ -37,7 +37,6 @@ import javax.sql.DataSource;
 public class DefaultDatabaseService implements DatabaseService, EventListener {
 	private final Provider<MessagePersistenceService> messagePersistenceServiceProvider;
 	private final Persistence persistence;
-	private boolean initialized = false;
 	private DataSource dataSource;
 	private Jdbi jdbi;
 
@@ -49,13 +48,14 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 	) {
 		this.messagePersistenceServiceProvider = messagePersistenceServiceProvider;
 		this.persistence = persistence;
+
 		eventManager.register(this);
+		initialize();
 	}
 
-	@IntercepticEvent(EventOrder.LOWEST)
-	public void onReady(InterceptReadyEvent event) {
+	public void initialize() {
 		if (!persistence.isEnabled()) return;
-		if (initialized) throw new IllegalStateException("DatabaseService has already been initialized");
+		if (jdbi != null) throw new IllegalStateException("DatabaseService has already been initialized");
 
 		try {
 			this.dataSource = DataSourceFactory.create(persistence);
@@ -73,18 +73,16 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 					.scanPackages("me.whereareiam.intercept.adapter.database.entity")
 					.setFailOnError(false);
 			schemaManager.initialize();
-
-			initialized = true;
 		} catch (Exception e) {
 			Logger.severe("Failed to initialize database: %s", e.getMessage());
 			throw new RuntimeException("Failed to initialize database", e);
 		}
 	}
 
-	@IntercepticEvent(EventOrder.LOW)
-	public void onReadyAfter(InterceptReadyEvent event) {
+	@IntercepticEvent(EventOrder.LOWEST)
+	public void onReady(InterceptReadyEvent event) {
 		if (!persistence.isEnabled() || !persistence.isAutoDownloadOnStartup()) return;
-		if (!initialized) {
+		if (!isInitialized()) {
 			Logger.warn("Auto-download requested but database is not initialized yet");
 			return;
 		}
@@ -92,15 +90,15 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 		try {
 			Logger.info("Auto-downloading messages from database...");
 			messagePersistenceServiceProvider.get().downloadMessages();
-			Logger.info("Messages downloaded from database into storage");
+			Logger.info("Messages downloaded from database to files, will be loaded during initialization");
 		} catch (Exception e) {
-			Logger.warn("Failed to auto-download messages: %s", e.getMessage());
+			Logger.severe("Failed to auto-download messages: %s", e.getMessage());
 		}
 	}
 
-	@IntercepticEvent(EventOrder.LOWEST)
+	@IntercepticEvent(EventOrder.HIGH)
 	public void onShutdown(InterceptShutdownEvent event) {
-		if (!initialized || !persistence.isEnabled()) return;
+		if (!isInitialized() || !persistence.isEnabled()) return;
 
 		try {
 			Logger.info("Shutting down database connection...");
@@ -112,7 +110,6 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 
 			dataSource = null;
 			jdbi = null;
-			initialized = false;
 		} catch (Exception e) {
 			Logger.warn("Error occurred while shutting down database connection: %s", e.getMessage());
 		}
@@ -120,7 +117,7 @@ public class DefaultDatabaseService implements DatabaseService, EventListener {
 
 	@Override
 	public boolean isInitialized() {
-		return initialized;
+		return jdbi != null;
 	}
 }
 

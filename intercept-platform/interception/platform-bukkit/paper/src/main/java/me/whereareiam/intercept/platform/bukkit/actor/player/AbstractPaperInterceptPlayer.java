@@ -7,6 +7,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 /**
  * Abstract base class for all Paper InterceptPlayer implementations.
  * Provides common functionality for wrapping Bukkit Players.
@@ -27,8 +29,7 @@ public abstract class AbstractPaperInterceptPlayer extends InterceptPlayer {
 	protected AbstractPaperInterceptPlayer(@NotNull Player bukkitPlayer) {
 		super(
 				bukkitPlayer.getUniqueId(),
-				bukkitPlayer.getName(),
-				bukkitPlayer.locale()
+				bukkitPlayer.getName()
 		);
 		this.bukkitPlayer = bukkitPlayer;
 	}
@@ -41,6 +42,12 @@ public abstract class AbstractPaperInterceptPlayer extends InterceptPlayer {
 	@Override
 	public boolean hasPermission(@NotNull String permission) {
 		return bukkitPlayer.hasPermission(permission);
+	}
+
+	@Override
+	@NotNull
+	public Locale getClientLocale() {
+		return bukkitPlayer.locale();
 	}
 
 	@Override

@@ -11,9 +11,9 @@ lombok = "1.18.42"
 guice = "7.0.0"
 annotations = "26.0.1"
 configura = "dev-2704ad8"
-attache = "dev-0ac3086"
-keystone = "dev-3dc5c8c"
-commandant = "dev-49c2037"
+attache = "dev-7a0d6fa"
+keystone = "dev-a150b3e"
+commandant = "dev-5a79a8e"
 semantica = "dev-ffdb76d"
 dialectica = "dev-97e4633"
 junit = "6.0.0"
@@ -30,6 +30,7 @@ cloud-minecraft-extras = "2.0.0-beta.13"
 velocity = "3.4.0-SNAPSHOT"
 spigot = "1.21.8-R0.1-SNAPSHOT"
 paper = "1.21.8-R0.1-SNAPSHOT"
+oraylen = "dev"
 
 # platform hooks
 packetevents = "2.10.1"
@@ -85,6 +86,7 @@ cloud-minecraft-extras = { group = "org.incendo", name = "cloud-minecraft-extras
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 spigot = { group = "org.spigotmc", name = "spigot-api", version.ref = "spigot" }
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+oraylen = { group = "net.oraylen", name = "oraylen", version.ref = "oraylen" }
 
 # platform hooks
 packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }

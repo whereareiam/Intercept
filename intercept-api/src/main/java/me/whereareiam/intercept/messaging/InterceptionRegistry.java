@@ -44,4 +44,11 @@ public interface InterceptionRegistry {
 	 * Clear the registry.
 	 */
 	void clear();
+
+	/**
+	 * Clear all patterns for a specific namespace.
+	 *
+	 * @param namespace the namespace prefix to clear
+	 */
+	void clearNamespace(String namespace);
 }

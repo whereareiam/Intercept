@@ -23,7 +23,7 @@ public final class SemanticaTestHelper {
 		LocaleParser<Locale> localeParser = SemanticLocale::wrap;
 
 		SemanticaConfiguration<Locale> configuration = SemanticaConfiguration.<Locale>builder()
-				.defaultLocale(SemanticLocale.wrap(settings.getLocale()))
+				.defaultLocale(SemanticLocale.wrap(Locale.US))
 				.tagConfiguration(TagConfiguration.defaults())
 				.performance(SemanticaConfiguration.PerformanceSettings.builder()
 						.cache(SemanticaConfiguration.PerformanceSettings.CacheSettings.builder()

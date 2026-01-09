@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(tableName = "intercept_message_entries", version = 1, dependsOn = {
+@Entity(tableName = "intercept_message_entries", dependsOn = {
 		MessageFileEntity.class
 })
 public class MessageEntryEntity implements EntitySchemaProvider {
@@ -40,6 +40,11 @@ public class MessageEntryEntity implements EntitySchemaProvider {
 	private String entryKey;
 
 	/**
+	 * Raw entry key preserving escaped dots/backslashes (e.g., "test\\.test").
+	 */
+	private String entryKeyRaw;
+
+	/**
 	 * Entry-level MessageType: MESSAGE, TEMPLATE, or NULL.
 	 * If NULL, inherits from file-level type.
 	 */
@@ -52,10 +57,10 @@ public class MessageEntryEntity implements EntitySchemaProvider {
 	private List<MessageTranslationEntity> translations;
 
 	/**
-	 * All regex patterns for this entry.
-	 * Cascade delete: deleting an entry deletes all its regex patterns.
+	 * All extension payloads for this entry.
+	 * Cascade delete: deleting an entry deletes all its extensions.
 	 */
-	private List<MessageRegexPatternEntity> regexPatterns;
+	private List<MessageExtensionEntity> extensions;
 
 	@Override
 	public String statement(DatabaseType databaseType) {
@@ -65,6 +70,7 @@ public class MessageEntryEntity implements EntitySchemaProvider {
 					id %s,
 					file_id BIGINT NOT NULL,
 					entry_key VARCHAR(255) NOT NULL,
+					entry_key_raw VARCHAR(255),
 					entry_type VARCHAR(20),
 					CONSTRAINT fk_message_entries_file
 						FOREIGN KEY (file_id)

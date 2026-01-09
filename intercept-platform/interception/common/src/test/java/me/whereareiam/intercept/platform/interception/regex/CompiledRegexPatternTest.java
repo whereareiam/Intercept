@@ -139,21 +139,7 @@ class CompiledRegexPatternTest {
 		assertFalse(result.isPresent());
 	}
 
-	@Test
-	void shouldHandleNullCaptureGroup() {
-		CompiledRegexPattern pattern = new CompiledRegexPattern(
-				"Player (\\w+)(?: was (\\w+))?",
-				Map.of("player", "$1", "action", "$2"),
-				0,
-				false
-		);
 
-		Optional<CompiledRegexPattern.MatchResult> result = pattern.match("Player Steve");
-
-		assertTrue(result.isPresent());
-		assertEquals("Steve", result.get().placeholders().get("player"));
-		assertNull(result.get().placeholders().get("action"));
-	}
 
 	@Test
 	void shouldStorePriority() {

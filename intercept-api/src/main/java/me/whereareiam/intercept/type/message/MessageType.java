@@ -12,10 +12,5 @@ public enum MessageType {
 	/**
 	 * A template that can be referenced by other messages.
 	 */
-	TEMPLATE,
-
-	/**
-	 * A mixed file containing both messages and templates.
-	 */
-	MIXED
+	TEMPLATE
 }

@@ -2,19 +2,24 @@ package me.whereareiam.intercept.adapter.command.executor.locale;
 
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.util.LocaleUtil;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.model.SerializerContent;
+import me.whereareiam.semantica.model.SemanticLocale;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public abstract class AbstractLocaleCommand {
 	protected final Provider<Messages> messagesProvider;
+	protected final TranslationService<Locale> translationService;
 
 	@NotNull
 	protected Messages.Commands.LocaleCommand getLocaleMessages() {
@@ -30,9 +35,25 @@ public abstract class AbstractLocaleCommand {
 	}
 
 	@Nullable
-	protected Locale parseLocale(@NotNull String localeInput) {
+	protected Locale parseAndValidateLocale(@NotNull String localeInput) {
 		try {
-			return LocaleUtil.parseLocale(localeInput);
+			Locale parsedLocale = LocaleUtil.parseLocale(localeInput);
+
+			// Collect all available locales from translation system
+			Set<Locale> availableLocales = new HashSet<>();
+			for (String key : translationService.getKeys()) {
+				translationService.getAvailableLocales(key).forEach(locale -> {
+					if (locale instanceof SemanticLocale semanticLocale)
+						availableLocales.add(semanticLocale.unwrap());
+				});
+			}
+			
+			// Validate that the locale exists in translation system
+			if (availableLocales.contains(parsedLocale))
+				return parsedLocale;
+			
+			// Locale not found in translation system
+			return null;
 		} catch (Exception ignored) {
 			return null;
 		}

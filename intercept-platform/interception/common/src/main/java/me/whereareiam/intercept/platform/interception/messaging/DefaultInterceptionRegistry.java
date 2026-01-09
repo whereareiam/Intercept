@@ -1,7 +1,12 @@
 package me.whereareiam.intercept.platform.interception.messaging;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
+import me.whereareiam.intercept.registry.base.Registry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,8 +16,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DefaultInterceptionRegistry implements InterceptionRegistry {
+@Singleton
+public class DefaultInterceptionRegistry implements InterceptionRegistry, Reloadable {
 	private final Map<String, List<CompiledRegexPattern>> patterns = new ConcurrentHashMap<>();
+
+	@Inject
+	public DefaultInterceptionRegistry(
+			Registry<Reloadable> reloadableRegistry
+	) {
+		reloadableRegistry.register(this);
+	}
 
 	@Override
 	public void register(String key, List<CompiledRegexPattern> patterns) {
@@ -45,5 +58,18 @@ public class DefaultInterceptionRegistry implements InterceptionRegistry {
 	@Override
 	public void clear() {
 		patterns.clear();
+	}
+
+	@Override
+	public void clearNamespace(String namespace) {
+		if (namespace == null || namespace.isBlank()) return;
+
+		String prefix = namespace + Constants.Namespace.NAMESPACE_SEPARATOR;
+		patterns.keySet().removeIf(key -> key.startsWith(prefix));
+	}
+
+	@Override
+	public void reload() {
+		clearNamespace(Constants.Namespace.INTERNAL);
 	}
 }

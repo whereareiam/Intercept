@@ -4,12 +4,13 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.commandant.annotation.Definition;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.model.SerializerContent;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.jetbrains.annotations.NotNull;
@@ -27,9 +28,10 @@ public class LocaleTargetCommand extends AbstractLocaleCommand {
 	@Inject
 	public LocaleTargetCommand(
 			@NotNull Provider<Messages> messagesProvider,
-			@NotNull PlayerRegistry playerRegistry
+			@NotNull PlayerRegistry playerRegistry,
+			@NotNull TranslationService<Locale> translationService
 	) {
-		super(messagesProvider);
+		super(messagesProvider, translationService);
 		this.playerRegistry = playerRegistry;
 	}
 
@@ -48,7 +50,7 @@ public class LocaleTargetCommand extends AbstractLocaleCommand {
 			return;
 		}
 
-		Locale locale = parseLocale(localeInput);
+		Locale locale = parseAndValidateLocale(localeInput);
 		if (locale == null) {
 			sendLocaleError(sender, localeMessages.getInvalidLocale(), localeInput);
 			return;
@@ -68,6 +70,7 @@ public class LocaleTargetCommand extends AbstractLocaleCommand {
 				.receiver(sender)
 				.message(template)
 				.placeholder("player", targetName);
+
 		sender.sendMessage(Serializer.serialize(builder.build()));
 	}
 }

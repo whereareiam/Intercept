@@ -10,7 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -19,12 +22,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class DefaultPlayerRegistryTest {
+	@Mock
 	private EventManager eventManager;
+	
 	private DefaultPlayerRegistry playerRegistry;
 
 	@BeforeAll
@@ -36,7 +40,6 @@ class DefaultPlayerRegistryTest {
 
 	@BeforeEach
 	void setUp() {
-		eventManager = mock(EventManager.class);
 		playerRegistry = new DefaultPlayerRegistry(eventManager);
 	}
 
@@ -106,7 +109,7 @@ class DefaultPlayerRegistryTest {
 		}
 
 		private TestInterceptPlayer(UUID uniqueId, String username) {
-			super(uniqueId, username, Locale.ENGLISH);
+			super(uniqueId, username);
 		}
 
 		@Override
@@ -117,6 +120,12 @@ class DefaultPlayerRegistryTest {
 		@Override
 		public boolean hasPermission(@NotNull String permission) {
 			return true;
+		}
+
+		@Override
+		@NotNull
+		public Locale getClientLocale() {
+			return Locale.ENGLISH;
 		}
 
 		@Override

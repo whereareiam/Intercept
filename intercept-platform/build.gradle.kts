@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     alias(libs.plugins.shadow)
@@ -9,11 +10,6 @@ subprojects {
 
     tasks.withType<ShadowJar> {
         archiveBaseName.set(rootProject.name)
-
-        relocate("me.whereareiam.attache", "me.whereareiam.intercept.library.attache")
-
-        relocate("com.google.common", "me.whereareiam.intercept.library.guava")
-        relocate("com.google.inject", "me.whereareiam.intercept.library.guice")
 
         val defaultDestination = rootProject.layout.buildDirectory.dir("libs")
 
@@ -27,25 +23,24 @@ subprojects {
             destinationDirectory.set(customOutputDir ?: defaultDestination)
     }
 
-    repositories {
-        maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://repo.codemc.io/repository/maven-releases/")
+    // Configure resource token replacement for platform-specific modules
+    if (project.path.contains(":platform-") && !project.path.endsWith(":common")) {
+        tasks.named<Copy>("processResources") {
+            filter<ReplaceTokens>(
+                "tokens" to mapOf(
+                    "projectName" to rootProject.name,
+                    "projectVersion" to project.version
+                )
+            )
+        }
     }
 
     dependencies {
-        val interceptionCommonPath = ":intercept-platform:interception:common"
+        "implementation"(project(":intercept-common"))
+        "implementation"(project(":intercept-adapter-command"))
+        "implementation"(project(":intercept-adapter-database"))
 
         "implementation"(rootProject.libs.attache.common)
-        "implementation"(project(":intercept-common"))
-
-        if (project.path.contains(":interception:") && project.path != interceptionCommonPath) {
-            "implementation"(project(interceptionCommonPath))
-        }
-
-        if (project.path != interceptionCommonPath) {
-            "implementation"(project(":intercept-adapter-command"))
-            "implementation"(project(":intercept-adapter-database"))
-        }
     }
 
     tasks.named<Jar>("jar") {

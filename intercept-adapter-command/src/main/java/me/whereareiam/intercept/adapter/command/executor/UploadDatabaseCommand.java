@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.annotation.Definition;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageDataService;
@@ -89,7 +89,6 @@ public class UploadDatabaseCommand {
 							.build())
 			);
 			Logger.severe("Failed to upload messages to database: %s", e.getMessage());
-			e.printStackTrace();
 		}
 	}
 }

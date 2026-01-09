@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.annotation.Definition;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.messaging.MessageDataService;
@@ -27,7 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class DownloadDatabaseCommand {
 	private final Provider<Messages> messagesProvider;
-	private final MessagePersistenceService persistenceService;
+	private final MessagePersistenceService messagePersistenceService;
 	private final MessageDataService messageDataService;
 
 	@Definition("database-download")
@@ -47,7 +47,7 @@ public class DownloadDatabaseCommand {
 			}
 
 			long startTime = System.currentTimeMillis();
-			MessageSnapshot snapshot = persistenceService.downloadMessages();
+			MessageSnapshot snapshot = messagePersistenceService.downloadMessages();
 			messageDataService.reload();
 
 			if (snapshot.getEntries().isEmpty()) {
@@ -89,7 +89,6 @@ public class DownloadDatabaseCommand {
 			}
 
 			Logger.severe("Failed to download messages from database: %s", e.getMessage());
-			e.printStackTrace();
 		}
 	}
 }

@@ -23,8 +23,8 @@ public class PaperInjector {
 				new PlatformConfiguration(),
 				new CommonConfiguration(dataPath),
 				new InterceptionConfiguration(),
-				new CommandConfiguration(),
-				new DatabaseConfiguration()
+				new DatabaseConfiguration(),
+				new CommandConfiguration()
 		);
 	}
 }

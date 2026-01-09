@@ -3,7 +3,7 @@ package me.whereareiam.intercept.platform.interception.listener;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.base.IntercepticEvent;

@@ -34,9 +34,9 @@ public abstract class InterceptPlayer implements Actor {
 	protected final String username;
 
 	/**
-	 * The player's preferred locale
+	 * The player's custom locale override.
+	 * If null, the player's client locale from Minecraft will be used.
 	 */
-	@NotNull
 	protected Locale locale;
 
 	/**
@@ -56,31 +56,64 @@ public abstract class InterceptPlayer implements Actor {
 	 *
 	 * @param uniqueId The player's UUID
 	 * @param username The player's username
-	 * @param locale   The player's locale
 	 */
 	protected InterceptPlayer(
 			@NotNull UUID uniqueId,
-			@NotNull String username,
-			@NotNull Locale locale
+			@NotNull String username
 	) {
 		this.uniqueId = uniqueId;
 		this.username = username;
-		this.locale = locale;
+		this.locale = null;
 
 		if (playerRegistry != null) playerRegistry.syncPlayerData(this);
 	}
 
 	/**
-	 * Sets the player's locale and fires a locale changed event.
+	 * Gets the effective locale for this player.
+	 * Returns the custom locale if set, otherwise returns the client's Minecraft locale.
 	 *
-	 * @param locale the new locale
+	 * @return the effective locale to use for this player
 	 */
-	public void setLocale(@NotNull Locale locale) {
-		if (this.locale.equals(locale)) return;
-		
-		Locale oldLocale = this.locale;
+	@NotNull
+	public Locale getLocale() {
+		if (locale != null)
+			return locale;
+
+		return getClientLocale();
+	}
+
+	/**
+	 * Gets the player's client locale from Minecraft.
+	 * Platform-specific implementation required.
+	 *
+	 * @return the player's client locale
+	 */
+	@NotNull
+	public abstract Locale getClientLocale();
+
+	/**
+	 * Gets the custom locale override, if any.
+	 *
+	 * @return the custom locale, or null if using client locale
+	 */
+	public Locale getCustomLocale() {
+		return locale;
+	}
+
+	/**
+	 * Sets the player's custom locale override and fires a locale changed event.
+	 * Set to null to use the player's client locale from Minecraft.
+	 *
+	 * @param locale the new custom locale, or null to use client locale
+	 */
+	public void setLocale(Locale locale) {
+		Locale oldEffectiveLocale = getLocale();
 		this.locale = locale;
-		EventUtil.callEvent(new PlayerLocaleChangedEvent(this, oldLocale, locale));
+		Locale newEffectiveLocale = getLocale();
+		
+		if (!oldEffectiveLocale.equals(newEffectiveLocale)) {
+			EventUtil.callEvent(new PlayerLocaleChangedEvent(this, oldEffectiveLocale, newEffectiveLocale));
+		}
 	}
 
 	/**
@@ -94,6 +127,18 @@ public abstract class InterceptPlayer implements Actor {
 		boolean oldValue = this.inspectionMode;
 		this.inspectionMode = inspectionMode;
 		EventUtil.callEvent(new PlayerInspectionModeChangedEvent(this, oldValue, inspectionMode));
+	}
+
+	/**
+	 * Internal method to sync player data without firing events.
+	 * Used by PlayerRegistry during construction to restore state.
+	 *
+	 * @param inspectionMode the inspection mode to restore
+	 * @param customLocale the custom locale to restore (null for client locale)
+	 */
+	public void syncDataFrom(boolean inspectionMode, Locale customLocale) {
+		this.inspectionMode = inspectionMode;
+		this.locale = customLocale;
 	}
 
 	/**

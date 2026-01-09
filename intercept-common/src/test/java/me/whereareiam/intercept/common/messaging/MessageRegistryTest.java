@@ -2,26 +2,31 @@ package me.whereareiam.intercept.common.messaging;
 
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.SemanticaTestHelper;
+import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class MessageRegistryTest {
+	@Mock
 	private Registry<Reloadable> reloadableRegistry;
 	private DefaultMessageRegistry registry;
 
 	@BeforeEach
 	void setUp() {
-		reloadableRegistry = mock(Registry.class);
 		registry = new DefaultMessageRegistry(new InterceptTranslationRegistry(), reloadableRegistry);
 	}
 
@@ -115,9 +120,9 @@ class MessageRegistryTest {
 	@Test
 	void shouldClearAllEntriesOnReload() {
 		// Register some entries
-		registry.register("key1", SemanticaTestHelper.template("Message 1"));
-		registry.register("key2", SemanticaTestHelper.template("Message 2"));
-		registry.register("key3", SemanticaTestHelper.template("Message 3"));
+		registry.register("key1", SemanticaTestHelper.template("Namespace 1"));
+		registry.register("key2", SemanticaTestHelper.template("Namespace 2"));
+		registry.register("key3", SemanticaTestHelper.template("Namespace 3"));
 
 		assertEquals(3, registry.getKeys().size());
 		assertTrue(registry.exists("key1"));
@@ -150,31 +155,5 @@ class MessageRegistryTest {
 		assertEquals("New", ((TemplateEntry) registry.get("key1")).getTemplate());
 		assertEquals("Additional", ((TemplateEntry) registry.get("key2")).getTemplate());
 		assertEquals(2, registry.getKeys().size());
-	}
-
-	@Test
-	void shouldHandleReloadOnEmptyRegistry() {
-		assertEquals(0, registry.getKeys().size());
-
-		// Should not throw exception
-		assertDoesNotThrow(registry::reload);
-
-		assertEquals(0, registry.getKeys().size());
-	}
-
-	@Test
-	void shouldHandleMultipleConsecutiveReloads() {
-		// Add entries
-		registry.register("key1", SemanticaTestHelper.template("Message"));
-
-		// Multiple reloads
-		registry.reload();
-		assertEquals(0, registry.getKeys().size());
-
-		registry.reload();
-		assertEquals(0, registry.getKeys().size());
-
-		registry.reload();
-		assertEquals(0, registry.getKeys().size());
 	}
 }

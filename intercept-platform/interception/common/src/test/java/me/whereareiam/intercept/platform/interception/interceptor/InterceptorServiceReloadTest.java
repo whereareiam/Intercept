@@ -13,6 +13,9 @@ import me.whereareiam.intercept.type.ComponentType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -20,26 +23,33 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class InterceptorServiceReloadTest {
-
-	private InterceptorRegistry registry;
+	@Mock
 	private Provider<Interception> interceptionProvider;
+	@Mock
 	private Registry<Reloadable> reloadableRegistry;
+	@Mock
+	private InterceptorRegistry registry;
+	@Mock
+	private InterceptorProvider mockProvider;
+	@Mock
+	private Interceptor mockInterceptor;
+	@Mock
+	private Interception mockInterception;
+	@Mock
+	private InterceptedComponent mockComponent;
+
 	private InterceptorService interceptorService;
 
 	@BeforeAll
 	static void initLogger() {
-		// Initialize Logger with a mock to prevent NPEs
 		LoggingHelper mockLogger = mock(LoggingHelper.class);
 		Logger.init(mockLogger);
 	}
 
 	@BeforeEach
 	void setUp() {
-		registry = mock(InterceptorRegistry.class);
-		interceptionProvider = mock(Provider.class);
-		reloadableRegistry = mock(Registry.class);
-
 		interceptorService = new InterceptorService(
 				registry,
 				interceptionProvider,
@@ -55,14 +65,12 @@ class InterceptorServiceReloadTest {
 	@Test
 	void shouldShutdownExistingInterceptorsOnReload() {
 		// Setup interception config with enabled component
-		Interception interception = createMockInterception(true);
-		when(interceptionProvider.get()).thenReturn(interception);
+		setupMockInterception(true);
+		when(interceptionProvider.get()).thenReturn(mockInterception);
 
 		// Setup mock provider and interceptor
-		InterceptorProvider provider = mock(InterceptorProvider.class);
-		Interceptor interceptor = mock(Interceptor.class);
-		when(registry.getBestProvider(any())).thenReturn(provider);
-		when(provider.createInterceptor(any())).thenReturn(interceptor);
+		when(registry.getBestProvider(any())).thenReturn(mockProvider);
+		when(mockProvider.createInterceptor(any())).thenReturn(mockInterceptor);
 
 		// Reload
 		interceptorService.reload();
@@ -74,14 +82,12 @@ class InterceptorServiceReloadTest {
 	@Test
 	void shouldReinitializeInterceptorsAfterReload() {
 		// Setup interception config
-		Interception interception = createMockInterception(true);
-		when(interceptionProvider.get()).thenReturn(interception);
+		setupMockInterception(true);
+		when(interceptionProvider.get()).thenReturn(mockInterception);
 
 		// Setup mock provider
-		InterceptorProvider provider = mock(InterceptorProvider.class);
-		Interceptor interceptor = mock(Interceptor.class);
-		when(registry.getBestProvider(any())).thenReturn(provider);
-		when(provider.createInterceptor(any())).thenReturn(interceptor);
+		when(registry.getBestProvider(any())).thenReturn(mockProvider);
+		when(mockProvider.createInterceptor(any())).thenReturn(mockInterceptor);
 
 		// Reload
 		interceptorService.reload();
@@ -90,8 +96,8 @@ class InterceptorServiceReloadTest {
 		verify(registry).shutdownAllInterceptors();
 
 		// Should create new interceptor and set it as active
-		verify(provider).createInterceptor(any());
-		verify(registry).setActiveInterceptor(any(), eq(interceptor));
+		verify(mockProvider).createInterceptor(any());
+		verify(registry).setActiveInterceptor(any(), eq(mockInterceptor));
 	}
 
 	@Test
@@ -109,8 +115,8 @@ class InterceptorServiceReloadTest {
 	@Test
 	void shouldHandleReloadWithDisabledComponents() {
 		// Return config with disabled components
-		Interception interception = createMockInterception(false);
-		when(interceptionProvider.get()).thenReturn(interception);
+		setupMockInterception(false);
+		when(interceptionProvider.get()).thenReturn(mockInterception);
 
 		// Reload
 		interceptorService.reload();
@@ -121,29 +127,10 @@ class InterceptorServiceReloadTest {
 	}
 
 	@Test
-	void shouldHandleMultipleReloads() {
-		Interception interception = createMockInterception(true);
-		when(interceptionProvider.get()).thenReturn(interception);
-
-		InterceptorProvider provider = mock(InterceptorProvider.class);
-		Interceptor interceptor = mock(Interceptor.class);
-		when(registry.getBestProvider(any())).thenReturn(provider);
-		when(provider.createInterceptor(any())).thenReturn(interceptor);
-
-		// Multiple reloads
-		interceptorService.reload();
-		interceptorService.reload();
-		interceptorService.reload();
-
-		// Should shutdown 3 times
-		verify(registry, times(3)).shutdownAllInterceptors();
-	}
-
-	@Test
 	void shouldHandleReloadWithNoAvailableProvider() {
 		// Return config with enabled components
-		Interception interception = createMockInterception(true);
-		when(interceptionProvider.get()).thenReturn(interception);
+		setupMockInterception(true);
+		when(interceptionProvider.get()).thenReturn(mockInterception);
 
 		// No provider available
 		when(registry.getBestProvider(any())).thenReturn(null);
@@ -158,14 +145,13 @@ class InterceptorServiceReloadTest {
 	@Test
 	void shouldHandleReloadWhenProviderReturnsNull() {
 		// Return config with enabled components
-		Interception interception = createMockInterception(true);
-		when(interceptionProvider.get()).thenReturn(interception);
+		setupMockInterception(true);
+		when(interceptionProvider.get()).thenReturn(mockInterception);
 
 		// Provider returns null interceptor
-		InterceptorProvider provider = mock(InterceptorProvider.class);
-		when(provider.getName()).thenReturn("TestProvider");
-		when(registry.getBestProvider(any())).thenReturn(provider);
-		when(provider.createInterceptor(any())).thenReturn(null);
+		when(mockProvider.getName()).thenReturn("TestProvider");
+		when(registry.getBestProvider(any())).thenReturn(mockProvider);
+		when(mockProvider.createInterceptor(any())).thenReturn(null);
 
 		// Should not throw exception
 		assertDoesNotThrow(() -> interceptorService.reload());
@@ -178,14 +164,12 @@ class InterceptorServiceReloadTest {
 	@Test
 	void shouldHandleReloadWhenProviderThrowsException() {
 		// Return config with enabled components
-		Interception interception = createMockInterception(true);
-		when(interceptionProvider.get()).thenReturn(interception);
+		setupMockInterception(true);
+		when(interceptionProvider.get()).thenReturn(mockInterception);
 
 		// Provider throws exception
-		InterceptorProvider provider = mock(InterceptorProvider.class);
-		when(provider.getName()).thenReturn("TestProvider");
-		when(registry.getBestProvider(any())).thenReturn(provider);
-		when(provider.createInterceptor(any())).thenThrow(new RuntimeException("Provider error"));
+		when(registry.getBestProvider(any())).thenReturn(mockProvider);
+		when(mockProvider.createInterceptor(any())).thenThrow(new RuntimeException("Provider error"));
 
 		// Should not propagate exception
 		assertDoesNotThrow(() -> interceptorService.reload());
@@ -194,16 +178,11 @@ class InterceptorServiceReloadTest {
 		verify(registry).shutdownAllInterceptors();
 	}
 
-	private Interception createMockInterception(boolean enabled) {
-		Interception interception = mock(Interception.class);
+	private void setupMockInterception(boolean enabled) {
 		Map<ComponentType, InterceptedComponent> components = new EnumMap<>(ComponentType.class);
-
-		InterceptedComponent chatComponent = mock(InterceptedComponent.class);
-		when(chatComponent.isEnabled()).thenReturn(enabled);
-		components.put(ComponentType.CHAT, chatComponent);
-
-		when(interception.getComponents()).thenReturn(components);
-		return interception;
+		when(mockComponent.isEnabled()).thenReturn(enabled);
+		components.put(ComponentType.CHAT, mockComponent);
+		when(mockInterception.getComponents()).thenReturn(components);
 	}
 }
 

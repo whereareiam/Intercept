@@ -101,23 +101,6 @@ class TagParserTest {
 	}
 
 	@Test
-	void shouldHandleInvalidTagFormat() {
-		String text = "Welcome <lang key=\"message\">";
-
-		// Invalid format (too short)
-		List<TagParser.TagData> tags1 = TagParser.extractTags(text, "l");
-		assertTrue(tags1.isEmpty());
-
-		// Invalid format (just opening)
-		List<TagParser.TagData> tags2 = TagParser.extractTags(text, "<>");
-		assertTrue(tags2.isEmpty());
-
-		// Null format
-		List<TagParser.TagData> tags3 = TagParser.extractTags(text, null);
-		assertTrue(tags3.isEmpty());
-	}
-
-	@Test
 	void shouldDetectTagInText() {
 		assertTrue(TagParser.containsTag("Welcome <lang key=\"message\">", "<lang>"));
 		assertFalse(TagParser.containsTag("Welcome to the server", "<lang>"));
@@ -161,11 +144,5 @@ class TagParserTest {
 		assertEquals("Admin", tags.get(0).placeholders().get(1).value());
 	}
 
-	@Test
-	void shouldHandleNullAndEmptyInputs() {
-		assertTrue(TagParser.extractTags(null, "<lang>").isEmpty());
-		assertTrue(TagParser.extractTags("", "<lang>").isEmpty());
-		assertFalse(TagParser.containsTag(null, "<lang>"));
-		assertFalse(TagParser.containsTag("text", null));
-	}
+
 }

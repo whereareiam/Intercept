@@ -8,6 +8,7 @@ import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.keystone.Actor;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.jetbrains.annotations.NotNull;
@@ -25,9 +26,10 @@ public class LocaleCommand extends AbstractLocaleCommand {
 	@Inject
 	public LocaleCommand(
 			@NotNull Provider<Messages> messagesProvider,
-			@NotNull PlayerRegistry playerRegistry
+			@NotNull PlayerRegistry playerRegistry,
+			@NotNull TranslationService<Locale> translationService
 	) {
-		super(messagesProvider);
+		super(messagesProvider, translationService);
 		this.playerRegistry = playerRegistry;
 	}
 
@@ -42,7 +44,7 @@ public class LocaleCommand extends AbstractLocaleCommand {
 		InterceptPlayer interceptPlayer = validateSenderIsPlayer(sender, localeMessages);
 		if (interceptPlayer == null) return;
 
-		Locale locale = parseLocale(localeInput);
+		Locale locale = parseAndValidateLocale(localeInput);
 		if (locale == null) {
 			sendLocaleError(sender, localeMessages.getInvalidLocale(), localeInput);
 			return;

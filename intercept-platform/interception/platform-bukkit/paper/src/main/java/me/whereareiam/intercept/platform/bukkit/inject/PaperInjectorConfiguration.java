@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.Scheduler;
+import me.whereareiam.intercept.adapter.command.resolver.CommandManagerResolver;
+import me.whereareiam.intercept.adapter.command.resolver.ProviderCommandManagerResolver;
 import me.whereareiam.intercept.listener.ListenerRegistrar;
 import me.whereareiam.intercept.platform.bukkit.PaperPlatformInteractor;
 import me.whereareiam.intercept.platform.bukkit.PaperScheduler;
@@ -30,6 +32,8 @@ public class PaperInjectorConfiguration extends AbstractModule {
 		bind(ListenerRegistrar.class).to(PaperListenerRegistrar.class);
 		bind(PlatformInteractor.class).to(PaperPlatformInteractor.class);
 		bind(new TypeLiteral<CommandManager<Actor>>() {}).toProvider(PaperCommandManagerProvider.class);
+		bind(new TypeLiteral<CommandManagerResolver<Actor>>() {})
+				.to(new TypeLiteral<ProviderCommandManagerResolver<Actor>>() {});
 		bind(LibraryManager.class).toInstance(libraryManager);
 	}
 }

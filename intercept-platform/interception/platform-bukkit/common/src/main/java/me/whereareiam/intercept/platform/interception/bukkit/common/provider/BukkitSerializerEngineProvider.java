@@ -1,0 +1,68 @@
+package me.whereareiam.intercept.platform.interception.bukkit.common.provider;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.model.config.Messages;
+import me.whereareiam.intercept.platform.interception.bukkit.common.config.PlatformSettings;
+import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.keystone.Serializers;
+import me.whereareiam.keystone.model.SerializerOptions;
+import me.whereareiam.keystone.serializer.SerializerEngine;
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * Guice Provider for SerializerEngine instances on Bukkit platforms.
+ */
+@Singleton
+public class BukkitSerializerEngineProvider implements Provider<SerializerEngine>, Reloadable {
+	private final Provider<Messages> messagesProvider;
+	private final Provider<PlatformSettings> settingsProvider;
+	private volatile SerializerEngine engine;
+
+	@Inject
+	public BukkitSerializerEngineProvider(
+			@NotNull Provider<Messages> messagesProvider,
+			@NotNull Provider<PlatformSettings> settingsProvider,
+			@NotNull Registry<Reloadable> reloadables
+	) {
+		this.messagesProvider = messagesProvider;
+		this.settingsProvider = settingsProvider;
+
+		reloadables.register(this);
+	}
+
+	@Override
+	@NotNull
+	public SerializerEngine get() {
+		if (engine == null) {
+			Messages messages = messagesProvider.get();
+			PlatformSettings settings = settingsProvider.get();
+			PlatformSettings.Serialization serialization = settings == null ? null : settings.getSerialization();
+
+			String adapter = serialization != null && serialization.getType() != null
+					? serialization.getType()
+					: "MINIMESSAGE";
+
+			boolean enableLegacyColors = serialization != null && serialization.isEnableLegacyColors();
+
+			SerializerOptions options = SerializerOptions.builder()
+					.defaultAdapter(adapter)
+					.prefixSupplier(messages::getPrefix)
+					.enableLegacyColors(enableLegacyColors)
+					.enablePlayerNamePlaceholder(true)
+					.placeholderFormat(SerializerOptions.PlaceholderFormat.custom("<", ">"))
+					.build();
+
+			engine = Serializers.createEngine(options);
+		}
+
+		return engine;
+	}
+
+	@Override
+	public void reload() {
+		engine = null;
+	}
+}

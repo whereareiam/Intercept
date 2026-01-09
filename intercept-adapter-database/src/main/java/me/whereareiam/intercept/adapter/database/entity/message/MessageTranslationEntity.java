@@ -10,11 +10,11 @@ import java.util.Locale;
 
 /**
  * Database entity representing a translation for a message entry.
- * Stores locale-specific translations for messages and templates.
+ * Stores locale-specific translations for localized messages.
  */
 @Setter
 @Getter
-@Entity(tableName = "intercept_message_translations", version = 1, dependsOn = {
+@Entity(tableName = "intercept_message_translations", dependsOn = {
 		MessageEntryEntity.class
 })
 public class MessageTranslationEntity implements EntitySchemaProvider {
@@ -32,7 +32,6 @@ public class MessageTranslationEntity implements EntitySchemaProvider {
 
 	/**
 	 * Locale for this translation.
-	 * Null for single-language entries (empty string in database).
 	 */
 	private Locale locale;
 

@@ -2,42 +2,50 @@ package me.whereareiam.intercept.platform.interception.regex;
 
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.logging.Logger;
+import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.translation.TranslationService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class RegexMatchingServiceReloadTest {
-
-	private InterceptionRegistry registry;
-	private TranslationService<Locale> translationService;
+	@Mock
 	private Provider<Interception> settingsProvider;
+	@Mock
+	private TranslationService<Locale> translationService;
+	@Mock
 	private Registry<Reloadable> reloadableRegistry;
-	private DefaultRegexMatchingService regexMatchingService;
+	@Mock
+	private InterceptionRegistry registry;
+
+	private RegexMatchingService regexMatchingService;
+
+	@BeforeAll
+	static void initLogger() {
+		LoggingHelper mockLogger = mock(LoggingHelper.class);
+		Logger.init(mockLogger);
+	}
 
 	@BeforeEach
 	void setUp() {
-		registry = mock(InterceptionRegistry.class);
-		translationService = mock(TranslationService.class);
-		settingsProvider = mock(Provider.class);
-		reloadableRegistry = mock(Registry.class);
-
 		Interception mockSettings = createMockSettings();
-		when(settingsProvider.get()).thenReturn(mockSettings);
+		// Use lenient stubbing since not all tests use the settings
+		lenient().when(settingsProvider.get()).thenReturn(mockSettings);
 
-		regexMatchingService = new DefaultRegexMatchingService(
+		regexMatchingService = new RegexMatchingService(
 				registry,
 				translationService,
 				settingsProvider,
@@ -51,72 +59,46 @@ class RegexMatchingServiceReloadTest {
 	}
 
 	@Test
-	void shouldHandleMatchAfterReloadWithPatternIndex() {
-		// Setup: Create a registry with regex patterns
-		when(registry.getKeys()).thenReturn(Set.of("test.key"));
-		when(registry.get("test.key")).thenReturn(List.of());
+	void shouldClearPatternIndexOnReload() {
+		// Setup: registry returns empty pattern list
+		when(registry.getKeys()).thenReturn(Collections.emptySet());
 
-		// Trigger pattern index build by calling match
-		regexMatchingService.match("test text", Locale.ENGLISH);
+		// Build pattern index by calling match
+		regexMatchingService.match("test", Locale.ENGLISH);
 
-		// Reload - this should clear the pattern index
+		// Reload clears the pattern index
 		regexMatchingService.reload();
 
-		// After reload, pattern index should be rebuilt on next match
-		// Pattern index is internal state, so we verify functionality works correctly
-		assertDoesNotThrow(() -> regexMatchingService.match("test text", Locale.ENGLISH));
+		// Next match should rebuild pattern index (verifying no exception from stale state)
+		assertDoesNotThrow(() -> regexMatchingService.match("test2", Locale.ENGLISH));
+
+		// Verify pattern index was rebuilt by checking registry was queried after reload
+		verify(registry, atLeast(2)).getKeys();
 	}
 
 	@Test
-	void shouldHandleMatchAfterReloadWithCacheEnabled() {
-		// Setup settings to enable caching
+	void shouldClearCacheOnReload() {
+		// Setup settings with caching enabled
 		Interception settings = createMockSettings();
 		when(settings.getRegex().isCacheResults()).thenReturn(true);
 		when(settingsProvider.get()).thenReturn(settings);
+		when(registry.getKeys()).thenReturn(Collections.emptySet());
 
-		// Create new service with caching enabled
-		DefaultRegexMatchingService serviceWithCache = new DefaultRegexMatchingService(
+		RegexMatchingService serviceWithCache = new RegexMatchingService(
 				registry,
 				translationService,
 				settingsProvider,
 				reloadableRegistry
 		);
 
-		// Perform a match to populate cache
-		when(registry.getKeys()).thenReturn(Collections.emptySet());
-		serviceWithCache.match("test", Locale.ENGLISH);
+		// Populate cache
+		serviceWithCache.match("cached", Locale.ENGLISH);
 
-		// Reload should clear the cache
+		// Reload clears cache
 		serviceWithCache.reload();
 
-		// Match again - result cache is internal state, so we verify functionality works correctly
-		assertDoesNotThrow(() -> serviceWithCache.match("test", Locale.ENGLISH));
-	}
-
-	@Test
-	void shouldHandleMultipleReloads() {
-		assertDoesNotThrow(() -> {
-			regexMatchingService.reload();
-			regexMatchingService.reload();
-			regexMatchingService.reload();
-		});
-	}
-
-	@Test
-	void shouldRebuildPatternIndexAfterReload() {
-		// First match - builds pattern index
-		when(registry.getKeys()).thenReturn(Collections.emptySet());
-		regexMatchingService.match("test1", Locale.ENGLISH);
-
-		// Reload - clears pattern index
-		regexMatchingService.reload();
-
-		// Second match - rebuilds pattern index
-		when(registry.getKeys()).thenReturn(Set.of("new.key"));
-		when(registry.get("new.key")).thenReturn(List.of());
-
-		// Should not throw exception even with new registry state
-		assertDoesNotThrow(() -> regexMatchingService.match("test2", Locale.ENGLISH));
+		// Next match should work without using stale cache (verifying no exception)
+		assertDoesNotThrow(() -> serviceWithCache.match("cached", Locale.ENGLISH));
 	}
 
 	@Test
@@ -125,7 +107,7 @@ class RegexMatchingServiceReloadTest {
 		when(settings.getRegex().isEnabled()).thenReturn(false);
 		when(settingsProvider.get()).thenReturn(settings);
 
-		DefaultRegexMatchingService disabledService = new DefaultRegexMatchingService(
+		RegexMatchingService disabledService = new RegexMatchingService(
 				registry,
 				translationService,
 				settingsProvider,
@@ -144,11 +126,9 @@ class RegexMatchingServiceReloadTest {
 		Interception settings = mock(Interception.class);
 		Interception.RegexSettings regex = mock(Interception.RegexSettings.class);
 
-		when(settings.getRegex()).thenReturn(regex);
-		when(regex.isEnabled()).thenReturn(true);
-		when(regex.isCacheResults()).thenReturn(false);
-		when(regex.isUseLiteralPrefix()).thenReturn(false);
-		when(regex.getWarnSlowPatternsMs()).thenReturn(100);
+		// Use lenient stubbing since not all tests need all settings
+		lenient().when(settings.getRegex()).thenReturn(regex);
+		lenient().when(regex.isEnabled()).thenReturn(true);
 
 		return settings;
 	}

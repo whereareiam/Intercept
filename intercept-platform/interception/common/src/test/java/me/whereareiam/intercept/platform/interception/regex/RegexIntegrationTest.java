@@ -5,13 +5,12 @@ import me.whereareiam.configura.Config;
 import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.messaging.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageFileLoader;
-import me.whereareiam.intercept.common.messaging.persistence.MessageDocumentNodeAdapter;
-import me.whereareiam.intercept.common.messaging.persistence.MessageFileScanner;
+import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.platform.interception.messaging.persistence.DefaultMessageFileLoader;
+import me.whereareiam.intercept.platform.interception.messaging.persistence.MessageDocumentNodeAdapter;
+import me.whereareiam.intercept.platform.interception.messaging.persistence.MessageFileScanner;
 import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
 import me.whereareiam.intercept.messaging.InterceptionRegistry;
-import me.whereareiam.intercept.messaging.RegexMatchingService;
 import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
 import me.whereareiam.intercept.platform.interception.config.template.InterceptionConfigTemplate;
 import me.whereareiam.intercept.platform.interception.messaging.DefaultInterceptionRegistry;
@@ -19,14 +18,14 @@ import me.whereareiam.intercept.platform.interception.messaging.InterceptionMess
 import me.whereareiam.intercept.platform.interception.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.messaging.file.MessageFileLoader;
+import me.whereareiam.intercept.platform.interception.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.model.messaging.document.MessageDocument;
+import me.whereareiam.intercept.platform.interception.messaging.MessageDocument;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.registry.base.Registry;
-import me.whereareiam.intercept.common.messaging.InterceptTranslationRegistry;
+import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import net.kyori.adventure.text.Component;
@@ -37,6 +36,9 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -54,12 +56,14 @@ import static org.mockito.Mockito.mock;
  * Integration test for regex matching system.
  * Tests loading patterns from YAML files and matching text against them.
  */
+@ExtendWith(MockitoExtension.class)
 class RegexIntegrationTest {
+	@Mock
+	private Registry<Reloadable> reloadableRegistry;
 	private DefaultMessageRegistry registry;
 	private InterceptionRegistry interceptionRegistry;
 	private RegexMatchingService regexService;
 	private TranslationService<Locale> translationService;
-	private Settings settings;
 	private Interception interceptionSettings;
 	private InterceptionMessageDocumentProcessor documentProcessor;
 
@@ -73,14 +77,13 @@ class RegexIntegrationTest {
 	@BeforeEach
 	void setUp() throws URISyntaxException {
 		// Setup registry
-		Registry<Reloadable> mockRegistry = mock(Registry.class);
 		InterceptTranslationRegistry translationRegistry = new InterceptTranslationRegistry();
-		registry = new DefaultMessageRegistry(translationRegistry, mockRegistry);
-		interceptionRegistry = new DefaultInterceptionRegistry();
+		registry = new DefaultMessageRegistry(translationRegistry, reloadableRegistry);
+		interceptionRegistry = new DefaultInterceptionRegistry(reloadableRegistry);
 		documentProcessor = new InterceptionMessageDocumentProcessor(interceptionRegistry);
 
 		// Setup settings with regex enabled
-		settings = new SettingsTemplate().supply(new Settings());
+		Settings settings = new SettingsTemplate().supply(new Settings());
 		interceptionSettings = new InterceptionConfigTemplate().supply(new Interception());
 		interceptionSettings.getRegex().setEnabled(true);
 		interceptionSettings.getRegex().setCacheResults(false);
@@ -95,7 +98,7 @@ class RegexIntegrationTest {
 
 		// Create regex matching service with Provider
 		Provider<Interception> settingsProvider = () -> interceptionSettings;
-		regexService = new DefaultRegexMatchingService(interceptionRegistry, translationService, settingsProvider, mockRegistry);
+		regexService = new RegexMatchingService(interceptionRegistry, translationService, settingsProvider, reloadableRegistry);
 	}
 
 	private void loadTestMessages() throws URISyntaxException {
@@ -110,7 +113,7 @@ class RegexIntegrationTest {
 		TextProcessor textProcessor = new TextProcessor();
 		MessageFileLoader loader = new DefaultMessageFileLoader(
 				textProcessor,
-				() -> settings
+				() -> Locale.US
 		);
 
 		for (Path file : files) {

@@ -10,12 +10,8 @@ import java.util.Map;
  * Central service for message file operations and data access.
  * Provides unified access to message entries and their file paths.
  */
+@SuppressWarnings("unused")
 public interface MessageDataService {
-	/**
-	 * Initialize the service by scanning and loading all message files.
-	 */
-	void initialize();
-
 	/**
 	 * Get all message entries from the registry.
 	 *

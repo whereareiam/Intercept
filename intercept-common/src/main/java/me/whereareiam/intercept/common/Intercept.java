@@ -7,8 +7,9 @@ import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.InterceptAPI;
 import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
-import me.whereareiam.intercept.common.messaging.MessageLifecycleService;
+import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
 import me.whereareiam.intercept.common.updater.UpdateScheduler;
+import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.event.EventListener;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.base.EventOrder;
@@ -43,6 +44,9 @@ public class Intercept implements EventListener {
 		// Load settings early so dependent modules can initialize based on config
 		injector.getInstance(Settings.class);
 
+		// Initialize database service early to register event listeners before InterceptReadyEvent
+		injector.getInstance(DatabaseService.class);
+
 		// Initialize the public API for external plugins
 		InterceptAPI.initialize(injector);
 	}
@@ -52,7 +56,7 @@ public class Intercept implements EventListener {
 		injector.getInstance(ListenerRegistrar.class).registerListeners();
 
 		// Initialize messages system
-		injector.getInstance(MessageLifecycleService.class).initialize();
+		injector.getInstance(DefaultMessageDataService.class).initialize();
 
 		// Initialize commands
 		injector.getInstance(CommandService.class);

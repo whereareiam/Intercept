@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.whereareiam.dialectica.EntitySchemaProvider;
 import me.whereareiam.dialectica.annotation.Entity;
 import me.whereareiam.dialectica.type.DatabaseType;
+import me.whereareiam.intercept.util.NamespaceUtil;
 
 import java.util.List;
 
@@ -14,12 +15,17 @@ import java.util.List;
  */
 @Getter
 @Setter
-@Entity(tableName = "intercept_message_files", version = 1)
+@Entity(tableName = "intercept_message_files", version = 2)
 public class MessageFileEntity implements EntitySchemaProvider {
 	/**
 	 * Primary key.
 	 */
 	private Long id;
+
+	/**
+	 * Namespace for this file (e.g., "intercept").
+	 */
+	private String namespace;
 
 	/**
 	 * Relative path from messages root without file extension (e.g., "errors/permissions", "common/styles").
@@ -45,7 +51,8 @@ public class MessageFileEntity implements EntitySchemaProvider {
 		if (filePath == null) return "";
 
 		// Replace path separators with dots
-		return filePath.replace('\\', '.').replace('/', '.');
+		String prefix = filePath.replace('\\', '.').replace('/', '.');
+		return NamespaceUtil.qualify(namespace, prefix);
 	}
 
 	@Override
@@ -54,7 +61,9 @@ public class MessageFileEntity implements EntitySchemaProvider {
 		return """
 				CREATE TABLE IF NOT EXISTS intercept_message_files (
 					id %s,
-					file_path VARCHAR(500) NOT NULL UNIQUE
+					namespace VARCHAR(100) NOT NULL,
+					file_path VARCHAR(500) NOT NULL,
+					CONSTRAINT uq_message_files_namespace_path UNIQUE (namespace, file_path)
 				)
 				""".formatted(idType);
 	}

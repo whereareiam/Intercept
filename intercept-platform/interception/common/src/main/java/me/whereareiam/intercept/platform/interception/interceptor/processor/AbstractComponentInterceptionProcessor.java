@@ -1,14 +1,14 @@
 package me.whereareiam.intercept.platform.interception.interceptor.processor;
 
 import com.google.inject.Provider;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.platform.interception.regex.RegexMatchingService;
+import me.whereareiam.intercept.platform.interception.tag.TagReplacementService;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.platform.interception.util.ComponentHelper;
 import me.whereareiam.intercept.platform.interception.util.TagParser;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.interception.ProcessedEvent;
 import me.whereareiam.intercept.logging.InterceptionHelper;
-import me.whereareiam.intercept.messaging.RegexMatchingService;
-import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.model.InterceptedComponent;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.interception.InterceptionContext;

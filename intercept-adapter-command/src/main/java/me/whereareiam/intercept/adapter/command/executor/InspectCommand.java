@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.annotation.Definition;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
@@ -97,8 +97,11 @@ public class InspectCommand {
 	 * @param message The error message (without prefix)
 	 */
 	private void sendErrorMessage(@NotNull Actor sender, @NotNull String message) {
-		Component component = Serializer.serialize(sender,
-				messagesProvider.get().getPrefix() + message);
+		Component component = Serializer.serialize(
+				sender,
+				messagesProvider.get().getPrefix() + message
+		);
+
 		sender.sendMessage(component);
 	}
 }

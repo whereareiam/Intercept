@@ -1,11 +1,22 @@
 package me.whereareiam.intercept.adapter.database.message;
 
 import me.whereareiam.dialectica.type.DatabaseType;
-import me.whereareiam.intercept.adapter.database.entity.message.*;
-import me.whereareiam.intercept.adapter.database.repository.message.*;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
+import me.whereareiam.intercept.adapter.database.entity.message.MessageExtensionEntity;
+import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
+import me.whereareiam.intercept.adapter.database.entity.message.MessageTemplateEntity;
+import me.whereareiam.intercept.adapter.database.entity.message.MessageTranslationEntity;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageExtensionRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
+import me.whereareiam.intercept.util.NamespaceUtil;
+import me.whereareiam.intercept.model.messaging.file.MapMessageExtensionPayload;
+import me.whereareiam.intercept.model.messaging.file.MessageExtensionKey;
+import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
-import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
@@ -42,7 +53,8 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("errors/permissions");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePathAndNamespace(
+				Constants.Namespace.INTERNAL, "errors/permissions");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "no-permission");
@@ -69,6 +81,7 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		MessageFileRepository fileRepo = fileRepo(type);
 		MessageEntryRepository entryRepo = entryRepo(type);
 		MessageTranslationRepository translationRepo = translationRepo(type);
+		MessageTemplateRepository templateRepo = templateRepo(type);
 
 		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
@@ -78,7 +91,8 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("common/greeting");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePathAndNamespace(
+				Constants.Namespace.INTERNAL, "common/greeting");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "greeting");
@@ -86,10 +100,11 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		assertEquals(MessageType.TEMPLATE, entryEntity.get().getEntryType());
 
 		List<MessageTranslationEntity> translations = translationRepo.findAllByEntryId(entryEntity.get().getId());
-		assertEquals(1, translations.size());
-		MessageTranslationEntity translation = translations.get(0);
-		assertEquals("Hello <player>!", translation.getText());
-		assertNull(translation.getLocale());
+		assertTrue(translations.isEmpty());
+
+		MessageTemplateEntity template = templateRepo.findByEntryId(entryEntity.get().getId());
+		assertNotNull(template);
+		assertEquals("Hello <player>!", template.getText());
 	}
 
 	@ParameterizedTest
@@ -109,8 +124,8 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
-		assertTrue(fileRepo.findByFilePath("errors/file1").isPresent());
-		assertTrue(fileRepo.findByFilePath("errors/file2").isPresent());
+		assertTrue(fileRepo.findByFilePathAndNamespace(Constants.Namespace.INTERNAL, "errors/file1").isPresent());
+		assertTrue(fileRepo.findByFilePathAndNamespace(Constants.Namespace.INTERNAL, "errors/file2").isPresent());
 		assertEquals(2, fileRepo.count());
 	}
 
@@ -124,165 +139,61 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 	@ParameterizedTest
 	@EnumSource(DatabaseType.class)
-	void testUploadMessagesWithRegexPatterns(DatabaseType type) {
+	void testUploadMessagesWithExtensions(DatabaseType type) {
 		DefaultMessagePersistenceService service = service(type);
 		MessageFileRepository fileRepo = fileRepo(type);
 		MessageEntryRepository entryRepo = entryRepo(type);
-		MessageRegexPatternRepository patternRepo = patternRepo(type);
-		InterceptionRegistry interceptionRegistry = interceptionRegistry(type);
+		MessageExtensionRepository extensionRepo = extensionRepo(type);
 
 		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
+		Map<String, MessageExtensions> extensionData = new HashMap<>();
 
-		Map<String, String> placeholders1 = new HashMap<>();
-		placeholders1.put("player", "$1");
-		placeholders1.put("message", "$2");
-		CompiledRegexPattern pattern1 = new CompiledRegexPattern("^<(.+)> (.+)$", placeholders1, 10, false);
-
-		Map<String, String> placeholders2 = new HashMap<>();
-		placeholders2.put("permission", "$1");
-		CompiledRegexPattern pattern2 = new CompiledRegexPattern("^You don't have permission: (.+)$", placeholders2, 5, true);
-
-		List<CompiledRegexPattern> patterns = List.of(pattern1, pattern2);
 		entries.put("chat.message", template("Chat message"));
 		filePaths.put("chat", resolveFile("chat/message.yml"));
-		interceptionRegistry.register("chat.message", patterns);
 
-		service.uploadMessages(new MessageSnapshot(entries, filePaths));
+		Map<String, Object> pattern = new LinkedHashMap<>();
+		pattern.put("pattern", "^<(.+)> (.+)$");
+		pattern.put("priority", 10);
+		pattern.put("replaceMatched", false);
+		pattern.put("placeholders", Map.of("player", "$1", "message", "$2"));
 
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("chat/message");
+		Map<String, Object> payloadData = new LinkedHashMap<>();
+		payloadData.put("patterns", List.of(pattern));
+
+		MessageExtensions extensions = new MessageExtensions();
+		MessageExtensionKey<MapMessageExtensionPayload> key =
+				new MessageExtensionKey<>("interception", MapMessageExtensionPayload.class);
+		extensions.put(key, new MapMessageExtensionPayload("interception", payloadData));
+		extensionData.put(NamespaceUtil.qualify(Constants.Namespace.INTERNAL, "chat.message"), extensions);
+
+		service.uploadMessages(new MessageSnapshot(entries, filePaths, extensionData));
+
+		Optional<MessageFileEntity> file = fileRepo.findByFilePathAndNamespace(
+				Constants.Namespace.INTERNAL, "chat/message");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "message");
 		assertTrue(entryEntity.isPresent());
 
-		List<MessageRegexPatternEntity> patternsList = patternRepo.findAllByEntryId(entryEntity.get().getId());
-		assertEquals(2, patternsList.size());
+		List<MessageExtensionEntity> storedExtensions =
+				extensionRepo.findAllByEntryId(entryEntity.get().getId());
+		assertEquals(1, storedExtensions.size());
 
-		MessageRegexPatternEntity savedPattern1 = patternsList.stream()
-				.filter(p -> p.getPattern().equals("^<(.+)> (.+)$"))
-				.findFirst()
-				.orElseThrow();
-		assertEquals(10, savedPattern1.getPriority());
-		assertFalse(savedPattern1.isReplaceMatched());
-		assertEquals(0, savedPattern1.getSortOrder());
+		MessageExtensionEntity stored = storedExtensions.get(0);
+		assertEquals("interception", stored.getExtensionId());
 
-		MessageRegexPatternEntity savedPattern2 = patternsList.stream()
-				.filter(p -> p.getPattern().equals("^You don't have permission: (.+)$"))
-				.findFirst()
-				.orElseThrow();
-		assertEquals(5, savedPattern2.getPriority());
-		assertTrue(savedPattern2.isReplaceMatched());
-		assertEquals(1, savedPattern2.getSortOrder());
+		Map<String, Object> decoded = MessageExtensionCodec.decode(stored.getPayload());
+		assertTrue(decoded.containsKey("patterns"));
 	}
 
 	@ParameterizedTest
 	@EnumSource(DatabaseType.class)
-	void testUploadMessagesWithRegexPatternsAndPlaceholders(DatabaseType type) {
+	void testUploadMessagesWithoutExtensions(DatabaseType type) {
 		DefaultMessagePersistenceService service = service(type);
 		MessageFileRepository fileRepo = fileRepo(type);
 		MessageEntryRepository entryRepo = entryRepo(type);
-		MessageRegexPatternRepository patternRepo = patternRepo(type);
-		MessageRegexPlaceholderRepository placeholderRepo = placeholderRepo(type);
-		InterceptionRegistry interceptionRegistry = interceptionRegistry(type);
-
-		Map<String, TranslationEntry> entries = new HashMap<>();
-		Map<String, Path> filePaths = new HashMap<>();
-
-		Map<String, String> placeholders = new HashMap<>();
-		placeholders.put("player", "$1");
-		placeholders.put("message", "$2");
-		placeholders.put("timestamp", "$3");
-		CompiledRegexPattern pattern = new CompiledRegexPattern("^\\[(.+)\\] <(.+)> (.+)$", placeholders, 15, false);
-
-		entries.put("chat.formatted", template("Formatted chat"));
-		filePaths.put("chat", resolveFile("chat/formatted.yml"));
-		interceptionRegistry.register("chat.formatted", List.of(pattern));
-
-		service.uploadMessages(new MessageSnapshot(entries, filePaths));
-
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("chat/formatted");
-		assertTrue(file.isPresent());
-
-		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "formatted");
-		assertTrue(entryEntity.isPresent());
-
-		List<MessageRegexPatternEntity> patternsList = patternRepo.findAllByEntryId(entryEntity.get().getId());
-		assertEquals(1, patternsList.size());
-
-		MessageRegexPatternEntity savedPattern = patternsList.get(0);
-		assertEquals("^\\[(.+)\\] <(.+)> (.+)$", savedPattern.getPattern());
-		assertEquals(15, savedPattern.getPriority());
-
-		List<MessageRegexPlaceholderEntity> placeholdersList = placeholderRepo.findAllByPatternId(savedPattern.getId());
-		assertEquals(3, placeholdersList.size());
-	}
-
-	@ParameterizedTest
-	@EnumSource(DatabaseType.class)
-	void testUploadMessagesWithMultiplePatternsAndPlaceholders(DatabaseType type) {
-		DefaultMessagePersistenceService service = service(type);
-		MessageFileRepository fileRepo = fileRepo(type);
-		MessageEntryRepository entryRepo = entryRepo(type);
-		MessageRegexPatternRepository patternRepo = patternRepo(type);
-		MessageRegexPlaceholderRepository placeholderRepo = placeholderRepo(type);
-		InterceptionRegistry interceptionRegistry = interceptionRegistry(type);
-
-		Map<String, TranslationEntry> entries = new HashMap<>();
-		Map<String, Path> filePaths = new HashMap<>();
-
-		Map<String, String> placeholders1 = new HashMap<>();
-		placeholders1.put("name", "$1");
-		CompiledRegexPattern pattern1 = new CompiledRegexPattern("^Player: (.+)$", placeholders1, 20, false);
-
-		Map<String, String> placeholders2 = new HashMap<>();
-		placeholders2.put("sender", "$1");
-		placeholders2.put("recipient", "$2");
-		placeholders2.put("content", "$3");
-		CompiledRegexPattern pattern2 = new CompiledRegexPattern("^(.+) -> (.+): (.+)$", placeholders2, 10, true);
-
-		CompiledRegexPattern pattern3 = new CompiledRegexPattern("^System: .+$", null, 5, false);
-
-		entries.put("messages.multi", template("Multi-pattern entry"));
-		filePaths.put("messages", resolveFile("messages/multi.yml"));
-		interceptionRegistry.register("messages.multi", List.of(pattern1, pattern2, pattern3));
-
-		service.uploadMessages(new MessageSnapshot(entries, filePaths));
-
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("messages/multi");
-		assertTrue(file.isPresent());
-
-		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "multi");
-		assertTrue(entryEntity.isPresent());
-
-		List<MessageRegexPatternEntity> patternsList = patternRepo.findAllByEntryId(entryEntity.get().getId());
-		assertEquals(3, patternsList.size());
-
-		patternsList.sort(Comparator.comparingInt(MessageRegexPatternEntity::getSortOrder));
-		assertEquals(0, patternsList.get(0).getSortOrder());
-		assertEquals(1, patternsList.get(1).getSortOrder());
-		assertEquals(2, patternsList.get(2).getSortOrder());
-
-		MessageRegexPatternEntity savedPattern1 = patternsList.get(0);
-		List<MessageRegexPlaceholderEntity> placeholders1List = placeholderRepo.findAllByPatternId(savedPattern1.getId());
-		assertEquals(1, placeholders1List.size());
-
-		MessageRegexPatternEntity savedPattern2 = patternsList.get(1);
-		List<MessageRegexPlaceholderEntity> placeholders2List = placeholderRepo.findAllByPatternId(savedPattern2.getId());
-		assertEquals(3, placeholders2List.size());
-
-		MessageRegexPatternEntity savedPattern3 = patternsList.get(2);
-		List<MessageRegexPlaceholderEntity> placeholders3List = placeholderRepo.findAllByPatternId(savedPattern3.getId());
-		assertEquals(0, placeholders3List.size());
-	}
-
-	@ParameterizedTest
-	@EnumSource(DatabaseType.class)
-	void testUploadMessagesWithoutRegexPatterns(DatabaseType type) {
-		DefaultMessagePersistenceService service = service(type);
-		MessageFileRepository fileRepo = fileRepo(type);
-		MessageEntryRepository entryRepo = entryRepo(type);
-		MessageRegexPatternRepository patternRepo = patternRepo(type);
+		MessageExtensionRepository extensionRepo = extensionRepo(type);
 
 		Map<String, TranslationEntry> entries = new HashMap<>();
 		Map<String, Path> filePaths = new HashMap<>();
@@ -292,14 +203,16 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 
 		service.uploadMessages(new MessageSnapshot(entries, filePaths));
 
-		Optional<MessageFileEntity> file = fileRepo.findByFilePath("simple/message");
+		Optional<MessageFileEntity> file = fileRepo.findByFilePathAndNamespace(
+				Constants.Namespace.INTERNAL, "simple/message");
 		assertTrue(file.isPresent());
 
 		Optional<MessageEntryEntity> entryEntity = entryRepo.findByFileIdAndEntryKey(file.get().getId(), "message");
 		assertTrue(entryEntity.isPresent());
 
-		List<MessageRegexPatternEntity> patternsList = patternRepo.findAllByEntryId(entryEntity.get().getId());
-		assertEquals(0, patternsList.size());
+		List<MessageExtensionEntity> storedExtensions =
+				extensionRepo.findAllByEntryId(entryEntity.get().getId());
+		assertEquals(0, storedExtensions.size());
 	}
 
 	private TranslationEntry template(String text) {

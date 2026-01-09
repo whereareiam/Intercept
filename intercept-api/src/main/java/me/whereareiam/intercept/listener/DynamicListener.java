@@ -5,7 +5,7 @@ package me.whereareiam.intercept.listener;
  * Unlike traditional Minecraft event listeners that use static {@code @EventHandler} priorities,
  * this interface allows for runtime modification of event handling priorities.
  * <p>
- * This approach provides more flexibility than the standard Minecraft event system,
+ * This approach provides more flexibility than the type Minecraft event system,
  * allowing listeners to adapt their priority based on runtime conditions.
  *
  * @param <T> the type of event this listener will handle

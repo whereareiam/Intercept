@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.Serializer;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.model.SerializerContent;

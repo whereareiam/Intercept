@@ -3,10 +3,6 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.intercept.model.Event;
-
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Main configuration settings class for the Intercept plugin.
@@ -28,24 +24,14 @@ public class Settings {
 	private int level;
 
 	/**
-	 * Default locale for messages
+	 * Namespace visibility configuration
 	 */
-	private Locale locale;
-
-	/**
-	 * Serialization configuration
-	 */
-	private Serialization serialization;
+	private Namespaces namespaces;
 
 	/**
 	 * Update checker configuration
 	 */
 	private Updater updater;
-
-	/**
-	 * Event listener configurations
-	 */
-	private Listeners listeners;
 
 	/**
 	 * Performance configuration
@@ -89,20 +75,6 @@ public class Settings {
 		 * Update check interval in minutes
 		 */
 		private int interval;
-	}
-
-	/**
-	 * Configuration for event listeners.
-	 * Maps event names to their corresponding event configurations.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Listeners {
-		/**
-		 * Map of event name to event configuration
-		 */
-		private Map<String, Event> events;
 	}
 
 	/**
@@ -185,25 +157,15 @@ public class Settings {
 	}
 
 	/**
-	 * Serialization configuration for message formatting.
-	 * Controls how messages are serialized and formatted.
+	 * Configuration for message namespaces.
 	 */
 	@Getter
 	@Setter
 	@ToString
-	public static class Serialization {
+	public static class Namespaces {
 		/**
-		 * Serializer adapter ID/type to use.
-		 * Available options: "MINIMESSAGE", "GSON", "LEGACY_AMPERSAND", "LEGACY_SECTION", "PLAIN"
-		 * Default: "MINIMESSAGE"
+		 * Whether to append namespaces to exposed keys.
 		 */
-		private String type = "MINIMESSAGE";
-
-		/**
-		 * Whether to enable legacy color code parsing (& and § codes).
-		 * When enabled, legacy codes in input will be converted to the target adapter format.
-		 * Default: false
-		 */
-		private boolean enableLegacyColors = false;
+		private boolean appendToKeys;
 	}
 }
