@@ -143,6 +143,4 @@ class TagParserTest {
 		assertEquals("Steve", tags.get(0).placeholders().get(0).value());
 		assertEquals("Admin", tags.get(0).placeholders().get(1).value());
 	}
-
-
 }

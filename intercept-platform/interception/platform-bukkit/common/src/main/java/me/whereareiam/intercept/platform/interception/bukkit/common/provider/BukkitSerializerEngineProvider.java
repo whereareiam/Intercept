@@ -38,8 +38,7 @@ public class BukkitSerializerEngineProvider implements Provider<SerializerEngine
 	public SerializerEngine get() {
 		if (engine == null) {
 			Messages messages = messagesProvider.get();
-			PlatformSettings settings = settingsProvider.get();
-			PlatformSettings.Serialization serialization = settings == null ? null : settings.getSerialization();
+			PlatformSettings.Serialization serialization = settingsProvider.get().getSerialization();
 
 			String adapter = serialization != null && serialization.getType() != null
 					? serialization.getType()
