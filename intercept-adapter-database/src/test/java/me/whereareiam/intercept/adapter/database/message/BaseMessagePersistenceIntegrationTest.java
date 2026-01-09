@@ -4,11 +4,16 @@ import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.adapter.database.BaseTest;
 import me.whereareiam.intercept.adapter.database.message.coordinator.MessageDownloadCoordinator;
 import me.whereareiam.intercept.adapter.database.message.coordinator.MessageUploadCoordinator;
-import me.whereareiam.intercept.adapter.database.repository.message.*;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageExtensionRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
+import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
 import me.whereareiam.intercept.messaging.MessageDataService;
 import me.whereareiam.intercept.messaging.file.MessageFileWriter;
-import me.whereareiam.intercept.model.messaging.CompiledMessageEntry;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
+import me.whereareiam.intercept.model.messaging.file.MessageFileData;
+import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
@@ -28,10 +33,10 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 	protected MessageEntryRepository mariaDbEntryRepo;
 	protected MessageTranslationRepository postgresTranslationRepo;
 	protected MessageTranslationRepository mariaDbTranslationRepo;
-	protected MessageRegexPatternRepository postgresPatternRepo;
-	protected MessageRegexPatternRepository mariaDbPatternRepo;
-	protected MessageRegexPlaceholderRepository postgresPlaceholderRepo;
-	protected MessageRegexPlaceholderRepository mariaDbPlaceholderRepo;
+	protected MessageTemplateRepository postgresTemplateRepo;
+	protected MessageTemplateRepository mariaDbTemplateRepo;
+	protected MessageExtensionRepository postgresExtensionRepo;
+	protected MessageExtensionRepository mariaDbExtensionRepo;
 	protected Path messagesPath;
 
 	@BeforeEach
@@ -42,10 +47,10 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		mariaDbEntryRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageEntryRepository.class);
 		postgresTranslationRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageTranslationRepository.class);
 		mariaDbTranslationRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageTranslationRepository.class);
-		postgresPatternRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageRegexPatternRepository.class);
-		mariaDbPatternRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageRegexPatternRepository.class);
-		postgresPlaceholderRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageRegexPlaceholderRepository.class);
-		mariaDbPlaceholderRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageRegexPlaceholderRepository.class);
+		postgresTemplateRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageTemplateRepository.class);
+		mariaDbTemplateRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageTemplateRepository.class);
+		postgresExtensionRepo = getJdbi(DatabaseType.POSTGRES).onDemand(MessageExtensionRepository.class);
+		mariaDbExtensionRepo = getJdbi(DatabaseType.MARIADB).onDemand(MessageExtensionRepository.class);
 
 		messagesPath = Files.createTempDirectory("messages-test");
 		MessageFileWriter postgresWriter = new TestMessageFileWriter(messagesPath);
@@ -57,8 +62,8 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				postgresFileRepo,
 				postgresEntryRepo,
 				postgresTranslationRepo,
-				postgresPatternRepo,
-				postgresPlaceholderRepo,
+				postgresTemplateRepo,
+				postgresExtensionRepo,
 				messagesPath
 		);
 
@@ -66,8 +71,8 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				postgresFileRepo,
 				postgresEntryRepo,
 				postgresTranslationRepo,
-				postgresPatternRepo,
-				postgresPlaceholderRepo,
+				postgresTemplateRepo,
+				postgresExtensionRepo,
 				postgresWriter
 		);
 
@@ -75,8 +80,8 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				mariaDbFileRepo,
 				mariaDbEntryRepo,
 				mariaDbTranslationRepo,
-				mariaDbPatternRepo,
-				mariaDbPlaceholderRepo,
+				mariaDbTemplateRepo,
+				mariaDbExtensionRepo,
 				messagesPath
 		);
 
@@ -84,8 +89,8 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				mariaDbFileRepo,
 				mariaDbEntryRepo,
 				mariaDbTranslationRepo,
-				mariaDbPatternRepo,
-				mariaDbPlaceholderRepo,
+				mariaDbTemplateRepo,
+				mariaDbExtensionRepo,
 				mariaWriter
 		);
 
@@ -123,12 +128,12 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		return type == DatabaseType.POSTGRES ? postgresTranslationRepo : mariaDbTranslationRepo;
 	}
 
-	protected MessageRegexPatternRepository patternRepo(DatabaseType type) {
-		return type == DatabaseType.POSTGRES ? postgresPatternRepo : mariaDbPatternRepo;
+	protected MessageTemplateRepository templateRepo(DatabaseType type) {
+		return type == DatabaseType.POSTGRES ? postgresTemplateRepo : mariaDbTemplateRepo;
 	}
 
-	protected MessageRegexPlaceholderRepository placeholderRepo(DatabaseType type) {
-		return type == DatabaseType.POSTGRES ? postgresPlaceholderRepo : mariaDbPlaceholderRepo;
+	protected MessageExtensionRepository extensionRepo(DatabaseType type) {
+		return type == DatabaseType.POSTGRES ? postgresExtensionRepo : mariaDbExtensionRepo;
 	}
 
 	protected Path resolveFile(String relative) {
@@ -137,8 +142,8 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 
 	private void clearTables(DatabaseType type) {
 		getJdbi(type).useHandle(handle -> {
-			handle.execute("DELETE FROM intercept_message_regex_placeholders");
-			handle.execute("DELETE FROM intercept_message_regex_patterns");
+			handle.execute("DELETE FROM intercept_message_extensions");
+			handle.execute("DELETE FROM intercept_message_templates");
 			handle.execute("DELETE FROM intercept_message_translations");
 			handle.execute("DELETE FROM intercept_message_entries");
 			handle.execute("DELETE FROM intercept_message_files");
@@ -153,10 +158,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		}
 
 		@Override
-		public void initialize() {}
-
-		@Override
-		public Map<String, CompiledMessageEntry> getAllEntries() {
+		public Map<String, TranslationEntry> getAllEntries() {
 			return Collections.emptyMap();
 		}
 
@@ -209,7 +211,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		}
 
 		@Override
-		public void write(String relativePath, me.whereareiam.intercept.model.messaging.document.MessageDocument fileData) {
+		public void write(String relativePath, MessageFileData fileData) {
 			Path target = resolvePath(relativePath);
 			try {
 				Path parent = target.getParent();
@@ -228,5 +230,7 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 			return messagesPath.resolve(normalized + ".yml").normalize();
 		}
 	}
+
+
 }
 

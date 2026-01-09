@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.common.messaging.processor;
 
+import me.whereareiam.configura.type.MultiValue;
+
 import java.util.List;
 
 /**
@@ -19,6 +21,11 @@ public class TextProcessor {
 
 		if (text instanceof String)
 			return (String) text;
+
+		if (text instanceof MultiValue<?> multi)
+			return String.join("\n", multi.asList().stream()
+					.map(Object::toString)
+					.toList());
 
 		if (text instanceof List<?> list)
 			return String.join("\n", list.stream()

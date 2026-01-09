@@ -1,17 +1,20 @@
 package me.whereareiam.intercept;
 
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import lombok.Getter;
 import me.whereareiam.intercept.event.EventManager;
-import me.whereareiam.intercept.messaging.MessageService;
+import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
 import me.whereareiam.intercept.registry.PlayerRegistry;
+import me.whereareiam.semantica.translation.TranslationService;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 /**
  * Main API access point for the Intercept plugin.
  *
  * <p>External plugins should use this class to access Intercept services.
- * All services become available after the {@link me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent}
+ * All services become available after the {@link InterceptStartedEvent}
  * is fired.</p>
  *
  * <p><b>Example usage:</b></p>
@@ -22,16 +25,16 @@ import org.jetbrains.annotations.NotNull;
  *     return;
  * }
  *
- * // Get the message service
- * MessageService messageService = InterceptAPI.getMessageService();
- * String message = messageService.resolve("my.key", Locale.ENGLISH);
+ * // Get the translation service
+ * TranslationService<Locale> translationService = InterceptAPI.getTranslationService();
+ * String message = translationService.resolve("my.key", Locale.ENGLISH);
  *
  * // Or get any service by class
  * PlayerRegistry registry = InterceptAPI.getService(PlayerRegistry.class);
  * }</pre>
  *
  * <p><b>Important:</b> Always check {@link #isInitialized()} before accessing services,
- * or wait for {@link me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent}.</p>
+ * or wait for {@link InterceptStartedEvent}.</p>
  */
 public final class InterceptAPI {
 	private static volatile Injector injector;
@@ -101,14 +104,20 @@ public final class InterceptAPI {
 	}
 
 	/**
-	 * Gets the MessageService for resolving localized messages.
+	 * Gets the TranslationService for resolving localized messages.
 	 *
-	 * @return the MessageService instance
+	 * @return the TranslationService instance
 	 * @throws IllegalStateException if the API is not initialized
 	 */
 	@NotNull
-	public static MessageService getMessageService() {
-		return getService(MessageService.class);
+	public static TranslationService<Locale> getTranslationService() {
+		Injector currentInjector = injector;
+		if (currentInjector == null) {
+			throw new IllegalStateException(
+					"InterceptAPI is not initialized. Make sure Intercept is loaded and wait for InterceptStartedEvent."
+			);
+		}
+		return currentInjector.getInstance(new Key<TranslationService<Locale>>() {});
 	}
 
 	/**

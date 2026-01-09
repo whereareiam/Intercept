@@ -2,14 +2,8 @@ package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
-import me.whereareiam.intercept.model.Event;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.type.EventPriority;
-import me.whereareiam.intercept.type.PlatformType;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 @Singleton
 public class SettingsTemplate implements TemplateProvider<Settings> {
@@ -18,14 +12,10 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		// Default logger level (2 = INFO)
 		settings.setLevel(2);
 
-		// Default locale for messages
-		settings.setLocale(Locale.US);
-
-		// Initialize serialization settings
-		Settings.Serialization serialization = new Settings.Serialization();
-		serialization.setType("MINIMESSAGE");
-		serialization.setEnableLegacyColors(false);
-		settings.setSerialization(serialization);
+		// Initialize namespace settings
+		Settings.Namespaces namespaces = new Settings.Namespaces();
+		namespaces.setAppendToKeys(false);
+		settings.setNamespaces(namespaces);
 
 		// Initialize updater settings
 		Settings.Updater updater = new Settings.Updater();
@@ -50,17 +40,6 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		cache.setDynamicExpireMinutes(5);
 		performance.setCache(cache);
 
-		Settings.Performance.Regex regex = new Settings.Performance.Regex();
-		regex.setEnabled(true);
-		regex.setTimeoutMs(100);
-		regex.setUseLiteralPrefix(true);
-		regex.setCacheResults(true);
-		regex.setCacheSize(1000);
-		regex.setCacheExpireMinutes(10);
-		regex.setMaxPatternComplexity(1000);
-		regex.setWarnSlowPatternsMs(50);
-		performance.setRegex(regex);
-
 		settings.setPerformance(performance);
 
 		// Initialize command settings
@@ -70,26 +49,6 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 
 		settings.setCommands(commands);
 
-		configureListeners(settings);
-
 		return settings;
-	}
-
-	private void configureListeners(Settings settings) {
-		Settings.Listeners listeners = new Settings.Listeners();
-		if (PlatformType.isAtLeast(PlatformType.BUKKIT))
-			listeners.setEvents(getPrioritiesForBukkit());
-
-		settings.setListeners(listeners);
-	}
-
-	private Map<String, Event> getPrioritiesForBukkit() {
-		Map<String, Event> priorities = new HashMap<>();
-
-		Event event = Event.builder().register(true).priority(EventPriority.LOWEST).build();
-
-		priorities.put("org.bukkit.event.player.PlayerQuitEvent", event);
-
-		return priorities;
 	}
 }

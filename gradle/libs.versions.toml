@@ -1,7 +1,7 @@
 [versions]
 
 # plugins
-shadow = "9.2.2"
+shadow = "9.3.0"
 buildconfig = "5.7.1"
 
 # compile time processing
@@ -10,11 +10,12 @@ lombok = "1.18.42"
 # general
 guice = "7.0.0"
 annotations = "26.0.1"
-configura = "dev-a76adc6"
-attache = "dev-5fad19f"
-keystone = "dev-697f401"
-commandant = "dev-5f99bce"
-dialectica = "dev-74ce2b6"
+configura = "dev-2704ad8"
+attache = "dev-7a0d6fa"
+keystone = "dev-a150b3e"
+commandant = "dev-5a79a8e"
+semantica = "dev-ffdb76d"
+dialectica = "dev-97e4633"
 junit = "6.0.0"
 mockito = "5.20.0"
 testcontainers = "2.0.2"
@@ -29,6 +30,7 @@ cloud-minecraft-extras = "2.0.0-beta.13"
 velocity = "3.4.0-SNAPSHOT"
 spigot = "1.21.8-R0.1-SNAPSHOT"
 paper = "1.21.8-R0.1-SNAPSHOT"
+oraylen = "dev"
 
 # platform hooks
 packetevents = "2.10.1"
@@ -57,6 +59,7 @@ annotations = { group = "org.jetbrains", name = "annotations", version.ref = "an
 configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
 keystone = { group = "me.whereareiam", name = "keystone", version.ref = "keystone" }
 commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
+semantica = { group = "me.whereareiam", name = "semantica", version.ref = "semantica" }
 dialectica = { group = "me.whereareiam", name = "dialectica", version.ref = "dialectica" }
 
 # attache
@@ -83,6 +86,7 @@ cloud-minecraft-extras = { group = "org.incendo", name = "cloud-minecraft-extras
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 spigot = { group = "org.spigotmc", name = "spigot-api", version.ref = "spigot" }
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+oraylen = { group = "net.oraylen", name = "oraylen", version.ref = "oraylen" }
 
 # platform hooks
 packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }

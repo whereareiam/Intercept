@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.adapter.database.message;
 
+import me.whereareiam.intercept.Constants;
+
 import java.util.Set;
 
 /**
@@ -31,9 +33,14 @@ public final class MessageKeyResolver {
 	 * @return the entry key (e.g., "no-permission")
 	 */
 	public static String extractEntryKey(String fullKey, String keyPrefix) {
-		if (keyPrefix.isEmpty()) return fullKey;
-		if (fullKey.startsWith(keyPrefix + "."))
-			return fullKey.substring(keyPrefix.length() + 1);
+		if (keyPrefix == null || keyPrefix.isEmpty()) return fullKey;
+		if (fullKey.startsWith(keyPrefix)) {
+			int start = keyPrefix.length();
+			if (!keyPrefix.endsWith(Constants.Namespace.NAMESPACE_SEPARATOR) && fullKey.length() > start && fullKey.charAt(start) == '.')
+				start++;
+
+			return fullKey.substring(start);
+		}
 
 		return fullKey;
 	}

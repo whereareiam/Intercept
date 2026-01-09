@@ -1,0 +1,7 @@
+debug: "<ref:common.styles.prefix> <ref:common.colors.info>Debug: <p:info>"
+
+command-usage:
+  - "<ref:common.styles.prefix>"
+  - "<ref:common.colors.warning>Usage: <ref:common.colors.accent>/myplugin <p:args>"
+
+status: "Status: <if enabled==true><ref:common.colors.success>Enabled<else><ref:common.colors.error>Disabled</if>"

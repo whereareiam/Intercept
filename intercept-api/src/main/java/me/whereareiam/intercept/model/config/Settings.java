@@ -3,12 +3,6 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.configura.annotation.PostProcess;
-import me.whereareiam.intercept.logging.InterceptionHelper;
-import me.whereareiam.intercept.model.Event;
-
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Main configuration settings class for the Intercept plugin.
@@ -30,24 +24,14 @@ public class Settings {
 	private int level;
 
 	/**
-	 * Default locale for messages
+	 * Namespace visibility configuration
 	 */
-	private Locale locale;
-
-	/**
-	 * Serialization configuration
-	 */
-	private Serialization serialization;
+	private Namespaces namespaces;
 
 	/**
 	 * Update checker configuration
 	 */
 	private Updater updater;
-
-	/**
-	 * Event listener configurations
-	 */
-	private Listeners listeners;
 
 	/**
 	 * Performance configuration
@@ -58,11 +42,6 @@ public class Settings {
 	 * Command configuration
 	 */
 	private Commands commands;
-
-	@PostProcess
-	public void updateInterceptionHelper() {
-		InterceptionHelper.init(level > 2);
-	}
 
 	/**
 	 * Configuration for the plugin's updater checker.
@@ -99,20 +78,6 @@ public class Settings {
 	}
 
 	/**
-	 * Configuration for event listeners.
-	 * Maps event names to their corresponding event configurations.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Listeners {
-		/**
-		 * Map of event name to event configuration
-		 */
-		private Map<String, Event> events;
-	}
-
-	/**
 	 * Performance configuration for the plugin.
 	 */
 	@Getter
@@ -123,11 +88,6 @@ public class Settings {
 		 * Cache configuration
 		 */
 		private Cache cache;
-
-		/**
-		 * Regex matching configuration
-		 */
-		private Regex regex;
 
 		/**
 		 * Whether to pre-render static messages at load time
@@ -176,54 +136,6 @@ public class Settings {
 			 */
 			private int expireMinutes;
 		}
-
-		/**
-		 * Regex matching configuration for performance optimization.
-		 */
-		@Getter
-		@Setter
-		@ToString
-		public static class Regex {
-			/**
-			 * Whether regex matching is enabled globally
-			 */
-			private boolean enabled;
-
-			/**
-			 * Timeout in milliseconds for each pattern match
-			 */
-			private int timeoutMs;
-
-			/**
-			 * Whether to use literal prefix optimization
-			 */
-			private boolean useLiteralPrefix;
-
-			/**
-			 * Whether to cache regex match results
-			 */
-			private boolean cacheResults;
-
-			/**
-			 * Maximum number of cached regex results
-			 */
-			private int cacheSize;
-
-			/**
-			 * Cache expiration in minutes
-			 */
-			private int cacheExpireMinutes;
-
-			/**
-			 * Maximum pattern complexity score
-			 */
-			private int maxPatternComplexity;
-
-			/**
-			 * Log warning for patterns taking longer than this (ms)
-			 */
-			private int warnSlowPatternsMs;
-		}
 	}
 
 	/**
@@ -245,25 +157,15 @@ public class Settings {
 	}
 
 	/**
-	 * Serialization configuration for message formatting.
-	 * Controls how messages are serialized and formatted.
+	 * Configuration for message namespaces.
 	 */
 	@Getter
 	@Setter
 	@ToString
-	public static class Serialization {
+	public static class Namespaces {
 		/**
-		 * Serializer adapter ID/type to use.
-		 * Available options: "MINIMESSAGE", "GSON", "LEGACY_AMPERSAND", "LEGACY_SECTION", "PLAIN"
-		 * Default: "MINIMESSAGE"
+		 * Whether to append namespaces to exposed keys.
 		 */
-		private String type = "MINIMESSAGE";
-
-		/**
-		 * Whether to enable legacy color code parsing (& and § codes).
-		 * When enabled, legacy codes in input will be converted to the target adapter format.
-		 * Default: false
-		 */
-		private boolean enableLegacyColors = false;
+		private boolean appendToKeys;
 	}
 }

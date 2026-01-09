@@ -1,6 +1,5 @@
 package me.whereareiam.intercept.adapter.database.repository.message;
 
-import me.whereareiam.dialectica.annotation.DialectUpdate;
 import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -22,15 +21,17 @@ public interface MessageEntryRepository {
 	@SqlQuery("SELECT * FROM intercept_message_entries WHERE file_id = :fileId ORDER BY entry_key")
 	List<MessageEntryEntity> findAllByFileId(@Bind("fileId") long fileId);
 
-	@SqlUpdate("INSERT INTO intercept_message_entries (file_id, entry_key, entry_type) VALUES (:fileId, :entryKey, :entryType)")
+	@SqlUpdate("INSERT INTO intercept_message_entries (file_id, entry_key, entry_key_raw, entry_type) VALUES (:fileId, :entryKey, :entryKeyRaw, :entryType)")
 	@GetGeneratedKeys("id")
-	long insert(@Bind("fileId") long fileId, @Bind("entryKey") String entryKey, @Bind("entryType") String entryType);
+	long insert(
+			@Bind("fileId") long fileId,
+			@Bind("entryKey") String entryKey,
+			@Bind("entryKeyRaw") String entryKeyRaw,
+			@Bind("entryType") String entryType
+	);
 
 	@SqlUpdate("UPDATE intercept_message_entries SET entry_type = :entryType WHERE id = :id")
 	void update(@Bind("id") long id, @Bind("entryType") String entryType);
-
-	@DialectUpdate(provider = MessageEntryAdapter.TruncateAll.class)
-	void truncateAll();
 
 	/**
 	 * Convenience method to save (insert or update) an entry entity.
@@ -40,7 +41,7 @@ public interface MessageEntryRepository {
 			long fileId = entity.getFile() != null ? entity.getFile().getId() : 0;
 			String entryType = entity.getEntryType() != null ? entity.getEntryType().name() : null;
 
-			long id = insert(fileId, entity.getEntryKey(), entryType);
+			long id = insert(fileId, entity.getEntryKey(), entity.getEntryKeyRaw(), entryType);
 			entity.setId(id);
 
 			return entity;

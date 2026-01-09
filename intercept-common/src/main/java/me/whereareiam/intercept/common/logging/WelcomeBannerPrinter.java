@@ -1,34 +1,33 @@
 package me.whereareiam.intercept.common.logging;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.Constants;
-import me.whereareiam.intercept.common.interceptor.InterceptorRegistry;
-import me.whereareiam.intercept.interceptor.Interceptor;
-import me.whereareiam.intercept.interceptor.InterceptorProvider;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.messaging.MessageRegistry;
+import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.type.AnsiColor;
-import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.type.PlatformType;
 import me.whereareiam.intercept.type.PluginType;
+import me.whereareiam.semantica.translation.TranslationService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Locale;
+import java.util.Set;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class WelcomeBannerPrinter {
 	private final LoggingHelper loggingHelper;
-	private final InterceptorRegistry interceptorRegistry;
-	private final MessageRegistry messageRegistry;
+	private final TranslationService<Locale> translationService;
+	private final Provider<Commands> commandsProvider;
+	private final Set<BannerContributor> contributors;
 
 	public void print() {
 		List<String> lines = new ArrayList<>();
 		lines.addAll(buildTitleLines());
-		lines.addAll(buildMessagesLine());
-		lines.addAll(buildAdapterLines());
+		lines.addAll(buildSummaryLines());
+		contributors.forEach(contributor -> contributor.contribute(lines));
 		lines.add("");
 
 		lines.forEach(loggingHelper::info);
@@ -53,41 +52,25 @@ public class WelcomeBannerPrinter {
 		return l;
 	}
 
-	private List<String> buildMessagesLine() {
+	private List<String> buildSummaryLines() {
 		List<String> l = new ArrayList<>();
-		int totalKeys = messageRegistry.getKeys().size();
+		int commandCount = 0;
+		Commands commands = commandsProvider.get();
+		if (commands != null && commands.getCommands() != null)
+			commandCount = commands.getCommands().size();
 
-		l.add("  Messages: " + AnsiColor.CYAN + totalKeys + " keys" + AnsiColor.RESET);
+		int totalKeys = translationService.getKeys().size();
+
+		l.add("  Loaded " + AnsiColor.CYAN + commandCount + AnsiColor.RESET + " " +
+				pluralize("command", commandCount));
+		l.add("  Loaded " + AnsiColor.CYAN + totalKeys + AnsiColor.RESET + " " +
+				pluralize("message", totalKeys));
 		l.add("");
 
 		return l;
 	}
 
-	private List<String> buildAdapterLines() {
-		List<String> l = new ArrayList<>();
-		Map<ComponentType, Interceptor> activeInterceptors = interceptorRegistry.getActiveInterceptors();
-
-		if (activeInterceptors.isEmpty()) {
-			l.add(AnsiColor.YELLOW + "  No interceptors active" + AnsiColor.RESET);
-			return l;
-		}
-
-		// Get the provider (same for all components)
-		InterceptorProvider provider = interceptorRegistry.getBestProvider(
-				activeInterceptors.keySet().iterator().next()
-		);
-
-		if (provider != null) {
-			l.add("  Components [" + provider.getName() + "]:");
-
-			// List all active component types
-			String components = activeInterceptors.keySet().stream()
-					.map(Enum::name)
-					.collect(Collectors.joining(", "));
-
-			l.add("   - " + AnsiColor.CYAN + components + AnsiColor.RESET);
-		}
-
-		return l;
+	private String pluralize(String word, int count) {
+		return count == 1 ? word : word + "s";
 	}
 }

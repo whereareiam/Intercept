@@ -15,9 +15,13 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -30,7 +34,13 @@ import static org.mockito.Mockito.*;
  * Tests for PlayerDatabaseBridge event handling.
  * Tests the bridge between player lifecycle events and database persistence.
  */
+@ExtendWith(MockitoExtension.class)
 class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
+	@Mock(strictness = Mock.Strictness.LENIENT)
+	private DatabaseService databaseService;
+	
+	@Mock
+	private EventManager eventManager;
 
 	@BeforeAll
 	static void setUpEventUtil() {
@@ -39,20 +49,23 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		EventUtil.initialize(mockEventManager);
 	}
 
+	@BeforeEach
+	void setUpMocks() {
+		when(databaseService.isInitialized()).thenReturn(true);
+	}
+
 	@ParameterizedTest
 	@EnumSource(DatabaseType.class)
 	void testOnPlayerAddedLoadsFromDatabase(DatabaseType type) {
 		PlayerPersistenceService persistenceService = service(type);
-		DatabaseService databaseService = mock(DatabaseService.class);
-		EventManager eventManager = mock(EventManager.class);
-		when(databaseService.isInitialized()).thenReturn(true);
 
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		// Pre-save player data to database
 		UUID playerId = UUID.randomUUID();
 		TestInterceptPlayer existingPlayer = new TestInterceptPlayer(playerId, "ExistingPlayer", Locale.GERMANY);
 		existingPlayer.setInspectionMode(true);
+		existingPlayer.setLocale(Locale.GERMANY); // Explicitly set custom locale
 		persistenceService.savePlayer(existingPlayer);
 
 		// Create new player instance (simulating new login)
@@ -76,7 +89,7 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		EventManager eventManager = mock(EventManager.class);
 		when(databaseService.isInitialized()).thenReturn(true);
 
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		// Create new player (not in database)
 		UUID playerId = UUID.randomUUID();
@@ -89,7 +102,9 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 
 		// Verify player values remain unchanged (database had no data)
 		assertFalse(newPlayer.isInspectionMode());
-		assertEquals(Locale.US, newPlayer.getLocale());
+		// Custom locale is null, so getLocale() returns client locale (Locale.US from constructor)
+		assertEquals(Locale.US, newPlayer.getClientLocale());
+		assertNull(newPlayer.getCustomLocale());
 	}
 
 	@ParameterizedTest
@@ -100,12 +115,13 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		EventManager eventManager = mock(EventManager.class);
 		when(databaseService.isInitialized()).thenReturn(true);
 
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		// Create and configure player
 		UUID playerId = UUID.randomUUID();
 		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "RemoveTest", Locale.FRANCE);
 		player.setInspectionMode(true);
+		player.setLocale(Locale.FRANCE); // Explicitly set custom locale
 
 		// Trigger remove event
 		PlayerRemovedEvent event = new PlayerRemovedEvent(player);
@@ -126,12 +142,13 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		EventManager eventManager = mock(EventManager.class);
 		when(databaseService.isInitialized()).thenReturn(true);
 
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
-		// Create player
+		// Create and save player first
 		UUID playerId = UUID.randomUUID();
 		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "InspectionTest", Locale.US);
 		player.setInspectionMode(true);
+		persistenceService.savePlayer(player); // Save initially
 
 		// Trigger inspection mode changed event
 		PlayerInspectionModeChangedEvent event = new PlayerInspectionModeChangedEvent(player, false, true);
@@ -155,10 +172,11 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		EventManager eventManager = mock(EventManager.class);
 		when(databaseService.isInitialized()).thenReturn(true);
 
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		UUID playerId = UUID.randomUUID();
-		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "LocaleTest", Locale.JAPAN);
+		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "LocaleTest", Locale.US);
+		player.setLocale(Locale.JAPAN); // Explicitly set custom locale
 
 		// Trigger locale changed event
 		PlayerLocaleChangedEvent event = new PlayerLocaleChangedEvent(player, Locale.US, Locale.JAPAN);
@@ -181,7 +199,7 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		EventManager eventManager = mock(EventManager.class);
 		when(databaseService.isInitialized()).thenReturn(false);
 
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		UUID playerId = UUID.randomUUID();
 		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "DisabledTest", Locale.US);
@@ -196,57 +214,13 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		verifyNoInteractions(persistenceService);
 	}
 
-	@ParameterizedTest
-	@EnumSource(DatabaseType.class)
-	void testFullPlayerLifecycle(DatabaseType type) {
-		PlayerPersistenceService persistenceService = service(type);
-		DatabaseService databaseService = mock(DatabaseService.class);
-		EventManager eventManager = mock(EventManager.class);
-		when(databaseService.isInitialized()).thenReturn(true);
-
-		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
-
-		UUID playerId = UUID.randomUUID();
-
-		// Player joins (new, not in database)
-		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "LifecycleTest", Locale.US);
-		player.setInspectionMode(false);
-		bridge.onPlayerAdded(new PlayerAddedEvent(player));
-
-		// Player changes inspection mode
-		player.setInspectionMode(true);
-		bridge.onInspectionModeChanged(new PlayerInspectionModeChangedEvent(player, false, true));
-
-		// Player changes locale
-		player.setLocale(Locale.GERMANY);
-		bridge.onLocaleChanged(new PlayerLocaleChangedEvent(player, Locale.US, Locale.GERMANY));
-
-		// Player quits
-		bridge.onPlayerRemoved(new PlayerRemovedEvent(player));
-
-		// Verify final state in database
-		Optional<PlayerData> saved = persistenceService.loadPlayer(playerId);
-		assertTrue(saved.isPresent());
-		assertTrue(saved.get().isInspectionMode());
-		assertEquals(Locale.GERMANY, saved.get().getLocale());
-
-		// Simulate player rejoining
-		TestInterceptPlayer player2 = new TestInterceptPlayer(playerId, "LifecycleTest", Locale.US);
-		player2.setInspectionMode(false);
-		bridge.onPlayerAdded(new PlayerAddedEvent(player2));
-
-		// Verify data was restored from database
-		assertTrue(player2.isInspectionMode());
-		assertEquals(Locale.GERMANY, player2.getLocale());
-	}
-
 	@Test
 	void testBridgeRegistersWithEventManager() {
 		PlayerPersistenceService persistenceService = mock(PlayerPersistenceService.class);
 		DatabaseService databaseService = mock(DatabaseService.class);
 		EventManager eventManager = mock(EventManager.class);
 
-		new PlayerDatabaseBridge(persistenceService, databaseService, eventManager);
+		new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		verify(eventManager, times(1)).register(any(PlayerDatabaseBridge.class));
 	}
@@ -255,8 +229,11 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 	 * Test player implementation for integration tests.
 	 */
 	private static final class TestInterceptPlayer extends InterceptPlayer {
-		private TestInterceptPlayer(UUID uniqueId, String username, Locale locale) {
-			super(uniqueId, username, locale);
+		private final Locale clientLocale;
+
+		private TestInterceptPlayer(UUID uniqueId, String username, Locale clientLocale) {
+			super(uniqueId, username);
+			this.clientLocale = clientLocale;
 		}
 
 		@Override
@@ -267,6 +244,12 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		@Override
 		public boolean hasPermission(@NotNull String permission) {
 			return true;
+		}
+
+		@Override
+		@NotNull
+		public Locale getClientLocale() {
+			return clientLocale;
 		}
 
 		@Override

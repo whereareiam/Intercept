@@ -1,0 +1,17 @@
+prefix: "<ref:common.colors.secondary>[<ref:common.colors.primary>Intercept<ref:common.colors.secondary>]"
+
+player-name: "<ref:common.colors.primary><p:name><reset>"
+
+separator:
+  - "<ref:common.colors.secondary>╔════════════════════╗"
+
+error:
+  format: "<ref:common.colors.error>? <p:message>"
+  box:
+    - "<ref:common.colors.error>╔═════════════════════╗"
+    - "<ref:common.colors.error>║ <bold><p:title></bold>"
+    - "<ref:common.colors.error>║ <p:message>"
+    - "<ref:common.colors.error>╚═════════════════════╝"
+
+success:
+  format: "<ref:common.colors.success>? <p:message>"

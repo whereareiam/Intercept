@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.config;
 
-import me.whereareiam.intercept.type.ConfigurationType;
+import me.whereareiam.configura.type.Format;
 
 public interface ConfigurationTypeResolver {
-	ConfigurationType getConfigurationType();
+	Format getConfigurationType();
 }

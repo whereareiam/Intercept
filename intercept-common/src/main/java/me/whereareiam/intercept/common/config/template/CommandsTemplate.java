@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.common.config.template;
 
 import com.google.inject.Singleton;
-import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.intercept.model.CommandDefinition;
 import me.whereareiam.configura.TemplateProvider;
 import me.whereareiam.intercept.model.config.Commands;
 

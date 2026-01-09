@@ -1,0 +1,61 @@
+permission-error:
+  locales:
+    en_US: "You lack permission: <p:permission>"
+    de_DE: "Keine Berechtigung: <p:permission>"
+  interception:
+    patterns:
+      - pattern: "You don't have permission:\\s*([\\w.]+)"
+        placeholders:
+          permission: "$1"
+        priority: 10
+      - pattern: "(?i)insufficient permission:\\s*([\\w.]+)"
+        placeholders:
+          permission: "$1"
+        priority: 5
+
+player-joined:
+  locales:
+    en_US: "Welcome, <p:name>!"
+  interception:
+    patterns:
+      - pattern: "Player (\\w+) joined the game"
+        placeholders:
+          name: "$1"
+        priority: 10
+      - pattern: "(\\w+) has joined"
+        placeholders:
+          name: "$1"
+        priority: 5
+
+priority-test:
+  locales:
+    en_US: "High priority: <p:word>"
+  interception:
+    patterns:
+      - pattern: "test (\\w+)"
+        placeholders:
+          word: "$1"
+        priority: 20
+      - pattern: "test.*"
+        placeholders:
+          word: "should not match"
+        priority: 5
+
+priority-test-low:
+  locales:
+    en_US: "Low priority: <p:word>"
+  interception:
+    patterns:
+      - pattern: "test (\\w+)"
+        placeholders:
+          word: "$1"
+        priority: 5
+
+partial-replace:
+  locales:
+    en_US: "test test"
+  interception:
+    patterns:
+      - pattern: "or incomplete command"
+        replaceMatched: true
+        priority: 10

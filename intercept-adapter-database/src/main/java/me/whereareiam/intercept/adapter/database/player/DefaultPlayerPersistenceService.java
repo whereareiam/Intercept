@@ -94,7 +94,7 @@ public class DefaultPlayerPersistenceService implements PlayerPersistenceService
 		PlayerEntity entity = new PlayerEntity();
 		entity.setUniqueId(player.getUniqueId());
 		entity.setInspectionMode(player.isInspectionMode());
-		entity.setLocale(player.getLocale());
+		entity.setLocale(player.getCustomLocale());
 
 		return entity;
 	}

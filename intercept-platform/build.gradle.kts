@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     alias(libs.plugins.shadow)
@@ -10,11 +11,6 @@ subprojects {
     tasks.withType<ShadowJar> {
         archiveBaseName.set(rootProject.name)
 
-        relocate("me.whereareiam.attache", "me.whereareiam.intercept.library.attache")
-
-        relocate("com.google.common", "me.whereareiam.intercept.library.guava")
-        relocate("com.google.inject", "me.whereareiam.intercept.library.guice")
-
         val defaultDestination = rootProject.layout.buildDirectory.dir("libs")
 
         val customOutputDir = if (project.hasProperty("output")) {
@@ -23,23 +19,28 @@ subprojects {
             null
         }
 
-        if (project.name != "common")
+        if (!project.path.endsWith(":common"))
             destinationDirectory.set(customOutputDir ?: defaultDestination)
     }
 
-    repositories {
-        maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://repo.codemc.io/repository/maven-releases/")
+    // Configure resource token replacement for platform-specific modules
+    if (project.path.contains(":platform-") && !project.path.endsWith(":common")) {
+        tasks.named<Copy>("processResources") {
+            filter<ReplaceTokens>(
+                "tokens" to mapOf(
+                    "projectName" to rootProject.name,
+                    "projectVersion" to project.version
+                )
+            )
+        }
     }
 
     dependencies {
+        "implementation"(project(":intercept-common"))
+        "implementation"(project(":intercept-adapter-command"))
+        "implementation"(project(":intercept-adapter-database"))
+
         "implementation"(rootProject.libs.attache.common)
-        rootProject.allprojects
-            .filter { it != project && it.parent == rootProject }
-            .forEach { subproject ->
-                if (subproject.name != "intercept-platform" && subproject.name != "intercept-integration")
-                    "implementation"(project(":${subproject.name}"))
-            }
     }
 
     tasks.named<Jar>("jar") {

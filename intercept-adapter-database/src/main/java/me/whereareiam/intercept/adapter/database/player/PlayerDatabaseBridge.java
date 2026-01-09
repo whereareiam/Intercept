@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.adapter.database.player;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.Provider;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.database.PlayerPersistenceService;
 import me.whereareiam.intercept.event.EventListener;
@@ -20,19 +20,18 @@ import me.whereareiam.intercept.model.player.PlayerData;
  * Bridges player lifecycle events with database persistence.
  * Listens to player events and synchronizes data between memory and database.
  */
-@Singleton
 public class PlayerDatabaseBridge implements EventListener {
 	private final PlayerPersistenceService persistenceService;
-	private final DatabaseService databaseService;
+	private final Provider<DatabaseService> databaseServiceProvider;
 
 	@Inject
 	public PlayerDatabaseBridge(
 			PlayerPersistenceService persistenceService,
-			DatabaseService databaseService,
+			Provider<DatabaseService> databaseServiceProvider,
 			EventManager eventManager
 	) {
 		this.persistenceService = persistenceService;
-		this.databaseService = databaseService;
+		this.databaseServiceProvider = databaseServiceProvider;
 		eventManager.register(this);
 	}
 
@@ -42,7 +41,7 @@ public class PlayerDatabaseBridge implements EventListener {
 	 */
 	@IntercepticEvent(EventOrder.LOWEST)
 	public void onPlayerAdded(PlayerAddedEvent event) {
-		if (!databaseService.isInitialized()) return;
+		if (!databaseServiceProvider.get().isInitialized()) return;
 
 		InterceptPlayer player = event.getPlayer();
 		Logger.debug("Loading player data from database for %s", player.getUniqueId());
@@ -56,7 +55,7 @@ public class PlayerDatabaseBridge implements EventListener {
 	 */
 	@IntercepticEvent
 	public void onPlayerRemoved(PlayerRemovedEvent event) {
-		if (!databaseService.isInitialized()) return;
+		if (!databaseServiceProvider.get().isInitialized()) return;
 
 		InterceptPlayer player = event.getPlayer();
 		Logger.debug("Saving player data to database for %s", player.getUniqueId());
@@ -69,7 +68,7 @@ public class PlayerDatabaseBridge implements EventListener {
 	 */
 	@IntercepticEvent
 	public void onInspectionModeChanged(PlayerInspectionModeChangedEvent event) {
-		if (!databaseService.isInitialized()) return;
+		if (!databaseServiceProvider.get().isInitialized()) return;
 
 		InterceptPlayer player = event.getPlayer();
 		Logger.debug("Persisting inspection mode change for %s (%s -> %s)",
@@ -83,7 +82,7 @@ public class PlayerDatabaseBridge implements EventListener {
 	 */
 	@IntercepticEvent
 	public void onLocaleChanged(PlayerLocaleChangedEvent event) {
-		if (!databaseService.isInitialized()) return;
+		if (!databaseServiceProvider.get().isInitialized()) return;
 
 		InterceptPlayer player = event.getPlayer();
 		Logger.debug("Persisting locale change for %s (%s -> %s)",

@@ -3,7 +3,7 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.whereareiam.commandant.model.CommandDefinition;
+import me.whereareiam.intercept.model.CommandDefinition;
 
 import java.util.HashMap;
 import java.util.Map;

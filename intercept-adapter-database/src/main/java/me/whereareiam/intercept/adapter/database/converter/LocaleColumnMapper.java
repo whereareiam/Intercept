@@ -10,14 +10,16 @@ import java.util.Locale;
 
 /**
  * Column mapper for converting database VARCHAR locale strings to Locale objects.
- * Handles empty string "" for single-language entries and regular locale strings.
+ * Returns null if the database value is null (representing use of client locale).
  */
 public class LocaleColumnMapper implements ColumnMapper<Locale> {
 	@Override
 	public Locale map(ResultSet rs, int columnNumber, StatementContext ctx) throws SQLException {
 		String localeString = rs.getString(columnNumber);
 
-		if (localeString == null || localeString.isEmpty()) return null;
+		// Null means use client locale
+		if (localeString == null || localeString.isEmpty())
+			return null;
 
 		// Handle special "default" locale
 		if ("default".equals(localeString))

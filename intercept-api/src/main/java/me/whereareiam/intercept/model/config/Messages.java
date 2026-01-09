@@ -6,7 +6,6 @@ import lombok.ToString;
 import me.whereareiam.commandant.model.message.ExceptionMessages;
 import me.whereareiam.commandant.model.message.HelpMessages;
 import me.whereareiam.commandant.model.message.PaginationMessages;
-import me.whereareiam.intercept.type.ComponentType;
 
 import java.util.List;
 import java.util.Map;
@@ -85,15 +84,15 @@ public class Messages {
 			/**
 			 * Success message when reload completes successfully.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
+			 * - <prefix>: The global message prefix
 			 */
 			private String success;
 
 			/**
 			 * Error message when reload fails.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
-			 * - {error}: The error message
+			 * - <prefix>: The global message prefix
+			 * - <error>: The error message
 			 */
 			private String error;
 		}
@@ -106,16 +105,16 @@ public class Messages {
 		@ToString
 		public static class Inspect {
 			/**
-			 * Message shown when inspection mode is enabled.
+			 * Namespace shown when inspection mode is enabled.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
+			 * - <prefix>: The global message prefix
 			 */
 			private String enabled;
 
 			/**
-			 * Message shown when inspection mode is disabled.
+			 * Namespace shown when inspection mode is disabled.
 			 * Placeholders:
-			 * - {prefix}: The global message prefix
+			 * - <prefix>: The global message prefix
 			 */
 			private String disabled;
 
@@ -135,15 +134,15 @@ public class Messages {
 				 * Hover text format shown when hovering over messages in inspection mode.
 				 * Each string in the list represents a line of the hover text.
 				 * Placeholders:
-				 * - {pattern}: The regex pattern (may be truncated if maxPatternLength is set)
-				 * - {fullPattern}: The full regex pattern (always complete, even if truncated in display)
-				 * - {truncated}: The truncation indicator if pattern was truncated, empty string otherwise
+				 * - <pattern>: The regex pattern (may be truncated if maxPatternLength is set)
+				 * - <fullPattern>: The full regex pattern (always complete, even if truncated in display)
+				 * - <truncated>: The truncation indicator if pattern was truncated, empty string otherwise
 				 */
 				private List<String> format;
 
 				/**
 				 * Text to append when the pattern is truncated.
-				 * This value is used as the {truncated} placeholder in format.
+				 * This value is used as the <truncated> placeholder in format.
 				 */
 				private String truncationFormat;
 
@@ -164,37 +163,37 @@ public class Messages {
 		@ToString
 		public static class LocaleCommand {
 			/**
-			 * Message shown when the executor is not a player.
+			 * Namespace shown when the executor is not a player.
 			 */
 			private String playerOnly;
 
 			/**
-			 * Message shown when a locale argument is missing.
+			 * Namespace shown when a locale argument is missing.
 			 */
 			private String missingLocaleArgument;
 
 			/**
-			 * Message shown when target-specific arguments are missing.
+			 * Namespace shown when target-specific arguments are missing.
 			 */
 			private String missingTargetArguments;
 
 			/**
-			 * Message shown when the supplied locale cannot be parsed.
+			 * Namespace shown when the supplied locale cannot be parsed.
 			 */
 			private String invalidLocale;
 
 			/**
-			 * Message shown when a target player cannot be found.
+			 * Namespace shown when a target player cannot be found.
 			 */
 			private String playerNotFound;
 
 			/**
-			 * Message shown after a player updates their own locale.
+			 * Namespace shown after a player updates their own locale.
 			 */
 			private String selfUpdated;
 
 			/**
-			 * Message shown after updating someone else's locale.
+			 * Namespace shown after updating someone else's locale.
 			 */
 			private String targetUpdated;
 		}
@@ -221,34 +220,34 @@ public class Messages {
 			@ToString
 			public static class Upload {
 				/**
-				 * Message shown when there are no messages to upload.
+				 * Namespace shown when there are no messages to upload.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
+				 * - <prefix>: The global message prefix
 				 */
 				private String noMessages;
 
 				/**
-				 * Message shown when starting the upload process.
+				 * Namespace shown when starting the upload process.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
-				 * - {entries}: The number of entries being uploaded
-				 * - {files}: The number of files being uploaded
+				 * - <prefix>: The global message prefix
+				 * - <entries>: The number of entries being uploaded
+				 * - <files>: The number of files being uploaded
 				 */
 				private String uploading;
 
 				/**
 				 * Success message when upload completes successfully.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
-				 * - {entries}: The number of entries uploaded
+				 * - <prefix>: The global message prefix
+				 * - <entries>: The number of entries uploaded
 				 */
 				private String success;
 
 				/**
 				 * Error message when upload fails.
 				 * Placeholders:
-				 * - {prefix}: The global message prefix
-				 * - {error}: The error message
+				 * - <prefix>: The global message prefix
+				 * - <error>: The error message
 				 */
 				private String error;
 			}
@@ -261,28 +260,28 @@ public class Messages {
 			@ToString
 			public static class Download {
 				/**
-				 * Message shown when starting the download process.
+				 * Namespace shown when starting the download process.
 				 */
 				private String preparing;
 
 				/**
-				 * Message shown when there are no entries/files in the database.
+				 * Namespace shown when there are no entries/files in the database.
 				 */
 				private String noEntries;
 
 				/**
 				 * Success message when download completes successfully.
 				 * Placeholders:
-				 * - {files}: Number of files written
-				 * - {entries}: Number of entries written
-				 * - {time}: Total time in milliseconds
+				 * - <files>: Number of files written
+				 * - <entries>: Number of entries written
+				 * - <time>: Total time in milliseconds
 				 */
 				private String success;
 
 				/**
 				 * Error message when download fails.
 				 * Placeholders:
-				 * - {error}: The error message/reason
+				 * - <error>: The error message/reason
 				 */
 				private String error;
 			}
@@ -308,11 +307,11 @@ public class Messages {
 		private boolean warnAdmins;
 
 		/**
-		 * Source-specific fallback formats
-		 * Key: component type (CHAT, ACTION_BAR, etc.)
+		 * Source-specific fallback formats.
+		 * Key: source identifier (e.g., "CHAT", "ACTION_BAR")
 		 * Value: format configuration for that source
 		 */
-		private Map<ComponentType, SourceFormat> formats;
+		private Map<String, SourceFormat> formats;
 
 		/**
 		 * Default fallback format when source is not specified or no specific format exists
@@ -334,12 +333,12 @@ public class Messages {
 			/**
 			 * Format template for missing translations.
 			 * Placeholders:
-			 * - {key}: The message key that was not found
-			 * - {locale}: The requested locale
-			 * - {source}: The source of the message
+			 * - <key>: The message key that was not found
+			 * - <locale>: The requested locale
+			 * - <source>: The source of the message
 			 * <p>
-			 * Example: "<red>[Missing: {key}]</red>"
-			 * Example: "[{source}] {key}"
+			 * Example: "<red>[Missing: <key>]</red>"
+			 * Example: "[<source>] <key>"
 			 */
 			private String format;
 

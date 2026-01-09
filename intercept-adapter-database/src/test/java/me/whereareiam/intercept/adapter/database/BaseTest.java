@@ -17,10 +17,10 @@ import org.jdbi.v3.core.argument.Arguments;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MariaDBContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mariadb.MariaDBContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +31,19 @@ import static org.mockito.Mockito.mock;
  * Base class for database integration tests using Testcontainers.
  * Provides PostgreSQL and MariaDB containers and Jdbi instances.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseTest {
 	@Container
-	protected static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:18.1");
+	static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:18.1")
+			.withDatabaseName("testdb")
+			.withUsername("test")
+			.withPassword("test");
 
 	@Container
-	protected static final MariaDBContainer<?> mariaDbContainer = new MariaDBContainer<>("mariadb:12");
+	static MariaDBContainer mariaDbContainer = new MariaDBContainer("mariadb:12")
+			.withDatabaseName("testdb")
+			.withUsername("test")
+			.withPassword("test");
 
 	protected static Jdbi postgresJdbi;
 	protected static Jdbi mariaDbJdbi;
@@ -65,8 +71,8 @@ public abstract class BaseTest {
 				.registerEntity(MessageFileEntity.class)
 				.registerEntity(MessageEntryEntity.class)
 				.registerEntity(MessageTranslationEntity.class)
-				.registerEntity(MessageRegexPatternEntity.class)
-				.registerEntity(MessageRegexPlaceholderEntity.class);
+				.registerEntity(MessageTemplateEntity.class)
+				.registerEntity(MessageExtensionEntity.class);
 		postgresSchemaManager.initialize();
 
 		SchemaManager mariaDbSchemaManager = Dialectica.schema(mariaDbJdbi)
@@ -74,8 +80,8 @@ public abstract class BaseTest {
 				.registerEntity(MessageFileEntity.class)
 				.registerEntity(MessageEntryEntity.class)
 				.registerEntity(MessageTranslationEntity.class)
-				.registerEntity(MessageRegexPatternEntity.class)
-				.registerEntity(MessageRegexPlaceholderEntity.class);
+				.registerEntity(MessageTemplateEntity.class)
+				.registerEntity(MessageExtensionEntity.class);
 		mariaDbSchemaManager.initialize();
 	}
 
