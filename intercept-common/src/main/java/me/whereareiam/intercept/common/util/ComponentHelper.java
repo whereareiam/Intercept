@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.platform.interception.util;
+package me.whereareiam.intercept.common.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;

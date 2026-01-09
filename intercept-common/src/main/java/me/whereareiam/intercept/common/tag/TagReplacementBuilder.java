@@ -1,9 +1,10 @@
-package me.whereareiam.intercept.platform.interception.tag;
+package me.whereareiam.intercept.common.tag;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
+import me.whereareiam.intercept.common.util.TagParser;
 import me.whereareiam.intercept.util.Serializer;
-import me.whereareiam.intercept.platform.interception.util.TagParser;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.semantica.translation.TranslationService;
 import net.kyori.adventure.text.Component;
@@ -14,37 +15,29 @@ import java.util.Locale;
 import java.util.Map;
 
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class TagReplacementBuilder {
 	private final TranslationService<Locale> translationService;
 	private final FallbackMessageFormatter fallbackFormatter;
-
-	@Inject
-	public TagReplacementBuilder(
-			TranslationService<Locale> translationService,
-			FallbackMessageFormatter fallbackFormatter
-	) {
-		this.translationService = translationService;
-		this.fallbackFormatter = fallbackFormatter;
-	}
 
 	Map<String, Component> buildReplacements(List<TagParser.TagData> tags, Locale locale, ComponentType source) {
 		Map<String, Component> replacements = new HashMap<>();
 
 		for (TagParser.TagData tag : tags) {
+			Map<String, Object> placeholders = convertPlaceholders(tag.placeholders());
+			String resolved = translationService.resolve(tag.key(), locale, placeholders);
+
+			if (!resolved.equals(tag.key())) {
+				replacements.put(tag.originalTag(), Serializer.serialize(resolved));
+				continue;
+			}
+
+			Component fallbackComponent = fallbackFormatter.formatFallbackComponent(tag.key(), locale, source);
+
+			replacements.put(tag.originalTag(), fallbackComponent);
 			try {
-				Map<String, Object> placeholders = convertPlaceholders(tag.placeholders());
-				String resolved = translationService.resolve(tag.key(), locale, placeholders);
-
-				if (resolved != null && !resolved.equals(tag.key())) {
-					replacements.put(tag.originalTag(), Serializer.serialize(resolved));
-					continue;
-				}
-
-				Component fallbackComponent = fallbackFormatter.formatFallbackComponent(tag.key(), locale, source);
-				replacements.put(tag.originalTag(), fallbackComponent);
 				fallbackFormatter.logMissingTranslation(tag.key(), locale, source);
-			} catch (Exception e) {
-				replacements.put(tag.originalTag(), Component.text(tag.originalTag()));
+			} catch (Exception ignored) {
 			}
 		}
 
@@ -59,3 +52,4 @@ public class TagReplacementBuilder {
 		return map;
 	}
 }
+

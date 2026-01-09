@@ -1,12 +1,13 @@
-package me.whereareiam.intercept.platform.interception.tag;
+package me.whereareiam.intercept.common.tag;
 
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.common.SemanticaTestHelper;
+import me.whereareiam.intercept.messaging.TagReplacementService;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;
@@ -62,7 +63,7 @@ class TagReplacementServiceTest {
 		Provider<Messages> messagesProvider = () -> messages;
 		FallbackMessageFormatter fallbackFormatter = new FallbackMessageFormatter(messagesProvider);
 		TagReplacementBuilder builder = new TagReplacementBuilder(translationService, fallbackFormatter);
-		tagService = new me.whereareiam.intercept.platform.interception.tag.TagReplacementService(builder);
+		tagService = new DefaultTagReplacementService(builder);
 	}
 
 	@Test
@@ -379,4 +380,6 @@ class TagReplacementServiceTest {
 		return PlainTextComponentSerializer.plainText().serialize(component);
 	}
 }
+
+
 

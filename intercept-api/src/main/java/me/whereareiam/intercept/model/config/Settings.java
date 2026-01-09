@@ -44,6 +44,11 @@ public class Settings {
 	private Commands commands;
 
 	/**
+	 * Translation configuration
+	 */
+	private Translation translation;
+
+	/**
 	 * Configuration for the plugin's updater checker.
 	 * Controls updater notifications and checking behavior.
 	 */
@@ -167,5 +172,31 @@ public class Settings {
 		 * Whether to append namespaces to exposed keys.
 		 */
 		private boolean appendToKeys;
+	}
+
+	/**
+	 * Configuration for translation tag processing.
+	 */
+	@Getter
+	@Setter
+	@ToString
+	public static class Translation {
+		/**
+		 * Tag format for internal Intercept messages (commands, etc.)
+		 * <p>
+		 * Examples: "{@code <lang>}", "{@code [tr]}", "{@code {i18n}}"
+		 * <p>
+		 * Note: Component interception (chat, action bar, etc.) uses per-component
+		 * tag configuration in the Interception section.
+		 */
+		private String tagFormat;
+
+		/**
+		 * Whether to automatically process translation tags in Serializer.
+		 * <p>
+		 * When enabled, messages containing translation tags will be automatically
+		 * translated during serialization through the MessageDecorator pipeline.
+		 */
+		private boolean autoProcess;
 	}
 }

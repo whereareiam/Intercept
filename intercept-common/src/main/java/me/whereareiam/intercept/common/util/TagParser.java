@@ -1,4 +1,4 @@
-package me.whereareiam.intercept.platform.interception.util;
+package me.whereareiam.intercept.common.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -206,4 +206,5 @@ public final class TagParser {
 		public record Placeholder(String name, String value) {}
 	}
 }
+
 

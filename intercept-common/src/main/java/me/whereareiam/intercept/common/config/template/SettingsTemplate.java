@@ -49,6 +49,17 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 
 		settings.setCommands(commands);
 
+		// Configure namespaces
+		Settings.Namespaces namespacesSettings = new Settings.Namespaces();
+		namespacesSettings.setAppendToKeys(true);
+		settings.setNamespaces(namespacesSettings);
+
+		// Configure translation settings
+		Settings.Translation translation = new Settings.Translation();
+		translation.setTagFormat("<lang>");
+		translation.setAutoProcess(false); // Disabled by default
+		settings.setTranslation(translation);
+
 		return settings;
 	}
 }

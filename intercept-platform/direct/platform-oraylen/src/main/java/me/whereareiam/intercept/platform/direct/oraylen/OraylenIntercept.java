@@ -4,10 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import me.whereareiam.intercept.common.tag.serializer.TagProcessingDecorator;
 import me.whereareiam.intercept.dependency.DependencyResolver;
 import me.whereareiam.intercept.common.CommonDependencyResolver;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.platform.direct.oraylen.inject.OraylenInjector;
+import me.whereareiam.keystone.Serializers;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.oraylen.api.annotation.OraylenExtension;
 import net.oraylen.api.loader.extension.Extension;
@@ -58,6 +60,10 @@ public final class OraylenIntercept extends Extension implements TranslationEngi
 
 		LoggingHelper loggingHelper = interceptInjector.getInjector().getInstance(LoggingHelper.class);
 		me.whereareiam.intercept.logging.Logger.init(loggingHelper);
+		
+		// Register tag processing decorator with Oraylen's serializer engine using public API
+		TagProcessingDecorator decorator = interceptInjector.getInjector().getInstance(TagProcessingDecorator.class);
+		Serializers.registerDecorator(serializerEngine, decorator);
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.common.tag.serializer.TagProcessingDecorator;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.platform.interception.bukkit.common.config.PlatformSettings;
 import me.whereareiam.intercept.registry.base.Registry;
@@ -19,16 +20,19 @@ import org.jetbrains.annotations.NotNull;
 public class BukkitSerializerEngineProvider implements Provider<SerializerEngine>, Reloadable {
 	private final Provider<Messages> messagesProvider;
 	private final Provider<PlatformSettings> settingsProvider;
+	private final TagProcessingDecorator tagProcessingDecorator;
 	private volatile SerializerEngine engine;
 
 	@Inject
 	public BukkitSerializerEngineProvider(
 			@NotNull Provider<Messages> messagesProvider,
 			@NotNull Provider<PlatformSettings> settingsProvider,
+			@NotNull TagProcessingDecorator tagProcessingDecorator,
 			@NotNull Registry<Reloadable> reloadables
 	) {
 		this.messagesProvider = messagesProvider;
 		this.settingsProvider = settingsProvider;
+		this.tagProcessingDecorator = tagProcessingDecorator;
 
 		reloadables.register(this);
 	}
@@ -54,7 +58,12 @@ public class BukkitSerializerEngineProvider implements Provider<SerializerEngine
 					.placeholderFormat(SerializerOptions.PlaceholderFormat.custom("<", ">"))
 					.build();
 
-			engine = Serializers.createEngine(options);
+			SerializerEngine newEngine = Serializers.createEngine(options);
+			
+			// Register tag processing decorator using public API
+			Serializers.registerDecorator(newEngine, tagProcessingDecorator);
+			
+			engine = newEngine;
 		}
 
 		return engine;

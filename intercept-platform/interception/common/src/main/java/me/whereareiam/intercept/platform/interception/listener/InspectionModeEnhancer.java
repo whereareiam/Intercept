@@ -12,7 +12,7 @@ import me.whereareiam.intercept.event.interception.chat.ChatProcessedEvent;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.interception.InterceptionContext;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
-import me.whereareiam.intercept.platform.interception.util.ComponentHelper;
+import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.registry.PlayerRegistry;
 import me.whereareiam.intercept.util.RegexHelper;
 import me.whereareiam.keystone.model.SerializerContent;
