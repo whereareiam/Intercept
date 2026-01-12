@@ -3,31 +3,60 @@ package me.whereareiam.intercept.platform.direct.oraylen.provider;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import me.whereareiam.intercept.common.InterceptSemanticaLogger;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.platform.direct.oraylen.SemanticaConfigurationFactory;
 import me.whereareiam.semantica.SemanticaConfiguration;
+import me.whereareiam.semantica.TagConfiguration;
+import me.whereareiam.semantica.model.SemanticLocale;
 
 import java.util.Locale;
 
 public final class OraylenSemanticaConfigurationProvider implements Provider<SemanticaConfiguration<Locale>> {
-	private final SemanticaConfigurationFactory factory;
-	private final Settings interceptSettings;
 	private final Provider<Locale> defaultLocaleProvider;
+	private final Settings settings;
 
 	@Inject
 	public OraylenSemanticaConfigurationProvider(
-			SemanticaConfigurationFactory factory,
-			Settings interceptSettings,
-			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider
+			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
+			Settings settings
 	) {
-		this.factory = factory;
-		this.interceptSettings = interceptSettings;
+		this.settings = settings;
 		this.defaultLocaleProvider = defaultLocaleProvider;
 	}
 
 	@Override
 	public SemanticaConfiguration<Locale> get() {
-		Locale defaultLocale = defaultLocaleProvider == null ? null : defaultLocaleProvider.get();
-		return factory.create(interceptSettings, defaultLocale == null ? Locale.ENGLISH : defaultLocale);
+		Locale defaultLocale = defaultLocaleProvider.get();
+
+		Settings.Performance performance = settings.getPerformance();
+		Settings.Performance.Cache cache = performance.getCache();
+
+		SemanticaConfiguration.PerformanceSettings.CacheSettings cacheSettings =
+				SemanticaConfiguration.PerformanceSettings.CacheSettings.builder()
+						.enabled(cache.isEnabled())
+						.semiStaticSize(cache.getSemiStaticSize())
+						.dynamicSize(cache.getDynamicSize())
+						.semiStaticExpireMinutes(cache.getSemiStaticExpireMinutes())
+						.dynamicExpireMinutes(cache.getDynamicExpireMinutes())
+						.build();
+
+		boolean prerender = performance.isPrerenderStatic();
+		boolean buildGraph = performance.isBuildDependencyGraph();
+
+		SemanticaConfiguration.PerformanceSettings performanceSettings =
+				SemanticaConfiguration.PerformanceSettings.builder()
+						.cache(cacheSettings)
+						.prerenderStatic(prerender)
+						.buildDependencyGraph(buildGraph)
+						.logTimings(false)
+						.build();
+
+		return SemanticaConfiguration.<Locale>builder()
+				.defaultLocale(SemanticLocale.wrap(defaultLocale))
+				.tagConfiguration(TagConfiguration.defaults())
+				.performance(performanceSettings)
+				.localeParser(SemanticLocale::wrap)
+				.logger(new InterceptSemanticaLogger())
+				.build();
 	}
 }

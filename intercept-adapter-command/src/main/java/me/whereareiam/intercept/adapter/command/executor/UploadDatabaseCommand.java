@@ -8,7 +8,7 @@ import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.MessageDataService;
+import me.whereareiam.intercept.persistence.TranslationDataService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.keystone.Actor;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class UploadDatabaseCommand {
 	private final Provider<Messages> messagesProvider;
 	private final MessagePersistenceService persistenceService;
-	private final MessageDataService messageDataService;
+	private final TranslationDataService translationDataService;
 
 	@Definition("database-upload")
 	@Command("intercept database upload")
@@ -36,8 +36,8 @@ public class UploadDatabaseCommand {
 		Messages.Commands.Database.Upload upload = messagesProvider.get().getCommands().getDatabase().getUpload();
 
 		try {
-			// Create snapshot from MessageDataService
-			MessageSnapshot snapshot = messageDataService.createSnapshot();
+			// Create snapshot from TranslationDataService
+			MessageSnapshot snapshot = translationDataService.createSnapshot();
 
 			if (snapshot.getEntries().isEmpty()) {
 				Component component = Serializer.serialize(sender, upload.getNoMessages());

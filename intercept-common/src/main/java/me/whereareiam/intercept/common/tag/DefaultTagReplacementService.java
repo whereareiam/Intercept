@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.common.util.TagParser;
-import me.whereareiam.intercept.messaging.TagReplacementService;
+import me.whereareiam.intercept.tag.TagReplacementService;
 import me.whereareiam.intercept.type.ComponentType;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import net.kyori.adventure.text.Component;

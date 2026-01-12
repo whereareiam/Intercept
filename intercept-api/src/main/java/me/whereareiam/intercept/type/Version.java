@@ -7,6 +7,7 @@ import java.util.Comparator;
  * Represents Minecraft server versions supported by the plugin.
  * Provides utility methods for version comparison and conversion.
  */
+@SuppressWarnings("unused")
 public enum Version {
 	/**
 	 * Represents an unknown or unrecognized version
@@ -58,7 +59,8 @@ public enum Version {
 	V_1_21_7,
 	V_1_21_8,
 	V_1_21_9,
-	V_1_21_10;
+	V_1_21_10,
+	V_1_21_11;
 
 	/**
 	 * Converts a version string to its corresponding Version enum.

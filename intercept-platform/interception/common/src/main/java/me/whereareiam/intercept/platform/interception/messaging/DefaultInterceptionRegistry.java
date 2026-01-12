@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
+import me.whereareiam.intercept.registry.InterceptionRegistry;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.registry.base.Registry;
 

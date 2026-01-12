@@ -2,15 +2,23 @@ package me.whereareiam.intercept.platform.interception.messaging.persistence;
 
 import me.whereareiam.configura.type.Format;
 import me.whereareiam.configura.Config;
+import me.whereareiam.configura.node.Node;
+import me.whereareiam.configura.node.ObjectNode;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
-import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
+import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
+import me.whereareiam.intercept.common.persistence.format.DefaultFormatContext;
+import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
+import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
+import me.whereareiam.intercept.common.translation.loader.mapper.TranslationEntryMapper;
+import me.whereareiam.intercept.common.persistence.TranslationFileScanner;
+import me.whereareiam.intercept.common.translation.loader.mapper.TextProcessor;
 import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
-import me.whereareiam.intercept.platform.interception.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.platform.interception.messaging.MessageDocument;
+import me.whereareiam.intercept.persistence.format.MessageFormat;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
+import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
@@ -39,8 +47,10 @@ class FileLoadingIntegrationTest {
 	
 	private DefaultMessageRegistry registry;
 	private TranslationService<Locale> service;
-	private MessageFileScanner scanner;
-	private MessageFileLoader loader;
+	private TranslationFileScanner scanner;
+	private TranslationEntryMapper entryMapper;
+	private MessageFormat format;
+	private ReservedKeyRegistry reservedKeyRegistry;
 	private Path messagesRoot;
 
 	@BeforeEach
@@ -52,13 +62,10 @@ class FileLoadingIntegrationTest {
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
-		Config.registerAdapter(MessageDocument.Node.class, new MessageDocumentNodeAdapter());
-
-		scanner = new MessageFileScanner(Format.YAML);
-		loader = new DefaultMessageFileLoader(
-				new TextProcessor(),
-				() -> Locale.US
-		);
+		scanner = new TranslationFileScanner(Format.YAML);
+		format = new MultiLocaleFormat();
+		reservedKeyRegistry = new DefaultReservedKeyRegistry();
+		entryMapper = new TranslationEntryMapper(new TextProcessor(), () -> Locale.US);
 
 		// Get path to test resources
 		messagesRoot = Paths.get(getClass().getResource("/messages").toURI());
@@ -75,10 +82,10 @@ class FileLoadingIntegrationTest {
 	@Test
 	void shouldLoadYamlColorPalette() {
 		Path colorsFile = messagesRoot.resolve("common/colors.yml");
-		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile);
+		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile, format, Locale.US);
 
-		MessageDocument data = Config.load(colorsFile, MessageDocument.class);
-		registerEntries(loader.loadFromData(keyPrefix, data));
+		MessageFileData data = loadFileData(colorsFile);
+		registerEntries(entryMapper.mapEntries(keyPrefix, data));
 
 		assertTrue(registry.exists("common.colors.primary"));
 		assertTrue(registry.exists("common.colors.error"));
@@ -188,17 +195,30 @@ class FileLoadingIntegrationTest {
 	}
 
 	private void loadFile(Path file) {
-		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
-
-		MessageDocument data = Config.load(file, MessageDocument.class);
-		registerEntries(loader.loadFromData(keyPrefix, data));
+		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file, format, Locale.US);
+		MessageFileData data = loadFileData(file);
+		registerEntries(entryMapper.mapEntries(keyPrefix, data));
 	}
 
 	private void registerEntries(Map<String, TranslationEntry> entries) {
 		if (entries == null || entries.isEmpty()) return;
 		service.register(entries);
 	}
+
+	private MessageFileData loadFileData(Path file) {
+		Node raw = Config.loadNode(file);
+		ObjectNode data = raw instanceof ObjectNode objectNode ? objectNode : new ObjectNode();
+		DefaultFormatContext context = new DefaultFormatContext(
+				messagesRoot,
+				file,
+				Locale.US,
+				null,
+				reservedKeyRegistry
+		);
+		return format.parse(data, context);
+	}
 }
+
 
 
 

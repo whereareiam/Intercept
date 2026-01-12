@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.common.player;
 
+import me.whereareiam.intercept.common.registry.DefaultPlayerRegistry;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.player.PlayerAddedEvent;
 import me.whereareiam.intercept.model.player.InterceptPlayer;

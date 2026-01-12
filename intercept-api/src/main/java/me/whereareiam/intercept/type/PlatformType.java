@@ -3,8 +3,9 @@ package me.whereareiam.intercept.type;
 /**
  * Enumeration representing different Minecraft server platform types.
  * This enum provides methods to detect and compare various server implementations
- * such as Bukkit, Spigot, Paper, Folia, and Velocity.
+ * such as Bukkit, Spigot, Paper, Folia, Velocity, and Oraylen.
  */
+@SuppressWarnings("unused")
 public enum PlatformType {
 	/**
 	 * Represents the basic Bukkit server platform
@@ -27,6 +28,10 @@ public enum PlatformType {
 	 */
 	VELOCITY,
 	/**
+	 * Represents the Oraylen platform
+	 */
+	ORAYLEN,
+	/**
 	 * Represents an unknown or unsupported platform type
 	 */
 	UNKNOWN;
@@ -37,6 +42,8 @@ public enum PlatformType {
 	 * @return The detected {@link PlatformType} based on the current environment
 	 */
 	public static PlatformType getType() {
+		if (isOraylen())
+			return ORAYLEN;
 		if (isVelocity())
 			return VELOCITY;
 		if (isFolia())
@@ -82,6 +89,7 @@ public enum PlatformType {
 			case SPIGOT -> isSpigot() || isPaper() || isFolia();
 			case PAPER -> isPaper() || isFolia();
 			case FOLIA -> isFolia();
+			case ORAYLEN -> isOraylen();
 			default -> false;
 		};
 	}
@@ -93,6 +101,17 @@ public enum PlatformType {
 	 */
 	private static boolean isVelocity() {
 		return isClassPresent("com.velocitypowered.api.plugin.Plugin");
+	}
+
+	/**
+	 * Checks if the platform is running Oraylen.
+	 *
+	 * @return true if Oraylen is detected, false otherwise
+	 */
+	private static boolean isOraylen() {
+		if (PluginType.getExactType() == PluginType.ORAYLEN)
+			return true;
+		return isClassPresent("net.oraylen.api.annotation.OraylenExtension");
 	}
 
 	/**

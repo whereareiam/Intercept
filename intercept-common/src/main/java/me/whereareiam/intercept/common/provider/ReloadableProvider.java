@@ -5,12 +5,12 @@ import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.registry.base.Registry;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Singleton
 public class ReloadableProvider implements Provider<Set<Reloadable>>, Registry<Reloadable> {
-	private final Set<Reloadable> reloadables = new HashSet<>();
+	private final Set<Reloadable> reloadables = new LinkedHashSet<>();
 
 	@Override
 	public void register(Reloadable reloadable) {

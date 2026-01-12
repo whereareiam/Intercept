@@ -16,7 +16,10 @@ public class InterceptDependencyLoader implements DependencyLoader {
 	private final boolean applyRelocations;
 	private final List<LibraryDescriptor> libraries = new ArrayList<>();
 
-	public InterceptDependencyLoader(LibraryManager libraryManager, boolean applyRelocations) {
+	public InterceptDependencyLoader(
+			LibraryManager libraryManager,
+			boolean applyRelocations
+	) {
 		this.libraryManager = Objects.requireNonNull(libraryManager, "libraryManager");
 		this.applyRelocations = applyRelocations;
 
@@ -24,6 +27,8 @@ public class InterceptDependencyLoader implements DependencyLoader {
 		if (!libraryManager.hasLibraryAdapter(LibraryDescriptor.class)) {
 			libraryManager.registerLibraryAdapter(LibraryDescriptor.class, this::toRequest);
 		}
+
+		Dependencies.applyTo(this);
 	}
 
 	@Override

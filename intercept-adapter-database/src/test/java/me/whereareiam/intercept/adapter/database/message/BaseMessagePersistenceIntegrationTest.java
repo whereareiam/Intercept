@@ -9,10 +9,16 @@ import me.whereareiam.intercept.adapter.database.repository.message.MessageExten
 import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
-import me.whereareiam.intercept.messaging.MessageDataService;
-import me.whereareiam.intercept.messaging.file.MessageFileWriter;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.persistence.TranslationDataService;
+import me.whereareiam.intercept.persistence.MessageFileWriter;
+import me.whereareiam.intercept.registry.MessageFormatRegistry;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
+import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
+import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
+import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -38,6 +44,9 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 	protected MessageExtensionRepository postgresExtensionRepo;
 	protected MessageExtensionRepository mariaDbExtensionRepo;
 	protected Path messagesPath;
+	protected MessageFormatRegistry formatRegistry;
+	protected ReservedKeyRegistry reservedKeyRegistry;
+	protected NamespaceResolver namespaceResolver;
 
 	@BeforeEach
 	void baseSetUp() throws IOException {
@@ -56,7 +65,13 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		MessageFileWriter postgresWriter = new TestMessageFileWriter(messagesPath);
 		MessageFileWriter mariaWriter = new TestMessageFileWriter(messagesPath);
 
-		MessageDataService noopDataService = new NoopMessageDataService(messagesPath);
+		formatRegistry = TestMessageSupport.createFormatRegistry();
+		reservedKeyRegistry = TestMessageSupport.createReservedKeyRegistry();
+		Settings settings = new Settings();
+		PlatformNamespaceProvider namespaceProvider = () -> Constants.Namespace.INTERNAL;
+		namespaceResolver = TestMessageSupport.createNamespaceResolver(settings, namespaceProvider, messagesPath);
+
+		TranslationDataService noopDataService = new NoopTranslationDataService(messagesPath);
 
 		MessageUploadCoordinator postgresUpload = new MessageUploadCoordinator(
 				postgresFileRepo,
@@ -64,7 +79,9 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				postgresTranslationRepo,
 				postgresTemplateRepo,
 				postgresExtensionRepo,
-				messagesPath
+				formatRegistry,
+				reservedKeyRegistry,
+				namespaceResolver
 		);
 
 		MessageDownloadCoordinator postgresDownload = new MessageDownloadCoordinator(
@@ -73,7 +90,11 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				postgresTranslationRepo,
 				postgresTemplateRepo,
 				postgresExtensionRepo,
-				postgresWriter
+				postgresWriter,
+				formatRegistry,
+				reservedKeyRegistry,
+				namespaceResolver,
+				namespaceProvider
 		);
 
 		MessageUploadCoordinator mariaUpload = new MessageUploadCoordinator(
@@ -82,7 +103,9 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				mariaDbTranslationRepo,
 				mariaDbTemplateRepo,
 				mariaDbExtensionRepo,
-				messagesPath
+				formatRegistry,
+				reservedKeyRegistry,
+				namespaceResolver
 		);
 
 		MessageDownloadCoordinator mariaDownload = new MessageDownloadCoordinator(
@@ -91,7 +114,11 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 				mariaDbTranslationRepo,
 				mariaDbTemplateRepo,
 				mariaDbExtensionRepo,
-				mariaWriter
+				mariaWriter,
+				formatRegistry,
+				reservedKeyRegistry,
+				namespaceResolver,
+				namespaceProvider
 		);
 
 		postgresService = new DefaultMessagePersistenceService(
@@ -150,10 +177,10 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 		});
 	}
 
-	private static class NoopMessageDataService implements MessageDataService {
+	private static class NoopTranslationDataService implements TranslationDataService {
 		private final Path messagesPath;
 
-		private NoopMessageDataService(Path messagesPath) {
+		private NoopTranslationDataService(Path messagesPath) {
 			this.messagesPath = messagesPath;
 		}
 
@@ -230,7 +257,5 @@ abstract class BaseMessagePersistenceIntegrationTest extends BaseTest {
 			return messagesPath.resolve(normalized + ".yml").normalize();
 		}
 	}
-
-
 }
 

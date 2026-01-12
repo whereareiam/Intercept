@@ -2,15 +2,19 @@ package me.whereareiam.intercept.platform.interception.regex;
 
 import com.google.inject.Provider;
 import me.whereareiam.configura.Config;
+import me.whereareiam.configura.node.Node;
+import me.whereareiam.configura.node.ObjectNode;
 import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.platform.interception.messaging.persistence.DefaultMessageFileLoader;
-import me.whereareiam.intercept.platform.interception.messaging.persistence.MessageDocumentNodeAdapter;
-import me.whereareiam.intercept.platform.interception.messaging.persistence.MessageFileScanner;
-import me.whereareiam.intercept.common.messaging.processor.TextProcessor;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
+import me.whereareiam.intercept.common.persistence.format.DefaultFormatContext;
+import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
+import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
+import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.persistence.TranslationFileScanner;
+import me.whereareiam.intercept.common.translation.loader.mapper.TranslationEntryMapper;
+import me.whereareiam.intercept.common.translation.loader.mapper.TextProcessor;
+import me.whereareiam.intercept.registry.InterceptionRegistry;
 import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
 import me.whereareiam.intercept.platform.interception.config.template.InterceptionConfigTemplate;
 import me.whereareiam.intercept.platform.interception.messaging.DefaultInterceptionRegistry;
@@ -18,14 +22,16 @@ import me.whereareiam.intercept.platform.interception.messaging.InterceptionMess
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.platform.interception.messaging.file.MessageFileLoader;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.platform.interception.messaging.MessageDocument;
+import me.whereareiam.intercept.model.messaging.file.MessageFileData;
+import me.whereareiam.intercept.persistence.format.MessageFormat;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 import me.whereareiam.intercept.model.regex.MatchDetails;
 import me.whereareiam.intercept.registry.base.Registry;
-import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
+import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
+import me.whereareiam.intercept.platform.interception.messaging.format.InterceptionKeyHandler;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import net.kyori.adventure.text.Component;
@@ -66,6 +72,8 @@ class RegexIntegrationTest {
 	private TranslationService<Locale> translationService;
 	private Interception interceptionSettings;
 	private InterceptionMessageDocumentProcessor documentProcessor;
+	private MessageFormat format;
+	private ReservedKeyRegistry reservedKeyRegistry;
 
 	@BeforeAll
 	static void initLogger() {
@@ -91,7 +99,9 @@ class RegexIntegrationTest {
 
 		// Set up YAML as default format for tests
 		Config.setReader(Config.reader(Format.YAML));
-		Config.registerAdapter(MessageDocument.Node.class, new MessageDocumentNodeAdapter());
+		format = new MultiLocaleFormat();
+		reservedKeyRegistry = new DefaultReservedKeyRegistry();
+		reservedKeyRegistry.register(new InterceptionKeyHandler());
 
 		// Load test message files
 		loadTestMessages();
@@ -106,22 +116,31 @@ class RegexIntegrationTest {
 		Path messagesRoot = Paths.get(getClass().getResource("/messages").toURI());
 
 		// Scan for message files
-		MessageFileScanner scanner = new MessageFileScanner(Format.YAML);
+		TranslationFileScanner scanner = new TranslationFileScanner(Format.YAML);
 		List<Path> files = scanner.scanDirectory(messagesRoot);
 
 		// Load each persistence
-		TextProcessor textProcessor = new TextProcessor();
-		MessageFileLoader loader = new DefaultMessageFileLoader(
-				textProcessor,
-				() -> Locale.US
-		);
+		TranslationEntryMapper entryMapper = new TranslationEntryMapper(new TextProcessor(), () -> Locale.US);
 
 		for (Path file : files) {
-			String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file);
-			MessageDocument fileData = Config.load(file, MessageDocument.class);
-			registerEntries(loader.loadFromData(keyPrefix, fileData));
+			String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file, format, Locale.US);
+			MessageFileData fileData = loadFileData(messagesRoot, file);
+			registerEntries(entryMapper.mapEntries(keyPrefix, fileData));
 			documentProcessor.process(keyPrefix, fileData);
 		}
+	}
+
+	private MessageFileData loadFileData(Path root, Path file) {
+		Node raw = Config.loadNode(file);
+		ObjectNode data = raw instanceof ObjectNode objectNode ? objectNode : new ObjectNode();
+		DefaultFormatContext context = new DefaultFormatContext(
+				root,
+				file,
+				Locale.US,
+				null,
+				reservedKeyRegistry
+		);
+		return format.parse(data, context);
 	}
 
 	private void registerEntries(Map<String, TranslationEntry> entries) {

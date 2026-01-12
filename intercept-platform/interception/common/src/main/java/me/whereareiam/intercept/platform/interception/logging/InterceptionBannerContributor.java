@@ -2,7 +2,7 @@ package me.whereareiam.intercept.platform.interception.logging;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import me.whereareiam.intercept.common.logging.BannerContributor;
+import me.whereareiam.intercept.logging.BannerContributor;
 import me.whereareiam.intercept.platform.interception.interceptor.InterceptorRegistry;
 import me.whereareiam.intercept.platform.interception.interceptor.base.Interceptor;
 import me.whereareiam.intercept.platform.interception.interceptor.base.InterceptorProvider;
@@ -47,5 +47,6 @@ public class InterceptionBannerContributor implements BannerContributor {
 				.collect(Collectors.joining(", "));
 
 		lines.add("   - " + AnsiColor.CYAN + components + AnsiColor.RESET);
+		lines.add("");
 	}
 }

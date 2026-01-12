@@ -2,7 +2,7 @@ package me.whereareiam.intercept.platform.interception.interceptor.processor;
 
 import com.google.inject.Provider;
 import me.whereareiam.intercept.platform.interception.regex.RegexMatchingService;
-import me.whereareiam.intercept.messaging.TagReplacementService;
+import me.whereareiam.intercept.tag.TagReplacementService;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.common.util.ComponentHelper;
 import me.whereareiam.intercept.common.util.TagParser;
@@ -152,4 +152,3 @@ public abstract class AbstractComponentInterceptionProcessor<T extends Intercept
 	 */
 	protected abstract ComponentType getComponentType();
 }
-

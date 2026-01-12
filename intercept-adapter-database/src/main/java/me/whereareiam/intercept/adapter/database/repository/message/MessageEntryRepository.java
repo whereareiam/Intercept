@@ -33,6 +33,9 @@ public interface MessageEntryRepository {
 	@SqlUpdate("UPDATE intercept_message_entries SET entry_type = :entryType WHERE id = :id")
 	void update(@Bind("id") long id, @Bind("entryType") String entryType);
 
+	@SqlUpdate("DELETE FROM intercept_message_entries WHERE id = :id")
+	void deleteById(@Bind("id") long id);
+
 	/**
 	 * Convenience method to save (insert or update) an entry entity.
 	 */

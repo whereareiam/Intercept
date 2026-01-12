@@ -20,4 +20,7 @@ public interface MessageTemplateRepository {
 	@GetGeneratedKeys("id")
 	@SqlUpdate("INSERT INTO intercept_message_templates (entry_id, text) VALUES (:entryId, :text)")
 	long insert(@Bind("entryId") long entryId, @Bind("text") String text);
+
+	@SqlUpdate("DELETE FROM intercept_message_templates WHERE entry_id = :entryId")
+	void deleteByEntryId(@Bind("entryId") long entryId);
 }

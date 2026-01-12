@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.interception.chat.ChatProcessedEvent;
-import me.whereareiam.intercept.messaging.TagReplacementService;
+import me.whereareiam.intercept.tag.TagReplacementService;
 import me.whereareiam.intercept.platform.interception.interceptor.chat.ChatInterceptionProcessor;
 import me.whereareiam.intercept.model.config.Interception;
 import me.whereareiam.intercept.model.interception.chat.ChatInterceptionContext;

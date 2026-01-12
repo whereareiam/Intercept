@@ -2,7 +2,11 @@ package me.whereareiam.intercept.platform.bukkit;
 
 import me.whereareiam.attache.LibraryManager;
 import me.whereareiam.attache.platform.paper.PaperLibraryManager;
-import me.whereareiam.intercept.dependency.DependencyResolver;
+import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.common.Dependencies;
+import me.whereareiam.intercept.common.InterceptDependencyLoader;
+import me.whereareiam.intercept.dependency.DependencyLoader;
+import me.whereareiam.intercept.model.dependency.LibraryDescriptor;
 import me.whereareiam.intercept.platform.interception.bukkit.common.BukkitLoggingHelper;
 import me.whereareiam.intercept.platform.interception.bukkit.common.interceptor.packetevents.PacketEventsInterceptorProvider;
 import me.whereareiam.intercept.platform.interception.interceptor.InterceptorRegistry;
@@ -16,10 +20,20 @@ import me.whereareiam.intercept.type.PluginType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Logger;
 
 @SuppressWarnings("unused")
 public class PaperIntercept extends JavaPlugin {
+	private static final List<LibraryDescriptor> PAPER_LIBRARIES = List.of(
+			LibraryDescriptor.builder()
+					.groupId("org.incendo")
+					.artifactId("cloud-paper")
+					.version(Constants.Dependency.CLOUD_PAPER)
+					.resolveTransitive(true)
+					.build()
+	);
+
 	private final Path dataPath = getDataFolder().toPath();
 	private final Logger logger = getLogger();
 	private PaperInjector paperInjector;
@@ -30,11 +44,11 @@ public class PaperIntercept extends JavaPlugin {
 		BukkitLoggingHelper.setLogger(logger);
 
 		LibraryManager libraryManager = new PaperLibraryManager(this, ".libraries");
+		registerPaperDependencies();
 
 		// Load dependencies first
-		DependencyResolver dependencyResolver = new PaperDependencyResolver(libraryManager);
-		dependencyResolver.loadLibraries();
-		dependencyResolver.resolveDependencies();
+		DependencyLoader dependencyLoader = new InterceptDependencyLoader(libraryManager, true);
+		dependencyLoader.loadLibraries();
 
 		paperInjector = new PaperInjector(this, dataPath, libraryManager);
 
@@ -65,5 +79,10 @@ public class PaperIntercept extends JavaPlugin {
 			EventManager eventManager = paperInjector.getInjector().getInstance(EventManager.class);
 			eventManager.call(new InterceptShutdownEvent());
 		}
+	}
+
+	private static void registerPaperDependencies() {
+		Dependencies.addRepository("https://repo.codemc.io/repository/maven-releases/");
+		PAPER_LIBRARIES.forEach(Dependencies::addLibrary);
 	}
 }

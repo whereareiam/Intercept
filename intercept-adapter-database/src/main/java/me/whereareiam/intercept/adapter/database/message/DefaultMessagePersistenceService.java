@@ -7,7 +7,7 @@ import me.whereareiam.intercept.adapter.database.message.coordinator.MessageDown
 import me.whereareiam.intercept.adapter.database.message.coordinator.MessageUploadCoordinator;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.MessageDataService;
+import me.whereareiam.intercept.persistence.TranslationDataService;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import org.jdbi.v3.core.Jdbi;
 
@@ -16,7 +16,7 @@ import org.jdbi.v3.core.Jdbi;
 public class DefaultMessagePersistenceService implements MessagePersistenceService {
 	private final MessageUploadCoordinator uploadCoordinator;
 	private final MessageDownloadCoordinator downloadCoordinator;
-	private final MessageDataService messageDataService;
+	private final TranslationDataService translationDataService;
 	private final Jdbi jdbi;
 
 	@Override
@@ -33,7 +33,7 @@ public class DefaultMessagePersistenceService implements MessagePersistenceServi
 
 	@Override
 	public MessageSnapshot downloadMessages() {
-		messageDataService.resetStorage();
+		translationDataService.resetStorage();
 
 		return jdbi.inTransaction(handle -> {
 			MessageSnapshot snapshot = downloadCoordinator.download();

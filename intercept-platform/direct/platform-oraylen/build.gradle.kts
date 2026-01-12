@@ -9,5 +9,6 @@ repositories {
 
 dependencies {
     "compileOnly"(libs.oraylen)
+    "compileOnly"(libs.cloud.core)
     "testImplementation"(libs.oraylen)
 }

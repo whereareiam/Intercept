@@ -2,8 +2,8 @@ package me.whereareiam.intercept.common.messaging.integration;
 
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
+import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
 import me.whereareiam.intercept.common.SemanticaTestHelper;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;

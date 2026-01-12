@@ -32,7 +32,7 @@ public abstract class CommandManagerProvider implements Provider<CommandManager<
 				yield createLegacyCommandManager();
 			}
 			case VELOCITY -> createVelocityCommandManager();
-			case UNKNOWN -> throw new IllegalStateException("Unknown platform type");
+			default -> throw new IllegalStateException("Unknown platform type");
 		};
 
 		return commandManager;

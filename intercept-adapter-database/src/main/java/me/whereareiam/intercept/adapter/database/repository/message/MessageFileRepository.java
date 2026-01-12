@@ -33,17 +33,23 @@ public interface MessageFileRepository {
 	List<MessageFileEntity> findAllByNamespace(@Bind("namespace") String namespace);
 
 	@GetGeneratedKeys("id")
-	@SqlUpdate("INSERT INTO intercept_message_files (namespace, file_path) VALUES (:namespace, :filePath)")
-	long insert(@Bind("namespace") String namespace, @Bind("filePath") String filePath);
+	@SqlUpdate("INSERT INTO intercept_message_files (namespace, file_path, file_type) VALUES (:namespace, :filePath, :fileType)")
+	long insert(
+			@Bind("namespace") String namespace,
+			@Bind("filePath") String filePath,
+			@Bind("fileType") String fileType
+	);
 
-	@SqlUpdate("UPDATE intercept_message_files SET namespace = :namespace, file_path = :filePath WHERE id = :id")
-	void update(@Bind("id") long id, @Bind("namespace") String namespace, @Bind("filePath") String filePath);
+	@SqlUpdate("UPDATE intercept_message_files SET namespace = :namespace, file_path = :filePath, file_type = :fileType WHERE id = :id")
+	void update(
+			@Bind("id") long id,
+			@Bind("namespace") String namespace,
+			@Bind("filePath") String filePath,
+			@Bind("fileType") String fileType
+	);
 
 	@SqlUpdate("DELETE FROM intercept_message_files WHERE id = :id")
 	void deleteById(@Bind("id") long id);
-
-	@SqlUpdate("DELETE FROM intercept_message_files WHERE namespace = :namespace")
-	void deleteByNamespace(@Bind("namespace") String namespace);
 
 	@SqlQuery("SELECT COUNT(*) > 0 FROM intercept_message_files WHERE id = :id")
 	boolean existsById(@Bind("id") long id);
@@ -62,13 +68,13 @@ public interface MessageFileRepository {
 	 */
 	default MessageFileEntity save(MessageFileEntity entity) {
 		if (entity.getId() == null) {
-			long id = insert(entity.getNamespace(), entity.getFilePath());
+			long id = insert(entity.getNamespace(), entity.getFilePath(), entity.getFileType());
 			entity.setId(id);
 
 			return entity;
 		}
 
-		update(entity.getId(), entity.getNamespace(), entity.getFilePath());
+		update(entity.getId(), entity.getNamespace(), entity.getFilePath(), entity.getFileType());
 
 		return entity;
 	}

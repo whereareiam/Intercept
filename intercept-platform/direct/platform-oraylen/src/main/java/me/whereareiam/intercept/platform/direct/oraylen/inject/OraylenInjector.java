@@ -4,8 +4,13 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import lombok.Getter;
+import me.whereareiam.intercept.adapter.command.CommandConfiguration;
+import me.whereareiam.intercept.adapter.database.DatabaseConfiguration;
+import me.whereareiam.intercept.common.CommonConfiguration;
 import me.whereareiam.keystone.serializer.SerializerEngine;
+import me.whereareiam.keystone.Actor;
 import net.oraylen.api.model.config.Settings;
+import org.incendo.cloud.CommandManager;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -19,17 +24,20 @@ public final class OraylenInjector {
 			Path extensionPath,
 			SerializerEngine serializerEngine,
 			Provider<Settings> settingsProvider,
-			Injector platformInjector,
-			Logger logger
+			Logger logger,
+			CommandManager<Actor> platformCommandManager
 	) {
 		this.injector = Guice.createInjector(
+				new CommonConfiguration(extensionPath),
 				new OraylenInjectorConfiguration(
 						Objects.requireNonNull(extensionPath, "extensionPath"),
 						Objects.requireNonNull(serializerEngine, "serializerEngine"),
 						Objects.requireNonNull(settingsProvider, "settingsProvider"),
-						Objects.requireNonNull(platformInjector, "platformInjector"),
-						Objects.requireNonNull(logger, "logger")
-				)
+						Objects.requireNonNull(logger, "logger"),
+						Objects.requireNonNull(platformCommandManager, "platformCommandManager")
+				),
+				new DatabaseConfiguration(),
+				new CommandConfiguration()
 		);
 	}
 }

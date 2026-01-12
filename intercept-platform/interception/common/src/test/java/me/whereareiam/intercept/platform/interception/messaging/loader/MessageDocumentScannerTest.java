@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.platform.interception.messaging.loader;
 
 import me.whereareiam.configura.type.Format;
-import me.whereareiam.intercept.platform.interception.messaging.persistence.MessageFileScanner;
+import me.whereareiam.intercept.common.persistence.TranslationFileScanner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -15,16 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MessageDocumentScannerTest {
-	private MessageFileScanner yamlScanner;
-	private MessageFileScanner jsonScanner;
+	private TranslationFileScanner yamlScanner;
+	private TranslationFileScanner jsonScanner;
 
 	@TempDir
 	Path tempDir;
 
 	@BeforeEach
 	void setUp() {
-		yamlScanner = new MessageFileScanner(Format.YAML);
-		jsonScanner = new MessageFileScanner(Format.JSON);
+		yamlScanner = new TranslationFileScanner(Format.YAML);
+		jsonScanner = new TranslationFileScanner(Format.JSON);
 	}
 
 	@Test
@@ -134,6 +134,4 @@ class MessageDocumentScannerTest {
 		assertEquals(1, files.size());
 		assertEquals("visible.yml", files.get(0).getFileName().toString());
 	}
-
-
 }

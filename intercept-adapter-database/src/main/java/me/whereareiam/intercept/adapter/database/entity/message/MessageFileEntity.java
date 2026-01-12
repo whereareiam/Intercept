@@ -35,6 +35,11 @@ public class MessageFileEntity implements EntitySchemaProvider {
 	private String filePath;
 
 	/**
+	 * Format id for this file (e.g., "MULTI_LOCALE").
+	 */
+	private String fileType;
+
+	/**
 	 * All message entries in this file.
 	 * Cascade delete: deleting a file deletes all its entries.
 	 */
@@ -63,6 +68,7 @@ public class MessageFileEntity implements EntitySchemaProvider {
 					id %s,
 					namespace VARCHAR(100) NOT NULL,
 					file_path VARCHAR(500) NOT NULL,
+					file_type VARCHAR(50),
 					CONSTRAINT uq_message_files_namespace_path UNIQUE (namespace, file_path)
 				)
 				""".formatted(idType);

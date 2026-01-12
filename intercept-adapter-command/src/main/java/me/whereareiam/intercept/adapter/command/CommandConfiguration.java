@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.adapter.command;
 
 import com.google.inject.AbstractModule;
-import me.whereareiam.intercept.CommandService;
+import me.whereareiam.intercept.command.CommandService;
 
 /**
  * Guice configuration module for command adapter.

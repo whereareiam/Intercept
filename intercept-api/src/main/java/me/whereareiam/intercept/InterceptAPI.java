@@ -3,6 +3,7 @@ package me.whereareiam.intercept;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import lombok.Getter;
+import me.whereareiam.intercept.command.CommandService;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
 import me.whereareiam.intercept.registry.PlayerRegistry;
@@ -36,6 +37,7 @@ import java.util.Locale;
  * <p><b>Important:</b> Always check {@link #isInitialized()} before accessing services,
  * or wait for {@link InterceptStartedEvent}.</p>
  */
+@SuppressWarnings("unused")
 public final class InterceptAPI {
 	private static volatile Injector injector;
 	@Getter
@@ -112,12 +114,13 @@ public final class InterceptAPI {
 	@NotNull
 	public static TranslationService<Locale> getTranslationService() {
 		Injector currentInjector = injector;
-		if (currentInjector == null) {
+		if (currentInjector == null)
 			throw new IllegalStateException(
 					"InterceptAPI is not initialized. Make sure Intercept is loaded and wait for InterceptStartedEvent."
 			);
-		}
-		return currentInjector.getInstance(new Key<TranslationService<Locale>>() {});
+
+		return currentInjector.getInstance(new Key<>() {
+		});
 	}
 
 	/**

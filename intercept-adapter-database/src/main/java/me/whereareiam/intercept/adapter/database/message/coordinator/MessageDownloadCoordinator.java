@@ -14,7 +14,12 @@ import me.whereareiam.intercept.adapter.database.repository.message.MessageExten
 import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
 import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
-import me.whereareiam.intercept.messaging.file.MessageFileWriter;
+import me.whereareiam.intercept.persistence.format.MessageFormat;
+import me.whereareiam.intercept.registry.MessageFormatRegistry;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
+import me.whereareiam.intercept.persistence.MessageFileWriter;
+import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
+import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
 import me.whereareiam.intercept.model.messaging.file.MapMessageExtensionPayload;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensionKey;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
@@ -23,6 +28,7 @@ import me.whereareiam.intercept.model.messaging.file.MessageValue;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.intercept.util.LocaleUtil;
+import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
@@ -41,28 +47,52 @@ public class MessageDownloadCoordinator {
 	private final MessageTemplateRepository templateRepository;
 	private final MessageExtensionRepository extensionRepository;
 	private final MessageFileWriter fileWriter;
+	private final MessageFormatRegistry formatRegistry;
+	private final ReservedKeyRegistry reservedKeyRegistry;
+	private final NamespaceResolver namespaceResolver;
+	private final PlatformNamespaceProvider namespaceProvider;
 
 	public MessageSnapshot download() {
-		List<MessageFileEntity> files = fileRepository.findAllByNamespace(Constants.Namespace.INTERNAL);
-		if (files.isEmpty()) return new MessageSnapshot(Map.of(), Map.of());
+		Set<String> namespaces = resolveNamespaces();
+		List<MessageFileEntity> files = new ArrayList<>();
+		for (String namespace : namespaces) {
+			files.addAll(fileRepository.findAllByNamespace(namespace));
+		}
+		if (files.isEmpty()) return new MessageSnapshot(Map.of(), Map.of(), Map.of(), Map.of());
 
 		Map<String, TranslationEntry> entrySnapshot = new LinkedHashMap<>();
 		Map<String, Path> fileSnapshot = new LinkedHashMap<>();
 		Map<String, MessageExtensions> extensionSnapshot = new LinkedHashMap<>();
+		Map<String, String> fileTypes = new LinkedHashMap<>();
 
 		for (MessageFileEntity fileEntity : files) {
+			String namespace = normalizeNamespace(fileEntity.getNamespace());
+			if (!isMessagesPathAllowed(namespace)) {
+				Logger.debug("Skipping namespace %s for message download", namespace);
+				continue;
+			}
+
+			String formatId = resolveFormatId(fileEntity.getFileType());
+			if (formatId == null) {
+				Logger.debug("Skipping unknown format: %s/%s (format: %s)",
+						namespace,
+						fileEntity.getFilePath(),
+						fileEntity.getFileType());
+				continue;
+			}
 			AssemblyResult result = assemble(fileEntity);
-			fileWriter.write(fileEntity.getNamespace(), fileEntity.getFilePath(), result.fileData());
+			fileWriter.write(namespace, fileEntity.getFilePath(), result.fileData(), formatId);
 			fileSnapshot.put(
 					fileEntity.getKeyPrefix(),
-					fileWriter.resolvePath(fileEntity.getNamespace(), fileEntity.getFilePath())
+					fileWriter.resolvePath(namespace, fileEntity.getFilePath())
 			);
+			fileTypes.put(fileEntity.getKeyPrefix(), formatId);
 
 			entrySnapshot.putAll(result.snapshotEntries());
 			extensionSnapshot.putAll(result.extensionEntries());
 		}
 
-		return new MessageSnapshot(entrySnapshot, fileSnapshot, extensionSnapshot);
+		return new MessageSnapshot(entrySnapshot, fileSnapshot, extensionSnapshot, fileTypes);
 	}
 
 	private AssemblyResult assemble(MessageFileEntity fileEntity) {
@@ -172,6 +202,9 @@ public class MessageDownloadCoordinator {
 		for (MessageExtensionEntity entity : entities) {
 			String extensionId = entity.getExtensionId();
 			if (extensionId == null || extensionId.isBlank()) continue;
+			if (reservedKeyRegistry != null && !reservedKeyRegistry.isReservedKey(extensionId))
+				continue;
+
 			Map<String, Object> data = MessageExtensionCodec.decode(entity.getPayload());
 			MapMessageExtensionPayload payload = new MapMessageExtensionPayload(extensionId, data);
 			extensions.put(new MessageExtensionKey<>(extensionId, MapMessageExtensionPayload.class), payload);
@@ -279,6 +312,35 @@ public class MessageDownloadCoordinator {
 		}
 
 		return templateText != null ? new TemplateEntry(templateText) : null;
+	}
+
+	private String resolveFormatId(String fileType) {
+		if (formatRegistry == null) return fileType;
+		if (fileType == null || fileType.isBlank()) {
+			return formatRegistry.getDefault().map(MessageFormat::getId).orElse(null);
+		}
+
+		return formatRegistry.get(fileType).map(MessageFormat::getId).orElse(null);
+	}
+
+	private Set<String> resolveNamespaces() {
+		if (namespaceResolver == null)
+			return Set.of(Constants.Namespace.INTERNAL);
+
+		if (namespaceProvider != null && namespaceProvider.useRuntimeNamespacesForDownload())
+			return namespaceResolver.resolveRuntimeNamespaces();
+
+		return namespaceResolver.resolveStorageNamespaces();
+	}
+
+	private boolean isMessagesPathAllowed(String namespace) {
+		if (namespaceProvider == null) return true;
+		return namespaceProvider.isMessagesPathNamespaceAllowed(namespace);
+	}
+
+	private String normalizeNamespace(String namespace) {
+		if (namespace == null || namespace.isBlank()) return Constants.Namespace.INTERNAL;
+		return namespace;
 	}
 
 	private record AssemblyResult(

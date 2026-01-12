@@ -1,22 +1,42 @@
 package me.whereareiam.intercept.platform.interception.messaging.persistence;
 
 import me.whereareiam.configura.Config;
+import me.whereareiam.configura.node.ArrayNode;
+import me.whereareiam.configura.node.Node;
+import me.whereareiam.configura.node.ObjectNode;
+import me.whereareiam.configura.node.StringNode;
 import me.whereareiam.configura.type.Format;
-import me.whereareiam.intercept.messaging.file.MessageFileWriter;
-import me.whereareiam.intercept.platform.interception.messaging.MessageDocument;
+import me.whereareiam.intercept.common.config.template.SettingsTemplate;
+import me.whereareiam.intercept.common.provider.DefaultPlatformNamespaceProvider;
+import me.whereareiam.intercept.common.persistence.format.DefaultTranslationFormatRegistry;
+import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
+import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
+import me.whereareiam.intercept.common.persistence.format.type.template.TemplateFormat;
+import me.whereareiam.intercept.common.persistence.DefaultTranslationFileWriter;
+import me.whereareiam.intercept.common.translation.namespace.DefaultNamespaceResolver;
+import me.whereareiam.intercept.persistence.MessageFileWriter;
+import me.whereareiam.intercept.registry.MessageFormatRegistry;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
+import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
+import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.file.MapMessageExtensionPayload;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensionKey;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.model.messaging.file.MessageValue;
+import me.whereareiam.intercept.platform.interception.messaging.format.InterceptionKeyHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
+import com.google.inject.Provider;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,8 +55,24 @@ class FileWritingIntegrationTest {
 	void setUp() {
 		Config.setWriter(Config.writer(Format.YAML));
 		Config.setReader(Config.reader(Format.YAML));
-		Config.registerAdapter(MessageDocument.Node.class, new MessageDocumentNodeAdapter());
-		writer = new InterceptionMessageFileWriter(tempDir);
+		MessageFormatRegistry formatRegistry = new DefaultTranslationFormatRegistry();
+		formatRegistry.register(new MultiLocaleFormat(), true);
+		formatRegistry.register(new TemplateFormat(), false);
+		ReservedKeyRegistry reservedKeyRegistry = new DefaultReservedKeyRegistry();
+		reservedKeyRegistry.register(new InterceptionKeyHandler());
+		Settings settings = new SettingsTemplate().supply(new Settings());
+		Provider<Settings> settingsProvider = () -> settings;
+		NamespaceResolver namespaceResolver = new DefaultNamespaceResolver(
+				settingsProvider,
+				new DefaultPlatformNamespaceProvider(),
+				tempDir
+		);
+		writer = new DefaultTranslationFileWriter(
+				formatRegistry,
+				reservedKeyRegistry,
+				namespaceResolver,
+				() -> Locale.US
+		);
 	}
 
 	@Test
@@ -46,7 +82,7 @@ class FileWritingIntegrationTest {
 		MessageFileData.Entry entry = new MessageFileData.Entry();
 		entry.setText(MessageValue.text("Welcome!"));
 
-		Map<String, Object> regex = new java.util.LinkedHashMap<>();
+		Map<String, Object> regex = new LinkedHashMap<>();
 		regex.put("pattern", ".*hello.*");
 		regex.put("priority", 5);
 		regex.put("replaceMatched", true);
@@ -63,23 +99,25 @@ class FileWritingIntegrationTest {
 		document.putEntry("welcome", entry);
 
 		String relativePath = "errors/permissions";
-		writer.write(relativePath, document);
+		writer.write(relativePath, document, "MULTI_LOCALE");
 
 		Path writtenPath = writer.resolvePath(relativePath);
 		assertTrue(Files.exists(writtenPath), "Expected file to be written to disk");
 
-		@SuppressWarnings("unchecked")
-		Map<String, Object> loaded = (Map<String, Object>) Config.load(writtenPath, Map.class);
-		assertTrue(loaded.containsKey("welcome"));
-		Object loadedEntry = loaded.get("welcome");
-		assertInstanceOf(Map.class, loadedEntry);
-		Map<?, ?> loadedMap = (Map<?, ?>) loadedEntry;
-		assertEquals("Welcome!", loadedMap.get("text"));
-		Object interceptionRaw = loadedMap.get("interception");
-		assertInstanceOf(Map.class, interceptionRaw);
-		Map<?, ?> interceptionMap = (Map<?, ?>) interceptionRaw;
-		Object patternsRaw = interceptionMap.get("patterns");
-		assertInstanceOf(List.class, patternsRaw);
-		assertEquals(1, ((List<?>) patternsRaw).size());
+		Node loaded = Config.loadNode(writtenPath);
+		ObjectNode root = loaded instanceof ObjectNode objectNode ? objectNode : new ObjectNode();
+		assertTrue(root.getValues().containsKey("welcome"));
+		Node loadedEntry = root.getValues().get("welcome");
+		assertInstanceOf(ObjectNode.class, loadedEntry);
+		ObjectNode loadedMap = (ObjectNode) loadedEntry;
+		Node textNode = loadedMap.getValues().get("text");
+		assertInstanceOf(StringNode.class, textNode);
+		assertEquals("Welcome!", ((StringNode) textNode).getValue());
+		Node interceptionRaw = loadedMap.getValues().get("interception");
+		assertInstanceOf(ObjectNode.class, interceptionRaw);
+		ObjectNode interceptionMap = (ObjectNode) interceptionRaw;
+		Node patternsRaw = interceptionMap.getValues().get("patterns");
+		assertInstanceOf(ArrayNode.class, patternsRaw);
+		assertEquals(1, ((ArrayNode) patternsRaw).getValues().size());
 	}
 }

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.Constants;
+import me.whereareiam.intercept.logging.BannerContributor;
 import me.whereareiam.intercept.logging.LoggingHelper;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.type.AnsiColor;
@@ -28,7 +29,6 @@ public class WelcomeBannerPrinter {
 		lines.addAll(buildTitleLines());
 		lines.addAll(buildSummaryLines());
 		contributors.forEach(contributor -> contributor.contribute(lines));
-		lines.add("");
 
 		lines.forEach(loggingHelper::info);
 	}

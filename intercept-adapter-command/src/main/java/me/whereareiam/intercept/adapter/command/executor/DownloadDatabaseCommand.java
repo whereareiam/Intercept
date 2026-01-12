@@ -8,7 +8,7 @@ import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.database.MessagePersistenceService;
 import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.messaging.MessageDataService;
+import me.whereareiam.intercept.persistence.TranslationDataService;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.keystone.Actor;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class DownloadDatabaseCommand {
 	private final Provider<Messages> messagesProvider;
 	private final MessagePersistenceService messagePersistenceService;
-	private final MessageDataService messageDataService;
+	private final TranslationDataService translationDataService;
 
 	@Definition("database-download")
 	@Command("intercept database download")
@@ -48,7 +48,7 @@ public class DownloadDatabaseCommand {
 
 			long startTime = System.currentTimeMillis();
 			MessageSnapshot snapshot = messagePersistenceService.downloadMessages();
-			messageDataService.reload();
+			translationDataService.reload();
 
 			if (snapshot.getEntries().isEmpty()) {
 				download = messagesProvider.get().getCommands().getDatabase().getDownload();

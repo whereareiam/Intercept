@@ -26,8 +26,8 @@ import java.util.Map;
  * operating at the string level to avoid circular dependencies.
  * <p>
  * Configuration:
- * - {@code settings.translation.auto-process}: Enable/disable automatic processing
- * - {@code settings.translation.tag-format}: Tag format to use (e.g., "{@code <lang>}")
+ * - {@code settings.translation.tag.auto-process}: Enable/disable automatic processing
+ * - {@code settings.translation.tag.format}: Tag format to use (e.g., "{@code <lang>}")
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -40,11 +40,14 @@ public class TagProcessingDecorator implements MessageDecorator {
 	public SerializerContent decorate(@NotNull SerializerContent content) {
 		Settings settings = settingsProvider.get();
 
+		Settings.Translation translation = settings.getTranslation();
+		Settings.Translation.Tag tag = translation != null ? translation.getTag() : null;
+
 		// Check if auto-processing is enabled
-		if (settings.getTranslation() == null || !settings.getTranslation().isAutoProcess())
+		if (tag == null || !tag.isAutoProcess())
 			return content;
 
-		String tagFormat = settings.getTranslation().getTagFormat();
+		String tagFormat = tag.getFormat();
 		if (tagFormat == null || tagFormat.isEmpty())
 			return content;
 
@@ -68,21 +71,21 @@ public class TagProcessingDecorator implements MessageDecorator {
 
 		// Build replacements map
 		Map<String, String> replacements = new HashMap<>();
-		for (TagParser.TagData tag : tags) {
+		for (TagParser.TagData tagData : tags) {
 			try {
-				Map<String, Object> placeholders = convertPlaceholders(tag.placeholders());
-				String resolved = translationService.resolve(tag.key(), locale, placeholders);
+				Map<String, Object> placeholders = convertPlaceholders(tagData.placeholders());
+				String resolved = translationService.resolve(tagData.key(), locale, placeholders);
 
-				if (resolved != null && !resolved.equals(tag.key())) {
-					replacements.put(tag.originalTag(), resolved);
+				if (resolved != null && !resolved.equals(tagData.key())) {
+					replacements.put(tagData.originalTag(), resolved);
 					continue;
 				}
 
 				// Fallback: just use the key
-				replacements.put(tag.originalTag(), tag.key());
+				replacements.put(tagData.originalTag(), tagData.key());
 			} catch (Exception e) {
 				// On error, leave the tag as-is (will be visible to help debug)
-				replacements.put(tag.originalTag(), tag.originalTag());
+				replacements.put(tagData.originalTag(), tagData.originalTag());
 			}
 		}
 
@@ -102,10 +105,12 @@ public class TagProcessingDecorator implements MessageDecorator {
 	@Override
 	public boolean isAvailable() {
 		Settings settings = settingsProvider.get();
-		return settings.getTranslation() != null
-				&& settings.getTranslation().isAutoProcess()
-				&& settings.getTranslation().getTagFormat() != null
-				&& !settings.getTranslation().getTagFormat().isEmpty();
+		Settings.Translation translation = settings.getTranslation();
+		Settings.Translation.Tag tag = translation != null ? translation.getTag() : null;
+		return tag != null
+				&& tag.isAutoProcess()
+				&& tag.getFormat() != null
+				&& !tag.getFormat().isEmpty();
 	}
 
 	/**

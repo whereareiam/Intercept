@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 /**
  * Main configuration settings class for the Intercept plugin.
  * Contains all configurable options and their default values.
@@ -11,7 +13,10 @@ import lombok.ToString;
  * <p>Configuration sections include:</p>
  * <ul>
  *   <li>Debug level for logging</li>
+ *   <li>Translation settings</li>
  *   <li>Update checker configuration</li>
+ *   <li>Performance configuration</li>
+ *   <li>Command configuration</li>
  * </ul>
  */
 @Getter
@@ -24,9 +29,9 @@ public class Settings {
 	private int level;
 
 	/**
-	 * Namespace visibility configuration
+	 * Translation configuration
 	 */
-	private Namespaces namespaces;
+	private Translation translation;
 
 	/**
 	 * Update checker configuration
@@ -42,11 +47,6 @@ public class Settings {
 	 * Command configuration
 	 */
 	private Commands commands;
-
-	/**
-	 * Translation configuration
-	 */
-	private Translation translation;
 
 	/**
 	 * Configuration for the plugin's updater checker.
@@ -162,19 +162,6 @@ public class Settings {
 	}
 
 	/**
-	 * Configuration for message namespaces.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Namespaces {
-		/**
-		 * Whether to append namespaces to exposed keys.
-		 */
-		private boolean appendToKeys;
-	}
-
-	/**
 	 * Configuration for translation tag processing.
 	 */
 	@Getter
@@ -182,21 +169,62 @@ public class Settings {
 	@ToString
 	public static class Translation {
 		/**
-		 * Tag format for internal Intercept messages (commands, etc.)
-		 * <p>
-		 * Examples: "{@code <lang>}", "{@code [tr]}", "{@code {i18n}}"
-		 * <p>
-		 * Note: Component interception (chat, action bar, etc.) uses per-component
-		 * tag configuration in the Interception section.
+		 * Translation tag configuration.
 		 */
-		private String tagFormat;
+		private Tag tag;
 
 		/**
-		 * Whether to automatically process translation tags in Serializer.
-		 * <p>
-		 * When enabled, messages containing translation tags will be automatically
-		 * translated during serialization through the MessageDecorator pipeline.
+		 * Namespace visibility configuration.
 		 */
-		private boolean autoProcess;
+		private Namespaces namespaces;
+
+		/**
+		 * Configuration for translation tag processing.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Tag {
+			/**
+			 * Tag format for internal Intercept messages (commands, etc.)
+			 * <p>
+			 * Examples: "{@code <lang>}", "{@code [tr]}", "{@code {i18n}}"
+			 * <p>
+			 * Note: Component interception (chat, action bar, etc.) uses per-component
+			 * tag configuration in the Interception section.
+			 */
+			private String format;
+
+			/**
+			 * Whether to automatically process translation tags in Serializer.
+			 * <p>
+			 * When enabled, messages containing translation tags will be automatically
+			 * translated during serialization through the MessageDecorator pipeline.
+			 */
+			private boolean autoProcess;
+		}
+
+		/**
+		 * Configuration for message namespaces.
+		 */
+		@Getter
+		@Setter
+		@ToString
+		public static class Namespaces {
+			/**
+			 * Whether to append namespaces to exposed keys.
+			 */
+			private boolean appendToKeys;
+
+			/**
+			 * Extra namespaces to include for storage.
+			 */
+			private List<String> extra;
+
+			/**
+			 * Optional runtime namespace filter.
+			 */
+			private List<String> load;
+		}
 	}
 }

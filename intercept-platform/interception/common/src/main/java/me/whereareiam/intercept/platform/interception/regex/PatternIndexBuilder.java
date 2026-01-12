@@ -1,7 +1,7 @@
 package me.whereareiam.intercept.platform.interception.regex;
 
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.messaging.InterceptionRegistry;
+import me.whereareiam.intercept.registry.InterceptionRegistry;
 import me.whereareiam.intercept.model.regex.CompiledRegexPattern;
 
 import java.util.ArrayList;

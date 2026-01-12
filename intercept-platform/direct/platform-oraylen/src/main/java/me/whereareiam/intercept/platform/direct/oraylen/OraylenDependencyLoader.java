@@ -1,6 +1,6 @@
 package me.whereareiam.intercept.platform.direct.oraylen;
 
-import lombok.RequiredArgsConstructor;
+import me.whereareiam.intercept.common.Dependencies;
 import me.whereareiam.intercept.dependency.DependencyLoader;
 import me.whereareiam.intercept.model.dependency.LibraryDescriptor;
 import me.whereareiam.intercept.model.dependency.RelocationRule;
@@ -10,11 +10,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class OraylenDependencyLoader implements DependencyLoader {
 	private final boolean applyRelocations;
 	private final List<URI> repositories = new ArrayList<>();
 	private final List<net.oraylen.api.model.library.LibraryDescriptor> libraries = new ArrayList<>();
+
+	public OraylenDependencyLoader(boolean applyRelocations) {
+		this.applyRelocations = applyRelocations;
+		Dependencies.applyTo(this);
+	}
 
 	@Override
 	public void addRepository(String repository) {

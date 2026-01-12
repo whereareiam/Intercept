@@ -185,4 +185,3 @@ class InterceptorServiceReloadTest {
 		when(mockInterception.getComponents()).thenReturn(components);
 	}
 }
-

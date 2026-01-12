@@ -30,7 +30,11 @@ public enum PluginType {
 	/**
 	 * Represents a Velocity proxy plugin implementation
 	 */
-	VELOCITY;
+	VELOCITY,
+	/**
+	 * Represents an Oraylen extension implementation
+	 */
+	ORAYLEN;
 
 	/**
 	 * The current plugin type set during runtime
@@ -58,10 +62,15 @@ public enum PluginType {
 	 */
 	public static PluginType getType() {
 		String pluginType = getPluginTypeFromManifest();
-		if (pluginType != null)
-			return PluginType.valueOf(pluginType);
+		if (pluginType != null) {
+			try {
+				return PluginType.valueOf(pluginType);
+			} catch (IllegalArgumentException ignored) {
+			}
+		}
 
-		throw new IllegalStateException("Unknown plugin type");
+		PluginType exact = getExactType();
+		return exact != null ? exact : UNKNOWN;
 	}
 
 	/**

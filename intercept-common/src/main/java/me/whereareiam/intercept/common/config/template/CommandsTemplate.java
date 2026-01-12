@@ -127,4 +127,3 @@ public class CommandsTemplate implements TemplateProvider<Commands> {
 		return commands;
 	}
 }
-

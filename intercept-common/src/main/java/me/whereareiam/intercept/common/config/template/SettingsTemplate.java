@@ -4,6 +4,8 @@ import com.google.inject.Singleton;
 import me.whereareiam.configura.TemplateProvider;
 import me.whereareiam.intercept.model.config.Settings;
 
+import java.util.List;
+
 
 @Singleton
 public class SettingsTemplate implements TemplateProvider<Settings> {
@@ -12,10 +14,20 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		// Default logger level (2 = INFO)
 		settings.setLevel(2);
 
-		// Initialize namespace settings
-		Settings.Namespaces namespaces = new Settings.Namespaces();
-		namespaces.setAppendToKeys(false);
-		settings.setNamespaces(namespaces);
+		// Configure translation settings
+		Settings.Translation translation = new Settings.Translation();
+		Settings.Translation.Tag tag = new Settings.Translation.Tag();
+		tag.setFormat("<lang>");
+		tag.setAutoProcess(false); // Disabled by default
+		translation.setTag(tag);
+
+		Settings.Translation.Namespaces namespaces = new Settings.Translation.Namespaces();
+		namespaces.setAppendToKeys(true);
+		namespaces.setExtra(List.of());
+		namespaces.setLoad(List.of());
+		translation.setNamespaces(namespaces);
+
+		settings.setTranslation(translation);
 
 		// Initialize updater settings
 		Settings.Updater updater = new Settings.Updater();
@@ -23,7 +35,7 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		updater.setWarnAboutUpdates(true);
 		updater.setWarnAboutLocalBuilds(true);
 		updater.setWarnAboutDevBuilds(true);
-		updater.setInterval(60); // 60 minutes
+		updater.setInterval(1); // 1 hour
 
 		settings.setUpdater(updater);
 
@@ -48,17 +60,6 @@ public class SettingsTemplate implements TemplateProvider<Settings> {
 		commands.setUseAsyncCompletions(true);
 
 		settings.setCommands(commands);
-
-		// Configure namespaces
-		Settings.Namespaces namespacesSettings = new Settings.Namespaces();
-		namespacesSettings.setAppendToKeys(true);
-		settings.setNamespaces(namespacesSettings);
-
-		// Configure translation settings
-		Settings.Translation translation = new Settings.Translation();
-		translation.setTagFormat("<lang>");
-		translation.setAutoProcess(false); // Disabled by default
-		settings.setTranslation(translation);
 
 		return settings;
 	}

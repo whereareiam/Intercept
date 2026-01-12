@@ -2,12 +2,12 @@ package me.whereareiam.intercept.common;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import me.whereareiam.intercept.CommandService;
+import me.whereareiam.intercept.command.CommandService;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.InterceptAPI;
 import me.whereareiam.intercept.PlatformInteractor;
 import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
-import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
+import me.whereareiam.intercept.common.persistence.DefaultTranslationDataService;
 import me.whereareiam.intercept.common.updater.UpdateScheduler;
 import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.event.EventListener;
@@ -56,7 +56,7 @@ public class Intercept implements EventListener {
 		injector.getInstance(ListenerRegistrar.class).registerListeners();
 
 		// Initialize messages system
-		injector.getInstance(DefaultMessageDataService.class).initialize();
+		injector.getInstance(DefaultTranslationDataService.class).initialize();
 
 		// Initialize commands
 		injector.getInstance(CommandService.class);

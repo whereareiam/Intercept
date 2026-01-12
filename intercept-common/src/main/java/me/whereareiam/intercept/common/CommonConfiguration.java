@@ -12,8 +12,11 @@ import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.common.persistence.DefaultTranslationDataService;
 import me.whereareiam.intercept.common.provider.config.SettingsProvider;
 import me.whereareiam.intercept.common.tag.DefaultTagReplacementService;
+import me.whereareiam.intercept.common.translation.namespace.DefaultNamespaceResolver;
+import me.whereareiam.intercept.tag.TagReplacementService;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.reader.ConfigReader;
@@ -21,13 +24,18 @@ import me.whereareiam.configura.type.Format;
 import me.whereareiam.configura.writer.ConfigWriter;
 import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
 import me.whereareiam.intercept.common.event.EventController;
-import me.whereareiam.intercept.common.logging.BannerContributor;
-import me.whereareiam.intercept.common.messaging.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.messaging.InterceptSemanticaLogger;
-import me.whereareiam.intercept.common.messaging.NoopTranslationLoader;
-import me.whereareiam.intercept.common.messaging.NamespacedTranslationService;
-import me.whereareiam.intercept.common.messaging.persistence.DefaultMessageDataService;
-import me.whereareiam.intercept.common.player.DefaultPlayerRegistry;
+import me.whereareiam.intercept.logging.BannerContributor;
+import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.translation.loader.NoopTranslationLoader;
+import me.whereareiam.intercept.common.translation.NamespacedTranslationService;
+import me.whereareiam.intercept.common.provider.DefaultPlatformNamespaceProvider;
+import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
+import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
+import me.whereareiam.intercept.common.persistence.format.DefaultTranslationFormatRegistry;
+import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
+import me.whereareiam.intercept.common.persistence.DefaultTranslationFileWriter;
+import me.whereareiam.intercept.common.registry.DefaultPlayerRegistry;
+import me.whereareiam.intercept.common.provider.DefaultTranslationServiceProvider;
 import me.whereareiam.intercept.common.provider.IntegrationProvider;
 import me.whereareiam.intercept.common.provider.ReloadableProvider;
 import me.whereareiam.intercept.common.provider.config.CommandsProvider;
@@ -39,9 +47,12 @@ import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
 import me.whereareiam.intercept.config.ConfigurationTypeResolver;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.integration.Integration;
-import me.whereareiam.intercept.messaging.MessageDataService;
-import me.whereareiam.intercept.messaging.MessageRegistry;
-import me.whereareiam.intercept.messaging.TranslationLoader;
+import me.whereareiam.intercept.persistence.TranslationDataService;
+import me.whereareiam.intercept.registry.MessageRegistry;
+import me.whereareiam.intercept.translation.TranslationLoader;
+import me.whereareiam.intercept.persistence.MessageFileWriter;
+import me.whereareiam.intercept.registry.MessageFormatRegistry;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Persistence;
@@ -52,11 +63,10 @@ import me.whereareiam.intercept.type.ProviderType;
 import me.whereareiam.intercept.updater.UpdateProvider;
 import me.whereareiam.intercept.util.EventUtil;
 import me.whereareiam.keystone.serializer.SerializerEngine;
-import me.whereareiam.semantica.Semantica;
 import me.whereareiam.semantica.SemanticaConfiguration;
 import me.whereareiam.semantica.SemanticaLogger;
 import me.whereareiam.semantica.TagConfiguration;
-import me.whereareiam.intercept.common.messaging.registry.InterceptTranslationRegistry;
+import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
 import me.whereareiam.semantica.locale.LocaleParser;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.translation.TranslationRegistry;
@@ -108,13 +118,29 @@ public class CommonConfiguration extends AbstractModule {
 		bind(Intercept.class).asEagerSingleton();
 
 		// Messages system
-		bind(me.whereareiam.intercept.messaging.TagReplacementService.class)
-				.to(DefaultTagReplacementService.class)
-				.in(Singleton.class);
+		bind(TagReplacementService.class)
+				.to(DefaultTagReplacementService.class);
 		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
+		OptionalBinder.newOptionalBinder(binder(), TranslationRegistry.class)
+				.setDefault().to(InterceptTranslationRegistry.class);
+		OptionalBinder.newOptionalBinder(
+				binder(),
+				Key.get(new TypeLiteral<TranslationService<Locale>>() {})
+		).setDefault().toProvider(DefaultTranslationServiceProvider.class);
+		OptionalBinder.newOptionalBinder(binder(), PlatformNamespaceProvider.class)
+				.setDefault().to(DefaultPlatformNamespaceProvider.class);
+		bind(NamespaceResolver.class)
+				.to(DefaultNamespaceResolver.class)
+				.asEagerSingleton();
+		OptionalBinder.newOptionalBinder(binder(), MessageFormatRegistry.class)
+				.setDefault().to(DefaultTranslationFormatRegistry.class);
+		OptionalBinder.newOptionalBinder(binder(), ReservedKeyRegistry.class)
+				.setDefault().to(DefaultReservedKeyRegistry.class);
 		OptionalBinder.newOptionalBinder(binder(), TranslationLoader.class)
 				.setDefault().to(NoopTranslationLoader.class);
-		bind(MessageDataService.class).to(DefaultMessageDataService.class);
+		OptionalBinder.newOptionalBinder(binder(), MessageFileWriter.class)
+				.setDefault().to(DefaultTranslationFileWriter.class);
+		bind(TranslationDataService.class).to(DefaultTranslationDataService.class);
 
 		// Updater
 		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))
@@ -222,21 +248,6 @@ public class CommonConfiguration extends AbstractModule {
 				.localeParser(localeParser)
 				.logger(logger)
 				.build();
-	}
-
-	@Provides
-	@Singleton
-	TranslationRegistry provideTranslationRegistry() {
-		return new InterceptTranslationRegistry();
-	}
-
-	@Provides
-	@Singleton
-	TranslationService<Locale> provideTranslationService(
-			SemanticaConfiguration<Locale> configuration,
-			TranslationRegistry registry
-	) {
-		return Semantica.createService(configuration, registry);
 	}
 
 	@Provides

@@ -25,4 +25,10 @@ public interface MessageExtensionRepository {
 			@Bind("extensionId") String extensionId,
 			@Bind("payload") String payload
 	);
+
+	@DialectUpdate(provider = MessageExtensionAdapter.Update.class)
+	void update(@Bind("id") long id, @Bind("payload") String payload);
+
+	@org.jdbi.v3.sqlobject.statement.SqlUpdate("DELETE FROM intercept_message_extensions WHERE id = :id")
+	void deleteById(@Bind("id") long id);
 }
