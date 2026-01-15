@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.platform.direct.oraylen.translation;
 
+import com.google.inject.Singleton;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationRegistry;
 import net.oraylen.api.Namespace;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Singleton
 public final class OraylenTranslationRegistry implements TranslationRegistry {
 	private final Map<String, TranslationEntry> entries = new ConcurrentHashMap<>();
 	private final Map<Namespace, NamespaceRegistration> namespaceRegistrations = new ConcurrentHashMap<>();
