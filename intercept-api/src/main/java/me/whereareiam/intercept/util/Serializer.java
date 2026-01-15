@@ -13,6 +13,7 @@ import java.util.Objects;
  * Static helper around {@link SerializerEngine} to simplify serialization invocations.
  */
 public final class Serializer {
+	public static final String SCOPE = "intercept";
 	private static volatile Provider<SerializerEngine> serializerProvider;
 
 	public static void initialize(@NotNull Provider<SerializerEngine> provider) {
@@ -21,16 +22,32 @@ public final class Serializer {
 
 	@NotNull
 	public static Component serialize(@NotNull String message) {
-		return getEngine().serialize(message);
+		return getEngine().serialize(SerializerContent.builder()
+				.scope(SCOPE)
+				.message(message)
+				.build());
 	}
 
 	@NotNull
 	public static Component serialize(@NotNull Actor actor, @NotNull String message) {
-		return getEngine().serialize(actor, message);
+		return getEngine().serialize(SerializerContent.builder()
+				.receiver(actor)
+				.scope(SCOPE)
+				.message(message)
+				.build());
 	}
 
 	@NotNull
 	public static Component serialize(@NotNull SerializerContent content) {
+		if (content.getScope() == null || content.getScope().isBlank()) {
+			return getEngine().serialize(SerializerContent.builder()
+					.receiver(content.getReceiver())
+					.scope(SCOPE)
+					.message(content.getMessage())
+					.placeholders(content.getPlaceholders())
+					.build());
+		}
+
 		return getEngine().serialize(content);
 	}
 

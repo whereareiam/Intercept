@@ -5,7 +5,9 @@ import com.google.inject.Provider;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.mapper.OraylenTranslationEntryMapper;
 import me.whereareiam.intercept.translation.mapper.PlaceholderMapper;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.OraylenTranslationLoader;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.keystone.serializer.SerializerEngine;
+import me.whereareiam.keystone.model.SerializerContent;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
@@ -66,7 +68,14 @@ public final class OraylenTranslationEngine implements TranslationEngine {
 				: null);
 
 		String resolved = translationService.resolve(key, effectiveLocale, placeholders);
-		return resolved != null ? serializerEngine.serialize(resolved) : Component.text(key);
+		if (resolved == null) {
+			return Component.text(key);
+		}
+
+		return serializerEngine.serialize(SerializerContent.builder()
+				.scope(Serializer.SCOPE)
+				.message(resolved)
+				.build());
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.common.SerializerDecoratorRegistrar;
 import me.whereareiam.intercept.common.tag.serializer.TagProcessingDecorator;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.platform.interception.bukkit.common.config.PlatformSettings;
@@ -52,17 +53,19 @@ public class BukkitSerializerEngineProvider implements Provider<SerializerEngine
 
 			SerializerOptions options = SerializerOptions.builder()
 					.defaultAdapter(adapter)
-					.prefixSupplier(messages::getPrefix)
 					.enableLegacyColors(enableLegacyColors)
 					.enablePlayerNamePlaceholder(true)
 					.placeholderFormat(SerializerOptions.PlaceholderFormat.custom("<", ">"))
 					.build();
 
 			SerializerEngine newEngine = Serializers.createEngine(options);
-			
-			// Register tag processing decorator using public API
-			Serializers.registerDecorator(newEngine, tagProcessingDecorator);
-			
+
+			SerializerDecoratorRegistrar.registerDefaults(
+					newEngine,
+					messages::getPrefix,
+					tagProcessingDecorator
+			);
+
 			engine = newEngine;
 		}
 

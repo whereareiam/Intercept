@@ -97,6 +97,7 @@ public class TagProcessingDecorator implements MessageDecorator {
 		// Return new content with processed message
 		return SerializerContent.builder()
 				.receiver(content.getReceiver())
+				.scope(content.getScope())
 				.message(processedMessage)
 				.placeholders(content.getPlaceholders())
 				.build();
