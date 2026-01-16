@@ -41,7 +41,7 @@ class DefaultMessageServiceTest {
 	void shouldResolveSimpleMessage() {
 		registerMessage("welcome", SemanticaTestHelper.template("Welcome!"));
 
-		String result = service.resolve("welcome", Locale.US);
+		String result = service.resolve("welcome", Locale.ENGLISH);
 		assertEquals("Welcome!", result);
 	}
 
@@ -49,7 +49,7 @@ class DefaultMessageServiceTest {
 	void shouldResolveMessageWithPlaceholder() {
 		registerMessage("greeting", SemanticaTestHelper.template("Hello, <p:name>!"));
 
-		String result = service.resolve("greeting", Locale.US, Map.of("name", "Steve"));
+		String result = service.resolve("greeting", Locale.ENGLISH, Map.of("name", "Steve"));
 		assertEquals("Hello, Steve!", result);
 	}
 
@@ -58,7 +58,7 @@ class DefaultMessageServiceTest {
 		registerMessage("prefix", SemanticaTestHelper.template("[App]"));
 		registerMessage("message", SemanticaTestHelper.template("<ref:prefix> Hello"));
 
-		String result = service.resolve("message", Locale.US);
+		String result = service.resolve("message", Locale.ENGLISH);
 		assertEquals("[App] Hello", result);
 	}
 
@@ -67,7 +67,7 @@ class DefaultMessageServiceTest {
 		registerMessage("error.fmt", SemanticaTestHelper.template("ERROR: <p:msg>"));
 		registerMessage("error", SemanticaTestHelper.template("<ref:error.fmt msg='Failed'>"));
 
-		String result = service.resolve("error", Locale.US);
+		String result = service.resolve("error", Locale.ENGLISH);
 		assertEquals("ERROR: Failed", result);
 	}
 
@@ -76,7 +76,7 @@ class DefaultMessageServiceTest {
 		registerMessage("status", SemanticaTestHelper.template(
 				"Player is <if online==true>online<else>offline</if>"));
 
-		String result = service.resolve("status", Locale.US, Map.of("online", true));
+		String result = service.resolve("status", Locale.ENGLISH, Map.of("online", true));
 		assertEquals("Player is online", result);
 	}
 
@@ -90,16 +90,16 @@ class DefaultMessageServiceTest {
 		registerMessage("error", SemanticaTestHelper.template(
 				"<ref:prefix app='System'> <ref:error.fmt message='<p:details>'>"));
 
-		String result = service.resolve("error", Locale.US, Map.of("details", "Connection lost"));
+		String result = service.resolve("error", Locale.ENGLISH, Map.of("details", "Connection lost"));
 		assertEquals("[System] <red>ERROR: Connection lost", result);
 	}
 
 	@Test
 	void shouldResolveMultiLocaleMessage() {
 		registerMessage("welcome", SemanticaTestHelper.localized(
-				Map.of(Locale.US, "Welcome!", Locale.GERMANY, "Willkommen!")));
+				Map.of(Locale.ENGLISH, "Welcome!", Locale.GERMANY, "Willkommen!")));
 
-		String enResult = service.resolve("welcome", Locale.US);
+		String enResult = service.resolve("welcome", Locale.ENGLISH);
 		assertEquals("Welcome!", enResult);
 
 		String deResult = service.resolve("welcome", Locale.GERMANY);
@@ -108,7 +108,7 @@ class DefaultMessageServiceTest {
 
 	@Test
 	void shouldReturnKeyForMissingEntry() {
-		String result = service.resolve("nonexistent", Locale.US);
+		String result = service.resolve("nonexistent", Locale.ENGLISH);
 		assertEquals("nonexistent", result); // Returns key as fallback
 	}
 
@@ -123,11 +123,11 @@ class DefaultMessageServiceTest {
 	@Test
 	void shouldGetAvailableLocales() {
 		registerMessage("msg", SemanticaTestHelper.localized(
-				Map.of(Locale.US, "Hello", Locale.GERMANY, "Hallo", Locale.FRANCE, "Bonjour")));
+				Map.of(Locale.ENGLISH, "Hello", Locale.GERMANY, "Hallo", Locale.FRANCE, "Bonjour")));
 
 		var locales = service.getAvailableLocales("msg");
 		assertEquals(3, locales.size());
-		assertTrue(locales.contains(SemanticLocale.wrap(Locale.US)));
+		assertTrue(locales.contains(SemanticLocale.wrap(Locale.ENGLISH)));
 		assertTrue(locales.contains(SemanticLocale.wrap(Locale.GERMANY)));
 		assertTrue(locales.contains(SemanticLocale.wrap(Locale.FRANCE)));
 	}
@@ -136,11 +136,11 @@ class DefaultMessageServiceTest {
 	void shouldUseUpdatedMessageAfterRegister() {
 		registerMessage("cached", SemanticaTestHelper.template("Original"));
 
-		assertEquals("Original", service.resolve("cached", Locale.US));
+		assertEquals("Original", service.resolve("cached", Locale.ENGLISH));
 
 		registerMessage("cached", SemanticaTestHelper.template("Updated"));
 
-		assertEquals("Updated", service.resolve("cached", Locale.US));
+		assertEquals("Updated", service.resolve("cached", Locale.ENGLISH));
 	}
 
 	private void registerMessage(String key, TranslationEntry entry) {

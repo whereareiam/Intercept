@@ -79,13 +79,26 @@ public class MessageUploadCoordinator {
 		Set<String> namespaces = resolveNamespaces(filePaths);
 
 		Map<String, MessageFileEntity> existingFiles = loadExistingFiles(namespaces);
-		Map<String, MessageFileEntity> fileEntities = upsertFileEntities(
-				filePaths,
-				fileTypes,
-				existingFiles
-		);
+		Map<String, MessageFileEntity> fileEntities = new HashMap<>();
+		Set<String> seenFileKeys = new HashSet<>();
 
-		deleteMissingFiles(filePaths, existingFiles);
+		for (Map.Entry<String, Path> fileEntry : filePaths.entrySet()) {
+			FileInfo fileInfo = resolveFileInfo(fileEntry.getKey(), fileEntry.getValue(), fileTypes);
+			if (fileInfo == null) continue;
+
+			seenFileKeys.add(fileInfo.fileKey());
+			MessageFileEntity existing = existingFiles.get(fileInfo.fileKey());
+
+			MessageFileEntity entity = existing != null ? existing : new MessageFileEntity();
+			entity.setNamespace(fileInfo.namespace());
+			entity.setFilePath(fileInfo.relativePath());
+			entity.setFileType(fileInfo.fileType());
+
+			MessageFileEntity saved = fileRepository.save(entity);
+			fileEntities.put(fileInfo.keyPrefix(), saved);
+		}
+
+		deleteMissingFiles(existingFiles.values(), seenFileKeys);
 
 		Map<Long, Set<String>> seenEntries = processEntries(
 				snapshot.getEntries(),
@@ -101,54 +114,47 @@ public class MessageUploadCoordinator {
 		for (String namespace : namespaces) {
 			List<MessageFileEntity> files = fileRepository.findAllByNamespace(namespace);
 			for (MessageFileEntity file : files) {
-				existing.put(file.getKeyPrefix(), file);
+				existing.put(buildFileKey(file.getNamespace(), file.getFilePath()), file);
 			}
 		}
 		return existing;
 	}
 
-	private Map<String, MessageFileEntity> upsertFileEntities(
-			Map<String, Path> filePaths,
-			Map<String, String> fileTypes,
-			Map<String, MessageFileEntity> existingFiles
-	) {
-		Map<String, MessageFileEntity> fileEntities = new HashMap<>();
-
-		for (Map.Entry<String, Path> fileEntry : filePaths.entrySet()) {
-			String keyPrefix = fileEntry.getKey();
-			Path filePath = fileEntry.getValue();
-
-			String namespace = NamespaceUtil.getNamespace(keyPrefix);
-			String rawPrefix = NamespaceUtil.stripNamespace(keyPrefix);
-			if (namespace == null || namespace.isBlank()) {
-				namespace = Constants.Namespace.INTERNAL;
-				keyPrefix = NamespaceUtil.qualify(namespace, rawPrefix);
-			}
-
-			MessageFileEntity existing = existingFiles.get(keyPrefix);
-			String relativePathString = resolveRelativePath(filePath, namespace);
-			String resolvedType = resolveFileType(keyPrefix, fileTypes);
-
-			MessageFileEntity entity = existing != null ? existing : new MessageFileEntity();
-			entity.setNamespace(namespace);
-			entity.setFilePath(relativePathString);
-			entity.setFileType(resolvedType);
-
-			MessageFileEntity saved = fileRepository.save(entity);
-			fileEntities.put(keyPrefix, saved);
-		}
-
-		return fileEntities;
-	}
-
-	private void deleteMissingFiles(Map<String, Path> filePaths, Map<String, MessageFileEntity> existingFiles) {
-		for (MessageFileEntity file : existingFiles.values()) {
-			String keyPrefix = file.getKeyPrefix();
-			if (filePaths.containsKey(keyPrefix)) continue;
+	private void deleteMissingFiles(Iterable<MessageFileEntity> existingFiles, Set<String> seenFileKeys) {
+		for (MessageFileEntity file : existingFiles) {
+			String fileKey = buildFileKey(file.getNamespace(), file.getFilePath());
+			if (seenFileKeys.contains(fileKey)) continue;
 			if (!isKnownFormat(file.getFileType())) continue;
 
 			fileRepository.deleteById(file.getId());
 		}
+	}
+
+	private FileInfo resolveFileInfo(
+			String keyPrefix,
+			Path filePath,
+			Map<String, String> fileTypes
+	) {
+		if (keyPrefix == null) return null;
+
+		String namespace = NamespaceUtil.getNamespace(keyPrefix);
+		String rawPrefix = NamespaceUtil.stripNamespace(keyPrefix);
+		if (namespace == null || namespace.isBlank()) {
+			namespace = Constants.Namespace.INTERNAL;
+			keyPrefix = NamespaceUtil.qualify(namespace, rawPrefix);
+		}
+
+		String relativePathString = resolveRelativePath(filePath, namespace);
+		String resolvedType = resolveFileType(keyPrefix, fileTypes);
+		String fileKey = buildFileKey(namespace, relativePathString);
+
+		return new FileInfo(keyPrefix, namespace, relativePathString, resolvedType, fileKey);
+	}
+
+	private String buildFileKey(String namespace, String filePath) {
+		String safeNamespace = namespace == null ? "" : namespace;
+		String safePath = filePath == null ? "" : filePath;
+		return safeNamespace + Constants.Namespace.NAMESPACE_SEPARATOR + safePath;
 	}
 
 	private Map<Long, Set<String>> processEntries(
@@ -426,4 +432,12 @@ public class MessageUploadCoordinator {
 
 		return resolved != null && formatRegistry.get(resolved).isPresent();
 	}
+
+	private record FileInfo(
+			String keyPrefix,
+			String namespace,
+			String relativePath,
+			String fileType,
+			String fileKey
+	) {}
 }

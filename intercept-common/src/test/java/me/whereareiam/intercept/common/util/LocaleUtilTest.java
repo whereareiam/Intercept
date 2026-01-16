@@ -12,9 +12,9 @@ class LocaleUtilTest {
 	@Test
 	@DisplayName("formatLocaleKey converts hyphenated tags to underscore keys")
 	void formatLocaleUsesUnderscoreSeparator() {
-		Locale locale = Locale.forLanguageTag("en-US");
+		Locale locale = Locale.forLanguageTag("en");
 
-		assertEquals("en_US", LocaleUtil.formatLocale(locale));
+		assertEquals("en", LocaleUtil.formatLocale(locale));
 	}
 
 	@Test

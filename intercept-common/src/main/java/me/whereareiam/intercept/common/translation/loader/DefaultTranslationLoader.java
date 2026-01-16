@@ -9,6 +9,8 @@ import me.whereareiam.intercept.registry.MessageFormatRegistry;
 import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
 import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 
@@ -31,9 +33,11 @@ public class DefaultTranslationLoader extends AbstractTranslationLoader {
 			NamespaceResolver namespaceResolver,
 			PlatformNamespaceProvider namespaceProvider,
 			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
+			TranslationFileCodecRegistry codecRegistry,
+			TranslationFileCodecResolver codecResolver,
 			TranslationEntryMapper entryMapper
 	) {
-		super(messagesPath, formatRegistry, reservedKeyRegistry, namespaceResolver, namespaceProvider, defaultLocaleProvider);
+		super(messagesPath, formatRegistry, reservedKeyRegistry, namespaceResolver, namespaceProvider, defaultLocaleProvider, codecRegistry, codecResolver);
 		this.entryMapper = entryMapper;
 	}
 

@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Integration tests for PlayerPersistenceService.
@@ -37,9 +37,9 @@ class PlayerPersistenceServiceTest extends BasePlayerPersistenceIntegrationTest 
 	void testSaveNewPlayer(DatabaseType type) {
 		DefaultPlayerPersistenceService service = service(type);
 		UUID playerId = UUID.randomUUID();
-		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "TestPlayer", Locale.US);
+		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "TestPlayer", Locale.ENGLISH);
 		player.setInspectionMode(true);
-		player.setLocale(Locale.US); // Explicitly set custom locale
+		player.setLocale(Locale.ENGLISH); // Explicitly set custom locale
 
 		service.savePlayer(player);
 
@@ -47,7 +47,7 @@ class PlayerPersistenceServiceTest extends BasePlayerPersistenceIntegrationTest 
 		assertTrue(entity.isPresent());
 		assertEquals(playerId, entity.get().getUniqueId());
 		assertTrue(entity.get().isInspectionMode());
-		assertEquals(Locale.US, entity.get().getLocale());
+		assertEquals(Locale.ENGLISH, entity.get().getLocale());
 	}
 
 	@ParameterizedTest
@@ -74,9 +74,9 @@ class PlayerPersistenceServiceTest extends BasePlayerPersistenceIntegrationTest 
 		UUID playerId = UUID.randomUUID();
 		
 		// Save initial data
-		TestInterceptPlayer player1 = new TestInterceptPlayer(playerId, "Player", Locale.US);
+		TestInterceptPlayer player1 = new TestInterceptPlayer(playerId, "Player", Locale.ENGLISH);
 		player1.setInspectionMode(false);
-		player1.setLocale(Locale.US); // Explicitly set custom locale
+		player1.setLocale(Locale.ENGLISH); // Explicitly set custom locale
 		service.savePlayer(player1);
 
 		// Update data

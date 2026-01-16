@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.platform.interception.messaging.persistence;
 
+import com.google.inject.Provider;
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.node.ArrayNode;
 import me.whereareiam.configura.node.Node;
@@ -7,24 +8,25 @@ import me.whereareiam.configura.node.ObjectNode;
 import me.whereareiam.configura.node.StringNode;
 import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.provider.DefaultPlatformNamespaceProvider;
+import me.whereareiam.intercept.common.persistence.DefaultTranslationFileWriter;
+import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecRegistry;
+import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecResolver;
+import me.whereareiam.intercept.common.persistence.file.codec.YamlTranslationFileCodec;
 import me.whereareiam.intercept.common.persistence.format.DefaultTranslationFormatRegistry;
-import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
 import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
 import me.whereareiam.intercept.common.persistence.format.type.template.TemplateFormat;
-import me.whereareiam.intercept.common.persistence.DefaultTranslationFileWriter;
+import me.whereareiam.intercept.common.provider.DefaultPlatformNamespaceProvider;
+import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
 import me.whereareiam.intercept.common.translation.namespace.DefaultNamespaceResolver;
+import me.whereareiam.intercept.model.config.Settings;
+import me.whereareiam.intercept.model.messaging.file.*;
 import me.whereareiam.intercept.persistence.MessageFileWriter;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
+import me.whereareiam.intercept.platform.interception.messaging.format.InterceptionKeyHandler;
 import me.whereareiam.intercept.registry.MessageFormatRegistry;
 import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
-import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.model.messaging.file.MapMessageExtensionPayload;
-import me.whereareiam.intercept.model.messaging.file.MessageExtensionKey;
-import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
-import me.whereareiam.intercept.model.messaging.file.MessageFileData;
-import me.whereareiam.intercept.model.messaging.file.MessageValue;
-import me.whereareiam.intercept.platform.interception.messaging.format.InterceptionKeyHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,8 +37,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import com.google.inject.Provider;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -67,11 +67,16 @@ class FileWritingIntegrationTest {
 				new DefaultPlatformNamespaceProvider(),
 				tempDir
 		);
+		TranslationFileCodecRegistry codecRegistry = new DefaultTranslationFileCodecRegistry();
+		codecRegistry.register(new YamlTranslationFileCodec(), null, true);
+		TranslationFileCodecResolver codecResolver = new DefaultTranslationFileCodecResolver(codecRegistry);
 		writer = new DefaultTranslationFileWriter(
 				formatRegistry,
 				reservedKeyRegistry,
 				namespaceResolver,
-				() -> Locale.US
+				() -> Locale.ENGLISH,
+				codecRegistry,
+				codecResolver
 		);
 	}
 

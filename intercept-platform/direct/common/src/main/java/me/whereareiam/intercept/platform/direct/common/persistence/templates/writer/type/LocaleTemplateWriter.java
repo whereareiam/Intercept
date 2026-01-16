@@ -1,9 +1,9 @@
 package me.whereareiam.intercept.platform.direct.common.persistence.templates.writer.type;
 
-import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.TemplateWriteContext;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.path.TemplatePathResolver;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.writer.TemplateWriter;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,6 +23,8 @@ final class LocaleTemplateWriter implements TemplateWriter {
         }
 
         TemplatePathResolver pathResolver = context.getPathResolver();
+        TranslationFileCodec codec = context.getCodec();
+        if (codec == null) return List.of();
         List<Path> generated = new ArrayList<>();
 
         for (Map.Entry<Locale, Map<String, Object>> entry : context.getGeneratedTemplates().entrySet()) {
@@ -45,7 +47,7 @@ final class LocaleTemplateWriter implements TemplateWriter {
                 continue;
 
             try {
-                Config.getDefaultWriter().write(target, entry.getValue());
+                codec.write(resolvedTarget, entry.getValue());
             } catch (Exception e) {
                 // Skip this file on error; platform can handle logging if needed
                 continue;

@@ -1,10 +1,10 @@
 package me.whereareiam.intercept.platform.direct.common.persistence.templates.writer.type;
 
-import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.TemplateMapBuilder;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.TemplateWriteContext;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.path.TemplatePathResolver;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.writer.TemplateWriter;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -26,6 +26,8 @@ final class TemplateFormatWriter implements TemplateWriter {
             return List.of();
 
         TemplatePathResolver pathResolver = context.getPathResolver();
+        TranslationFileCodec codec = context.getCodec();
+        if (codec == null) return List.of();
 
         // Extract single locale's values (preferring default locale)
         Map<String, Object> templates = TemplateMapBuilder.buildDefaultTemplateMap(
@@ -50,7 +52,7 @@ final class TemplateFormatWriter implements TemplateWriter {
                 return List.of();
 
             try {
-                Config.getDefaultWriter().write(target, templates);
+                codec.write(resolvedTarget, templates);
             } catch (Exception e) {
                 // Return empty on error; platform can handle logging if needed
                 return List.of();

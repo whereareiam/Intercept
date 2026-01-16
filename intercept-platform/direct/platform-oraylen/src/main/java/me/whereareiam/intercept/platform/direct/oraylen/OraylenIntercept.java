@@ -18,8 +18,9 @@ import me.whereareiam.keystone.serializer.SerializerEngine;
 import net.oraylen.api.annotation.OraylenExtension;
 import net.oraylen.api.loader.extension.Extension;
 import net.oraylen.api.model.library.LibraryDescriptor;
-import net.oraylen.api.translation.TranslationEngine;
-import net.oraylen.api.translation.TranslationEngineProvider;
+import net.oraylen.api.translation.file.TranslationFileCodecRegistry;
+import net.oraylen.api.translation.engine.TranslationEngine;
+import net.oraylen.api.translation.engine.TranslationEngineProvider;
 import org.incendo.cloud.CommandManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public final class OraylenIntercept extends Extension implements TranslationEngi
 	private final SerializerEngine serializerEngine;
 	private final Provider<net.oraylen.api.model.config.Settings> settingsProvider;
 	private final CommandManager<Actor> platformCommandManager;
+	private final TranslationFileCodecRegistry oraylenCodecRegistry;
 	private final Logger platformLogger = LoggerFactory.getLogger(OraylenIntercept.class);
 	private final OraylenDependencyLoader dependencyLoader;
 
@@ -44,12 +46,14 @@ public final class OraylenIntercept extends Extension implements TranslationEngi
 			@Named("extensionPath") Path extensionPath,
 			SerializerEngine serializerEngine,
 			Provider<net.oraylen.api.model.config.Settings> settingsProvider,
-			CommandManager<Actor> platformCommandManager
+			CommandManager<Actor> platformCommandManager,
+			TranslationFileCodecRegistry oraylenCodecRegistry
 	) {
 		this.extensionPath = extensionPath;
 		this.serializerEngine = serializerEngine;
 		this.settingsProvider = settingsProvider;
 		this.platformCommandManager = platformCommandManager;
+		this.oraylenCodecRegistry = oraylenCodecRegistry;
 
 		this.dependencyLoader = new OraylenDependencyLoader(false);
 	}
@@ -63,7 +67,8 @@ public final class OraylenIntercept extends Extension implements TranslationEngi
 				serializerEngine,
 				settingsProvider,
 				platformLogger,
-				platformCommandManager
+				platformCommandManager,
+				oraylenCodecRegistry
 		);
 
 		LoggingHelper loggingHelper = injector.getInjector().getInstance(LoggingHelper.class);

@@ -9,9 +9,9 @@ import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.TranslationRegistry;
 import me.whereareiam.semantica.translation.TranslationService;
 import me.whereareiam.semantica.translation.base.TranslationLocale;
-import me.whereareiam.semantica.translation.TranslationRegistry;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -23,7 +23,7 @@ public final class SemanticaTestHelper {
 		LocaleParser<Locale> localeParser = SemanticLocale::wrap;
 
 		SemanticaConfiguration<Locale> configuration = SemanticaConfiguration.<Locale>builder()
-				.defaultLocale(SemanticLocale.wrap(Locale.US))
+				.defaultLocale(SemanticLocale.wrap(Locale.ENGLISH))
 				.tagConfiguration(TagConfiguration.defaults())
 				.performance(SemanticaConfiguration.PerformanceSettings.builder()
 						.cache(SemanticaConfiguration.PerformanceSettings.CacheSettings.builder()

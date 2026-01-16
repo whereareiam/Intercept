@@ -2,22 +2,14 @@ package me.whereareiam.intercept.adapter.database.message;
 
 import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.Constants;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageEntryEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageExtensionEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageFileEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageTemplateEntity;
-import me.whereareiam.intercept.adapter.database.entity.message.MessageTranslationEntity;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageExtensionRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
-import me.whereareiam.intercept.util.NamespaceUtil;
+import me.whereareiam.intercept.adapter.database.entity.message.*;
+import me.whereareiam.intercept.adapter.database.repository.message.*;
 import me.whereareiam.intercept.model.messaging.file.MapMessageExtensionPayload;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensionKey;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
 import me.whereareiam.intercept.type.message.MessageType;
+import me.whereareiam.intercept.util.NamespaceUtil;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.LocalizedEntry;
 import me.whereareiam.semantica.model.translation.entry.TemplateEntry;
@@ -45,7 +37,7 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		Map<String, Path> filePaths = new HashMap<>();
 
 		Map<Locale, String> translations = new HashMap<>();
-		translations.put(Locale.US, "No permission");
+		translations.put(Locale.ENGLISH, "No permission");
 		translations.put(Locale.GERMANY, "Keine Berechtigung");
 
 		entries.put("errors.permissions.no-permission", localized(translations));
@@ -70,7 +62,7 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 			translationMap.put(localeStr, t.getText());
 		}
 
-		assertEquals("No permission", translationMap.get("en_US"));
+		assertEquals("No permission", translationMap.get("en"));
 		assertEquals("Keine Berechtigung", translationMap.get("de_DE"));
 	}
 
@@ -127,6 +119,33 @@ class MessageUploadIntegrationTest extends BaseMessagePersistenceIntegrationTest
 		assertTrue(fileRepo.findByFilePathAndNamespace(Constants.Namespace.INTERNAL, "errors/file1").isPresent());
 		assertTrue(fileRepo.findByFilePathAndNamespace(Constants.Namespace.INTERNAL, "errors/file2").isPresent());
 		assertEquals(2, fileRepo.count());
+	}
+
+	@ParameterizedTest
+	@EnumSource(DatabaseType.class)
+	void testReuploadDoesNotDuplicateFiles(DatabaseType type) {
+		DefaultMessagePersistenceService service = service(type);
+		MessageFileRepository fileRepo = fileRepo(type);
+		MessageEntryRepository entryRepo = entryRepo(type);
+
+		Map<String, TranslationEntry> entries = new HashMap<>();
+		Map<String, Path> filePaths = new HashMap<>();
+
+		entries.put("oraylen:en.greeting", template("Hello"));
+		filePaths.put("oraylen:en", resolveFile("en.yml"));
+
+		MessageSnapshot snapshot = new MessageSnapshot(entries, filePaths);
+
+		service.uploadMessages(snapshot);
+		assertDoesNotThrow(() -> service.uploadMessages(snapshot));
+
+		Optional<MessageFileEntity> file = fileRepo.findByFilePathAndNamespace("oraylen", "en");
+		assertTrue(file.isPresent());
+		assertEquals(1, fileRepo.count());
+
+		List<MessageEntryEntity> storedEntries = entryRepo.findAllByFileId(file.get().getId());
+		assertEquals(1, storedEntries.size());
+		assertEquals("greeting", storedEntries.get(0).getEntryKey());
 	}
 
 	@ParameterizedTest

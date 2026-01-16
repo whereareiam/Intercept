@@ -1,24 +1,24 @@
 package me.whereareiam.intercept.platform.interception.messaging.persistence;
 
-import me.whereareiam.configura.type.Format;
 import me.whereareiam.configura.Config;
 import me.whereareiam.configura.node.Node;
 import me.whereareiam.configura.node.ObjectNode;
+import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
-import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
-import me.whereareiam.intercept.common.persistence.format.DefaultFormatContext;
-import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
-import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
-import me.whereareiam.intercept.common.translation.loader.mapper.TranslationEntryMapper;
 import me.whereareiam.intercept.common.persistence.TranslationFileScanner;
+import me.whereareiam.intercept.common.persistence.format.DefaultFormatContext;
+import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
+import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
+import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
 import me.whereareiam.intercept.common.translation.loader.mapper.TextProcessor;
-import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
+import me.whereareiam.intercept.common.translation.loader.mapper.TranslationEntryMapper;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.persistence.format.MessageFormat;
-import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
+import me.whereareiam.intercept.persistence.format.MessageFormat;
+import me.whereareiam.intercept.platform.interception.SemanticaTestHelper;
+import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
@@ -65,7 +65,7 @@ class FileLoadingIntegrationTest {
 		scanner = new TranslationFileScanner(Format.YAML);
 		format = new MultiLocaleFormat();
 		reservedKeyRegistry = new DefaultReservedKeyRegistry();
-		entryMapper = new TranslationEntryMapper(new TextProcessor(), () -> Locale.US);
+		entryMapper = new TranslationEntryMapper(new TextProcessor(), () -> Locale.ENGLISH);
 
 		// Get path to test resources
 		messagesRoot = Paths.get(getClass().getResource("/messages").toURI());
@@ -82,14 +82,14 @@ class FileLoadingIntegrationTest {
 	@Test
 	void shouldLoadYamlColorPalette() {
 		Path colorsFile = messagesRoot.resolve("common/colors.yml");
-		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile, format, Locale.US);
+		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, colorsFile, format, Locale.ENGLISH);
 
 		MessageFileData data = loadFileData(colorsFile);
 		registerEntries(entryMapper.mapEntries(keyPrefix, data));
 
 		assertTrue(registry.exists("common.colors.primary"));
 		assertTrue(registry.exists("common.colors.error"));
-		String text = service.resolve("common.colors.primary", Locale.US);
+		String text = service.resolve("common.colors.primary", Locale.ENGLISH);
 		assertEquals("<#5DADE2>", text);
 	}
 
@@ -114,7 +114,7 @@ class FileLoadingIntegrationTest {
 
 		assertTrue(registry.exists("errors.permissions.no-permission"));
 
-		String enText = service.resolve("errors.permissions.no-permission", Locale.US,
+		String enText = service.resolve("errors.permissions.no-permission", Locale.ENGLISH,
 				Map.of("permission", "intercept.admin"));
 		String deText = service.resolve("errors.permissions.no-permission", Locale.GERMANY,
 				Map.of("permission", "intercept.admin"));
@@ -131,7 +131,7 @@ class FileLoadingIntegrationTest {
 
 		String result = service.resolve(
 				"errors.permissions.no-permission",
-				Locale.US,
+				Locale.ENGLISH,
 				Map.of("permission", "intercept.admin")
 		);
 
@@ -146,7 +146,7 @@ class FileLoadingIntegrationTest {
 
 		String result = service.resolve(
 				"errors.permissions.rank-required",
-				Locale.US,
+				Locale.ENGLISH,
 				Map.of("rank", "ADMIN")
 		);
 
@@ -162,7 +162,7 @@ class FileLoadingIntegrationTest {
 
 		String result = service.resolve(
 				"plugins.myplugin.debug",
-				Locale.US,
+				Locale.ENGLISH,
 				Map.of("info", "test data")
 		);
 
@@ -195,7 +195,7 @@ class FileLoadingIntegrationTest {
 	}
 
 	private void loadFile(Path file) {
-		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file, format, Locale.US);
+		String keyPrefix = scanner.buildKeyPrefix(messagesRoot, file, format, Locale.ENGLISH);
 		MessageFileData data = loadFileData(file);
 		registerEntries(entryMapper.mapEntries(keyPrefix, data));
 	}
@@ -211,7 +211,7 @@ class FileLoadingIntegrationTest {
 		DefaultFormatContext context = new DefaultFormatContext(
 				messagesRoot,
 				file,
-				Locale.US,
+				Locale.ENGLISH,
 				null,
 				reservedKeyRegistry
 		);

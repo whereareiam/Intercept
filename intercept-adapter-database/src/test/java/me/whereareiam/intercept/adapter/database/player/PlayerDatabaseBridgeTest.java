@@ -5,9 +5,9 @@ import me.whereareiam.intercept.database.DatabaseService;
 import me.whereareiam.intercept.database.PlayerPersistenceService;
 import me.whereareiam.intercept.event.EventManager;
 import me.whereareiam.intercept.event.player.PlayerAddedEvent;
+import me.whereareiam.intercept.event.player.PlayerRemovedEvent;
 import me.whereareiam.intercept.event.player.change.PlayerInspectionModeChangedEvent;
 import me.whereareiam.intercept.event.player.change.PlayerLocaleChangedEvent;
-import me.whereareiam.intercept.event.player.PlayerRemovedEvent;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.model.player.PlayerData;
 import me.whereareiam.intercept.util.EventUtil;
@@ -69,7 +69,7 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		persistenceService.savePlayer(existingPlayer);
 
 		// Create new player instance (simulating new login)
-		TestInterceptPlayer newPlayer = new TestInterceptPlayer(playerId, "ExistingPlayer", Locale.US);
+		TestInterceptPlayer newPlayer = new TestInterceptPlayer(playerId, "ExistingPlayer", Locale.ENGLISH);
 		newPlayer.setInspectionMode(false);
 
 		// Trigger event
@@ -93,7 +93,7 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 
 		// Create new player (not in database)
 		UUID playerId = UUID.randomUUID();
-		TestInterceptPlayer newPlayer = new TestInterceptPlayer(playerId, "NewPlayer", Locale.US);
+		TestInterceptPlayer newPlayer = new TestInterceptPlayer(playerId, "NewPlayer", Locale.ENGLISH);
 		newPlayer.setInspectionMode(false);
 
 		// Trigger event
@@ -102,8 +102,8 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 
 		// Verify player values remain unchanged (database had no data)
 		assertFalse(newPlayer.isInspectionMode());
-		// Custom locale is null, so getLocale() returns client locale (Locale.US from constructor)
-		assertEquals(Locale.US, newPlayer.getClientLocale());
+		// Custom locale is null, so getLocale() returns client locale (Locale.ENGLISH from constructor)
+		assertEquals(Locale.ENGLISH, newPlayer.getClientLocale());
 		assertNull(newPlayer.getCustomLocale());
 	}
 
@@ -146,7 +146,7 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 
 		// Create and save player first
 		UUID playerId = UUID.randomUUID();
-		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "InspectionTest", Locale.US);
+		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "InspectionTest", Locale.ENGLISH);
 		player.setInspectionMode(true);
 		persistenceService.savePlayer(player); // Save initially
 
@@ -175,15 +175,15 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		UUID playerId = UUID.randomUUID();
-		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "LocaleTest", Locale.US);
+		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "LocaleTest", Locale.ENGLISH);
 		player.setLocale(Locale.JAPAN); // Explicitly set custom locale
 
 		// Trigger locale changed event
-		PlayerLocaleChangedEvent event = new PlayerLocaleChangedEvent(player, Locale.US, Locale.JAPAN);
+		PlayerLocaleChangedEvent event = new PlayerLocaleChangedEvent(player, Locale.ENGLISH, Locale.JAPAN);
 		bridge.onLocaleChanged(event);
 
 		// Verify event data
-		assertEquals(Locale.US, event.getOldLocale());
+		assertEquals(Locale.ENGLISH, event.getOldLocale());
 		assertEquals(Locale.JAPAN, event.getNewLocale());
 
 		// Verify data was saved
@@ -202,13 +202,13 @@ class PlayerDatabaseBridgeTest extends BasePlayerPersistenceIntegrationTest {
 		PlayerDatabaseBridge bridge = new PlayerDatabaseBridge(persistenceService, () -> databaseService, eventManager);
 
 		UUID playerId = UUID.randomUUID();
-		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "DisabledTest", Locale.US);
+		TestInterceptPlayer player = new TestInterceptPlayer(playerId, "DisabledTest", Locale.ENGLISH);
 
 		// Trigger all events
 		bridge.onPlayerAdded(new PlayerAddedEvent(player));
 		bridge.onPlayerRemoved(new PlayerRemovedEvent(player));
 		bridge.onInspectionModeChanged(new PlayerInspectionModeChangedEvent(player, false, true));
-		bridge.onLocaleChanged(new PlayerLocaleChangedEvent(player, Locale.US, Locale.GERMANY));
+		bridge.onLocaleChanged(new PlayerLocaleChangedEvent(player, Locale.ENGLISH, Locale.GERMANY));
 
 		// Verify persistence service was never called
 		verifyNoInteractions(persistenceService);

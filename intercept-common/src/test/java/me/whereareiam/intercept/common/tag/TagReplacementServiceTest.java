@@ -3,25 +3,25 @@ package me.whereareiam.intercept.common.tag;
 import com.google.inject.Provider;
 import me.whereareiam.intercept.Reloadable;
 import me.whereareiam.intercept.common.SemanticaTestHelper;
-import me.whereareiam.intercept.tag.TagReplacementService;
-import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.common.config.template.MessagesTemplate;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
+import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;
+import me.whereareiam.intercept.tag.TagReplacementService;
 import me.whereareiam.intercept.type.ComponentType;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.keystone.Serializers;
 import me.whereareiam.keystone.model.SerializerOptions;
 import me.whereareiam.keystone.serializer.SerializerEngine;
-import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
+import me.whereareiam.semantica.translation.TranslationService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import me.whereareiam.semantica.translation.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +71,7 @@ class TagReplacementServiceTest {
 		registerMessage("welcome.message", template("Welcome to the server!"));
 		Component input = Component.text("<lang key=\"welcome.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("Welcome to the server!", plainText);
@@ -82,7 +82,7 @@ class TagReplacementServiceTest {
 		registerMessage("player.join", template("<p:name> joined the game!"));
 		Component input = Component.text("<lang key=\"player.join\" name=\"Steve\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("Steve joined the game!", plainText);
@@ -94,7 +94,7 @@ class TagReplacementServiceTest {
 		registerMessage("shop.opened", template("Shop opened"));
 		Component input = Component.text("<lang key=\"prefix.info\"> <lang key=\"shop.opened\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("[INFO] Shop opened", plainText);
@@ -106,7 +106,7 @@ class TagReplacementServiceTest {
 		Component input = Component.text("Server: ")
 				.append(Component.text("<lang key=\"welcome\">").color(NamedTextColor.GOLD));
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("Server: Welcome!", plainText);
@@ -123,7 +123,7 @@ class TagReplacementServiceTest {
 				.decorate(TextDecoration.BOLD)
 				.decorate(TextDecoration.ITALIC);
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		assertTrue(result.hasDecoration(TextDecoration.BOLD));
 		assertTrue(result.hasDecoration(TextDecoration.ITALIC));
@@ -133,7 +133,7 @@ class TagReplacementServiceTest {
 	void shouldReturnOriginalComponentWhenNoTags() {
 		Component input = Component.text("No tag here");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		assertEquals(input, result);
 	}
@@ -142,7 +142,7 @@ class TagReplacementServiceTest {
 	void shouldHandleNonExistentMessageKey() {
 		Component input = Component.text("<lang key=\"nonexistent.key\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		// Should fall back to using the key itself
@@ -154,7 +154,7 @@ class TagReplacementServiceTest {
 		registerMessage("message", template("Hello"));
 		Component input = Component.text("<lang key=\"message\"> <other key=\"test\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("Hello"));
@@ -171,7 +171,7 @@ class TagReplacementServiceTest {
 				.append(Component.text(" <lang key=\"name\">").color(NamedTextColor.BLUE))
 				.append(Component.text(" End"));
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("Start Hello World End", plainText);
@@ -184,7 +184,7 @@ class TagReplacementServiceTest {
 
 		Component input = Component.text("<lang key=\"announcement\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("[Server] Maintenance soon", plainText);
@@ -195,7 +195,7 @@ class TagReplacementServiceTest {
 		registerMessage("player.info", template("<p:name> (<p:rank>) from <p:location>"));
 		Component input = Component.text("<lang key=\"player.info\" name=\"Steve\" rank=\"Admin\" location=\"Spawn\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("Steve (Admin) from Spawn", plainText);
@@ -223,7 +223,7 @@ class TagReplacementServiceTest {
 	void shouldHandleEmptyComponent() {
 		Component input = Component.empty();
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		assertEquals(input, result);
 	}
@@ -233,7 +233,7 @@ class TagReplacementServiceTest {
 		registerMessage("item", template("Diamond Sword"));
 		Component input = Component.text("You received a <lang key=\"item\">!");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("You received a Diamond Sword!", plainText);
@@ -242,13 +242,13 @@ class TagReplacementServiceTest {
 	@Test
 	void shouldReplaceTagsWithLocalization() {
 		registerMessage("welcome", localized(java.util.Map.of(
-				Locale.US, "Welcome!",
+				Locale.ENGLISH, "Welcome!",
 				Locale.FRANCE, "Bienvenue!"
 		)));
 
 		Component input = Component.text("<lang key=\"welcome\">");
 
-		Component resultEN = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component resultEN = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 		Component resultFR = tagService.replaceTags(input, "<lang>", Locale.FRANCE);
 
 		assertEquals("Welcome!", extractPlainText(resultEN));
@@ -267,7 +267,7 @@ class TagReplacementServiceTest {
 				.append(Component.text("]").color(NamedTextColor.GRAY))
 				.build();
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH);
 
 		String plainText = extractPlainText(result);
 		assertEquals("[ALERT]", plainText);
@@ -282,7 +282,7 @@ class TagReplacementServiceTest {
 	void shouldReturnFallbackForMissingTranslationInChat() {
 		Component input = Component.text("<lang key=\"missing.chat.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.chat.message"),
@@ -295,7 +295,7 @@ class TagReplacementServiceTest {
 	void shouldReturnFallbackForMissingTranslationInUnknownSource() {
 		Component input = Component.text("<lang key=\"missing.unknown.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.UNKNOWN);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH, ComponentType.UNKNOWN);
 
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.unknown.message"),
@@ -308,7 +308,7 @@ class TagReplacementServiceTest {
 		registerMessage("existing.message", template("This exists!"));
 		Component input = Component.text("<lang key=\"existing.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		assertEquals("This exists!", plainText);
@@ -324,7 +324,7 @@ class TagReplacementServiceTest {
 				.build();
 
 		// Note: We can only pass one source, so this tests that it applies consistently
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.chat"));
@@ -337,7 +337,7 @@ class TagReplacementServiceTest {
 		messages.getFallback().setEnabled(false);
 		Component input = Component.text("<lang key=\"missing.message\">");
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		// Should just return the key when fallback is disabled
@@ -353,7 +353,7 @@ class TagReplacementServiceTest {
 				.color(NamedTextColor.BLUE)
 				.decorate(TextDecoration.BOLD);
 
-		Component result = tagService.replaceTags(input, "<lang>", Locale.US, ComponentType.CHAT);
+		Component result = tagService.replaceTags(input, "<lang>", Locale.ENGLISH, ComponentType.CHAT);
 
 		String plainText = extractPlainText(result);
 		assertTrue(plainText.contains("missing.formatted"), "Should contain the key");

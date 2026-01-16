@@ -1,7 +1,6 @@
 package me.whereareiam.intercept.platform.direct.common.persistence;
 
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.logging.Logger;
 
 import java.nio.file.FileSystems;
@@ -16,7 +15,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public final class DirectTranslationSourceResolver {
 	private final DirectTranslationPathResolver pathResolver;
-	private final Format format;
 
 	public ResolvedSource resolve(Path baseDirectory, String rawPath, Locale defaultLocale) {
 		if (rawPath == null || rawPath.isBlank()) {
@@ -116,10 +114,7 @@ public final class DirectTranslationSourceResolver {
 	}
 
 	private boolean hasSupportedExtension(Path path) {
-		String name = path.getFileName() == null ? "" : path.getFileName().toString().toLowerCase(Locale.ROOT);
-		String extension = format == null ? "" : format.getExtension();
-		return extension != null && !extension.isBlank()
-				&& name.endsWith(extension.toLowerCase(Locale.ROOT));
+		return pathResolver != null && pathResolver.hasSupportedExtension(path);
 	}
 
 	public static final class ResolvedSource {

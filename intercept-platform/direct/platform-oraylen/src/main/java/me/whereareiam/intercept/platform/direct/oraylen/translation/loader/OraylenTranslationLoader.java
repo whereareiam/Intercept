@@ -9,6 +9,8 @@ import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.platform.direct.common.translation.loader.DirectTranslationLoader;
 import me.whereareiam.intercept.platform.direct.common.translation.source.DirectTranslationSourceEntry;
 import me.whereareiam.intercept.registry.MessageFormatRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import net.oraylen.api.translation.TranslationSource;
 
 import java.nio.file.Path;
@@ -23,19 +25,27 @@ public final class OraylenTranslationLoader {
 	public OraylenTranslationLoader(
 			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
 			MessageFormatRegistry formatRegistry,
-			ReservedKeyRegistry reservedKeyRegistry
+			ReservedKeyRegistry reservedKeyRegistry,
+			TranslationFileCodecRegistry codecRegistry,
+			TranslationFileCodecResolver codecResolver
 	) {
 		this.loader = new DirectTranslationLoader(
 				defaultLocaleProvider,
 				formatRegistry,
 				reservedKeyRegistry,
+				codecRegistry,
+				codecResolver,
 				null
 		);
 		this.sourceAdapter = new OraylenTranslationSourceMapper();
 	}
 
 	public List<MessageFileData> load(Path baseDirectory, TranslationSource source) {
+		return load(null, baseDirectory, source);
+	}
+
+	public List<MessageFileData> load(String namespace, Path baseDirectory, TranslationSource source) {
 		List<DirectTranslationSourceEntry> entries = sourceAdapter.adapt(source);
-		return loader.load(baseDirectory, entries);
+		return loader.load(namespace, baseDirectory, entries);
 	}
 }

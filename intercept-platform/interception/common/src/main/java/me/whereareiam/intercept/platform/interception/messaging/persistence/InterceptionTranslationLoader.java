@@ -7,6 +7,8 @@ import com.google.inject.name.Named;
 import me.whereareiam.intercept.common.translation.loader.AbstractTranslationLoader;
 import me.whereareiam.intercept.registry.MessageFormatRegistry;
 import me.whereareiam.intercept.registry.ReservedKeyRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
 import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
 import me.whereareiam.intercept.common.translation.loader.mapper.TranslationEntryMapper;
@@ -36,9 +38,11 @@ public class InterceptionTranslationLoader extends AbstractTranslationLoader {
 			ReservedKeyRegistry reservedKeyRegistry,
 			NamespaceResolver namespaceResolver,
 			PlatformNamespaceProvider namespaceProvider,
-			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider
+			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
+			TranslationFileCodecRegistry codecRegistry,
+			TranslationFileCodecResolver codecResolver
 	) {
-		super(messagesPath, formatRegistry, reservedKeyRegistry, namespaceResolver, namespaceProvider, defaultLocaleProvider);
+		super(messagesPath, formatRegistry, reservedKeyRegistry, namespaceResolver, namespaceProvider, defaultLocaleProvider, codecRegistry, codecResolver);
 		this.entryMapper = entryMapper;
 		this.documentProcessor = documentProcessor;
 		reservedKeyRegistry.register(new InterceptionKeyHandler());

@@ -21,6 +21,6 @@ public class BukkitDefaultLocaleProvider implements Provider<Locale> {
 		if (settings != null && settings.getLocale() != null) {
 			return settings.getLocale();
 		}
-		return Locale.US;
+		return Locale.ENGLISH;
 	}
 }

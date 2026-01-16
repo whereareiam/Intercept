@@ -2,7 +2,6 @@ package me.whereareiam.intercept.common.translation.loader;
 
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import me.whereareiam.configura.Config;
 import me.whereareiam.configura.node.Node;
 import me.whereareiam.configura.node.ObjectNode;
 import me.whereareiam.intercept.Constants;
@@ -20,6 +19,9 @@ import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
 import me.whereareiam.intercept.model.messaging.file.MessageExtensions;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 
 import java.io.IOException;
@@ -43,7 +45,8 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 	private final NamespaceResolver namespaceResolver;
 	private final PlatformNamespaceProvider namespaceProvider;
 	private final Provider<Locale> defaultLocaleProvider;
-	private final TranslationFileScanner scanner;
+	private final TranslationFileCodecRegistry codecRegistry;
+	private final TranslationFileCodecResolver codecResolver;
 
 	protected AbstractTranslationLoader(
 			@Named("messagesPath") Path messagesPath,
@@ -51,7 +54,9 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 			ReservedKeyRegistry reservedKeyRegistry,
 			NamespaceResolver namespaceResolver,
 			PlatformNamespaceProvider namespaceProvider,
-			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider
+			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
+			TranslationFileCodecRegistry codecRegistry,
+			TranslationFileCodecResolver codecResolver
 	) {
 		this.messagesPath = messagesPath;
 		this.formatRegistry = formatRegistry;
@@ -59,7 +64,8 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 		this.namespaceResolver = namespaceResolver;
 		this.namespaceProvider = namespaceProvider;
 		this.defaultLocaleProvider = defaultLocaleProvider;
-		this.scanner = new TranslationFileScanner(Config.getDefaultReader().getFormat());
+		this.codecRegistry = codecRegistry;
+		this.codecResolver = codecResolver;
 	}
 
 	@Override
@@ -90,6 +96,7 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 			if (!isMessagesPathAllowed(namespace)) continue;
 			Path root = resolveNamespacePath(namespace);
 			ensureNamespaceRoot(root, namespace);
+			TranslationFileScanner scanner = new TranslationFileScanner(resolveExtensionsForNamespace(namespace));
 			List<Path> files = scanner.scanDirectory(root);
 			Logger.debug("Found %d message files in namespace %s", files.size(), namespace);
 
@@ -108,7 +115,7 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 				}
 
 				try {
-					loadFile(file, root, namespace, format, filePathMap, fileTypeMap, entries, extensions);
+					loadFile(file, root, namespace, format, scanner, filePathMap, fileTypeMap, entries, extensions);
 				} catch (Exception e) {
 					Logger.severe("Failed to load message file %s: %s", file, e.getMessage());
 				}
@@ -157,6 +164,7 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 			Path root,
 			String namespace,
 			MessageFormat format,
+			TranslationFileScanner scanner,
 			Map<String, Path> filePathMap,
 			Map<String, String> fileTypeMap,
 			Map<String, TranslationEntry> entries,
@@ -170,7 +178,7 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 		filePathMap.put(namespacedPrefix, file);
 		fileTypeMap.put(namespacedPrefix, format.getId());
 
-		ObjectNode rawData = loadRawData(file);
+		ObjectNode rawData = loadRawData(root, file, namespace);
 		if (rawData.getValues().isEmpty()) return;
 
 		DefaultFormatContext context = new DefaultFormatContext(
@@ -217,17 +225,79 @@ public abstract class AbstractTranslationLoader implements TranslationLoader {
 		return defaultFormat;
 	}
 
-	private ObjectNode loadRawData(Path file) {
-		try {
-			Node loaded = Config.getDefaultReader().readNode(file.toString());
-			if (loaded instanceof ObjectNode objectNode)
-				return objectNode;
-
+	private ObjectNode loadRawData(Path root, Path file, String namespace) {
+		TranslationFileCodec codec = resolveCodec(root, file, namespace);
+		if (codec == null) {
+			Logger.warn("No translation file codec available for file %s", file);
 			return new ObjectNode();
+		}
+
+		try {
+			return toObjectNode(codec.read(file));
 		} catch (Exception e) {
 			Logger.warn("Failed to load message file %s: %s", file, e.getMessage());
 			return new ObjectNode();
 		}
+	}
+
+	private TranslationFileCodec resolveCodec(Path root, Path file, String namespace) {
+		if (codecResolver != null) {
+			String relativePath = resolveRelativePath(root, file);
+			TranslationFileCodec resolved = codecResolver.resolve(namespace, relativePath, null);
+			if (resolved != null) return resolved;
+		}
+
+		if (codecRegistry != null) {
+			String extension = extractExtension(file);
+			if (extension != null) {
+				TranslationFileCodec resolved = codecRegistry.resolveByExtension(extension, namespace).orElse(null);
+				if (resolved != null) return resolved;
+			}
+			return codecRegistry.getDefault();
+		}
+
+		return null;
+	}
+
+	private ObjectNode toObjectNode(Map<String, Object> data) {
+		Node node = MessageFormatUtil.toNode(data);
+		if (node instanceof ObjectNode objectNode) {
+			return objectNode;
+		}
+		return new ObjectNode();
+	}
+
+	private List<String> resolveExtensionsForNamespace(String namespace) {
+		if (codecRegistry != null) {
+			Set<String> extensions = codecRegistry.fileExtensions(namespace);
+			if (extensions != null && !extensions.isEmpty()) {
+				return List.copyOf(extensions);
+			}
+			TranslationFileCodec codec = codecRegistry.getDefault();
+			if (codec != null && codec.getFileExtensions() != null && !codec.getFileExtensions().isEmpty()) {
+				return codec.getFileExtensions();
+			}
+		}
+		return List.of(".yml");
+	}
+
+	private String resolveRelativePath(Path root, Path file) {
+		if (file == null) return "";
+		if (root == null) return file.getFileName() == null ? "" : file.getFileName().toString();
+		try {
+			Path relative = root.relativize(file);
+			return relative == null ? "" : relative.toString().replace('\\', '/');
+		} catch (Exception e) {
+			return file.getFileName() == null ? "" : file.getFileName().toString();
+		}
+	}
+
+	private String extractExtension(Path file) {
+		if (file == null) return null;
+		String name = file.getFileName() != null ? file.getFileName().toString() : file.toString();
+		int dot = name.lastIndexOf('.');
+		if (dot <= 0 || dot == name.length() - 1) return null;
+		return name.substring(dot);
 	}
 
 	private Map<String, MessageExtensions> extractExtensions(String keyPrefix, MessageFileData data) {

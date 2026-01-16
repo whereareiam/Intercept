@@ -11,16 +11,18 @@ import me.whereareiam.intercept.common.persistence.format.type.template.Template
 import me.whereareiam.intercept.common.translation.loader.DefaultTranslationLoader;
 import me.whereareiam.intercept.listener.ListenerRegistrar;
 import me.whereareiam.intercept.logging.LoggingHelper;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import me.whereareiam.intercept.platform.direct.oraylen.OraylenLoggingHelper;
 import me.whereareiam.intercept.platform.direct.oraylen.OraylenPlatformInteractor;
 import me.whereareiam.intercept.platform.direct.oraylen.OraylenScheduler;
-import me.whereareiam.intercept.platform.direct.oraylen.config.PlatformSettings;
-import me.whereareiam.intercept.platform.direct.oraylen.config.provider.PlatformSettingsProvider;
 import me.whereareiam.intercept.platform.direct.oraylen.listener.OraylenListenerRegistrar;
 import me.whereareiam.intercept.platform.direct.oraylen.provider.DefaultLocaleProvider;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.OraylenNamespaceProvider;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.OraylenTranslationEngine;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.OraylenTranslationRegistry;
+import me.whereareiam.intercept.platform.direct.oraylen.translation.file.OraylenTranslationFileCodecRegistry;
+import me.whereareiam.intercept.platform.direct.oraylen.translation.file.OraylenTranslationFileCodecResolver;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.OraylenTranslationLoader;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.mapper.OraylenTranslationEntryMapper;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.mapper.OraylenPlaceholderMapper;
@@ -32,7 +34,7 @@ import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import me.whereareiam.semantica.translation.TranslationRegistry;
 import net.oraylen.api.translation.Placeholder;
-import net.oraylen.api.translation.TranslationEngine;
+import net.oraylen.api.translation.engine.TranslationEngine;
 import org.incendo.cloud.CommandManager;
 import org.slf4j.Logger;
 
@@ -46,19 +48,22 @@ final class OraylenInjectorConfiguration extends AbstractModule {
 	private final Provider<net.oraylen.api.model.config.Settings> settingsProvider;
 	private final Logger logger;
 	private final CommandManager<Actor> platformCommandManager;
+	private final net.oraylen.api.translation.file.TranslationFileCodecRegistry oraylenCodecRegistry;
 
 	public OraylenInjectorConfiguration(
 			Path extensionPath,
 			SerializerEngine serializerEngine,
 			Provider<net.oraylen.api.model.config.Settings> settingsProvider,
 			Logger logger,
-			CommandManager<Actor> platformCommandManager
+			CommandManager<Actor> platformCommandManager,
+			net.oraylen.api.translation.file.TranslationFileCodecRegistry oraylenCodecRegistry
 	) {
 		this.extensionPath = extensionPath;
 		this.serializerEngine = serializerEngine;
 		this.settingsProvider = settingsProvider;
 		this.logger = logger;
 		this.platformCommandManager = platformCommandManager;
+		this.oraylenCodecRegistry = oraylenCodecRegistry;
 	}
 
 	@Override
@@ -70,9 +75,8 @@ final class OraylenInjectorConfiguration extends AbstractModule {
 		bind(Logger.class).toInstance(logger);
 		bind(net.oraylen.api.model.config.Settings.class).toProvider(settingsProvider);
 		bind(new TypeLiteral<CommandManager<Actor>>() {}).toInstance(platformCommandManager);
-
-		bind(PlatformSettingsProvider.class).asEagerSingleton();
-		bind(PlatformSettings.class).toProvider(PlatformSettingsProvider.class);
+		bind(net.oraylen.api.translation.file.TranslationFileCodecRegistry.class)
+				.toInstance(oraylenCodecRegistry);
 
 		OptionalBinder.newOptionalBinder(
 				binder(),
@@ -97,6 +101,10 @@ final class OraylenInjectorConfiguration extends AbstractModule {
 				.setBinding().to(OraylenNamespaceProvider.class);
 		OptionalBinder.newOptionalBinder(binder(), TranslationLoader.class)
 				.setBinding().to(DefaultTranslationLoader.class);
+		OptionalBinder.newOptionalBinder(binder(), TranslationFileCodecRegistry.class)
+				.setBinding().to(OraylenTranslationFileCodecRegistry.class);
+		OptionalBinder.newOptionalBinder(binder(), TranslationFileCodecResolver.class)
+				.setBinding().to(OraylenTranslationFileCodecResolver.class);
 	}
 
 	@Inject

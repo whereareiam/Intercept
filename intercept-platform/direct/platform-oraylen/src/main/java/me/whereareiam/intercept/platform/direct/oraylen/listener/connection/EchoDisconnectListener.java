@@ -5,17 +5,18 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.listener.DynamicListener;
 import me.whereareiam.intercept.registry.PlayerRegistry;
-import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.oraylen.api.event.type.player.EchoDisconnectEvent;
+import net.oraylen.api.model.actor.Echo;
 
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
-public class PlayerDisconnectListener implements DynamicListener<PlayerDisconnectEvent> {
+public class EchoDisconnectListener implements DynamicListener<EchoDisconnectEvent> {
 	private final PlayerRegistry playerRegistry;
 
 	@Override
-	public void onEvent(PlayerDisconnectEvent event) {
-		Player player = event.getPlayer();
-		playerRegistry.removePlayerData(player.getUuid());
+	public void onEvent(EchoDisconnectEvent event) {
+		Echo echo = event.getEcho();
+		if (echo == null) return;
+		playerRegistry.removePlayerData(echo.getUniqueId());
 	}
 }

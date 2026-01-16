@@ -1,12 +1,12 @@
 no-permission:
   locales:
-    en_US: "<ref:common.styles.prefix> <ref:common.styles.error.format message='You lack permission: <ref:common.colors.accent><p:permission>'>"
+    en: "<ref:common.styles.prefix> <ref:common.styles.error.format message='You lack permission: <ref:common.colors.accent><p:permission>'>"
     de_DE: "<ref:common.styles.prefix> <ref:common.styles.error.format message='Keine Berechtigung: <ref:common.colors.accent><p:permission>'>"
     fr_FR: "<ref:common.styles.prefix> <ref:common.styles.error.format message='Permission manquante: <ref:common.colors.accent><p:permission>'>"
 
 rank-required:
   locales:
-    en_US:
+    en:
       - "<ref:common.styles.error.box"
       - "  title='Access Denied'"
       - "  message='Rank <ref:common.colors.accent><p:rank><ref:common.colors.error> required'>"

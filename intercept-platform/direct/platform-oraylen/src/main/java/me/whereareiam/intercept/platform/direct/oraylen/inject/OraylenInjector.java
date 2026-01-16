@@ -9,6 +9,7 @@ import me.whereareiam.intercept.adapter.database.DatabaseConfiguration;
 import me.whereareiam.intercept.common.CommonConfiguration;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import me.whereareiam.keystone.Actor;
+import net.oraylen.api.translation.file.TranslationFileCodecRegistry;
 import net.oraylen.api.model.config.Settings;
 import org.incendo.cloud.CommandManager;
 import org.slf4j.Logger;
@@ -25,7 +26,8 @@ public final class OraylenInjector {
 			SerializerEngine serializerEngine,
 			Provider<Settings> settingsProvider,
 			Logger logger,
-			CommandManager<Actor> platformCommandManager
+			CommandManager<Actor> platformCommandManager,
+			TranslationFileCodecRegistry oraylenCodecRegistry
 	) {
 		this.injector = Guice.createInjector(
 				new CommonConfiguration(extensionPath),
@@ -34,7 +36,8 @@ public final class OraylenInjector {
 						Objects.requireNonNull(serializerEngine, "serializerEngine"),
 						Objects.requireNonNull(settingsProvider, "settingsProvider"),
 						Objects.requireNonNull(logger, "logger"),
-						Objects.requireNonNull(platformCommandManager, "platformCommandManager")
+						Objects.requireNonNull(platformCommandManager, "platformCommandManager"),
+						Objects.requireNonNull(oraylenCodecRegistry, "oraylenCodecRegistry")
 				),
 				new DatabaseConfiguration(),
 				new CommandConfiguration()

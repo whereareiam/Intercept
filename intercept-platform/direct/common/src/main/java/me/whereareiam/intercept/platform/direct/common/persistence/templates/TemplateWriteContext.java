@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import me.whereareiam.intercept.platform.direct.common.persistence.templates.path.TemplatePathResolver;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -22,4 +23,5 @@ public final class TemplateWriteContext {
 	private final String rawPath;
 	private final Locale defaultLocale;
 	private final TemplatePathResolver pathResolver;
+	private final TranslationFileCodec codec;
 }

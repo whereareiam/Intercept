@@ -178,16 +178,12 @@ public class TranslationEntryMapper {
 
 		if (entry.localized()) {
 			Map<TranslationLocale, String> translations = new HashMap<>();
-			for (Map.Entry<Locale, String> translation : entry.locales().entrySet()) {
+			for (Map.Entry<Locale, String> translation : entry.locales().entrySet())
 				translations.put(SemanticLocale.wrap(translation.getKey()), translation.getValue());
-			}
 
 			String defaultText = entry.defaultText();
 			if (defaultText != null) {
-				Locale defaultLocale = defaultLocaleProvider == null ? Locale.US : defaultLocaleProvider.get();
-				if (defaultLocale == null) {
-					defaultLocale = Locale.US;
-				}
+				Locale defaultLocale = defaultLocaleProvider.get();
 				TranslationLocale defaultTranslationLocale = SemanticLocale.wrap(defaultLocale);
 				translations.putIfAbsent(defaultTranslationLocale, defaultText);
 			}

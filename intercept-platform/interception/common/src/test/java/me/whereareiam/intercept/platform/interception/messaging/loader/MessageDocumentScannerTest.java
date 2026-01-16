@@ -107,12 +107,12 @@ class MessageDocumentScannerTest {
 	@Test
 	void shouldHandleMultipleDotsInFilename() {
 		Path root = Path.of("/messages");
-		Path file = Path.of("/messages/test.en_US.yml");
+		Path file = Path.of("/messages/test.en.yml");
 
 		String key = yamlScanner.buildKeyPrefix(root, file);
 
 		// Should remove only the extension, not the locale part
-		assertEquals("test.en_US", key);
+		assertEquals("test.en", key);
 	}
 
 	@Test

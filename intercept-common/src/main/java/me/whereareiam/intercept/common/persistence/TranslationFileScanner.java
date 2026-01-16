@@ -7,20 +7,29 @@ import me.whereareiam.intercept.persistence.format.MessageFormat;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
  * Scans message directories and builds key prefixes from directory structure.
  */
 public class TranslationFileScanner {
-	private final String[] supportedExtensions;
+	private final Set<String> supportedExtensions;
+
+	public TranslationFileScanner(Iterable<String> extensions) {
+		Set<String> resolved = new HashSet<>();
+		if (extensions != null) {
+			for (String extension : extensions) {
+				if (extension == null || extension.isBlank()) continue;
+				String normalized = extension.startsWith(".") ? extension : "." + extension;
+				resolved.add(normalized.toLowerCase(Locale.ROOT));
+			}
+		}
+		this.supportedExtensions = Set.copyOf(resolved);
+	}
 
 	public TranslationFileScanner(Format format) {
-		this.supportedExtensions = new String[]{format.getExtension()};
+		this(List.of(format.getExtension()));
 	}
 
 	/**
@@ -96,9 +105,7 @@ public class TranslationFileScanner {
 	private boolean isMessageFile(Path path) {
 		String fileName = path.getFileName().toString().toLowerCase();
 		for (String ext : supportedExtensions) {
-			if (fileName.endsWith(ext)) {
-				return true;
-			}
+			if (fileName.endsWith(ext)) return true;
 		}
 		return false;
 	}

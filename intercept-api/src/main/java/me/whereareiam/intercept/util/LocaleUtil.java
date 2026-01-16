@@ -10,7 +10,7 @@ public final class LocaleUtil {
 	}
 
 	/**
-	 * Parses a locale string (e.g., "en_US") into a Locale object.
+	 * Parses a locale string (e.g., "en") into a Locale object.
 	 * Compatible with Java 17.
 	 *
 	 * @param localeString The locale string to parse
@@ -26,7 +26,7 @@ public final class LocaleUtil {
 	}
 
 	/**
-	 * Formats a Locale into the underscore separated form expected by message files (e.g., "en_US").
+	 * Formats a Locale into the underscore separated form expected by message files (e.g., "en").
 	 *
 	 * @param locale The locale to format
 	 * @return The underscore separated locale string

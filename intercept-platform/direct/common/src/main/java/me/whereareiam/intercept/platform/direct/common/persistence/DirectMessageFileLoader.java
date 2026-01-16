@@ -1,11 +1,12 @@
 package me.whereareiam.intercept.platform.direct.common.persistence;
 
-import me.whereareiam.configura.Config;
 import me.whereareiam.configura.node.Node;
 import me.whereareiam.configura.node.ObjectNode;
+import me.whereareiam.intercept.common.util.MessageFormatUtil;
 import me.whereareiam.intercept.logging.Logger;
 import me.whereareiam.intercept.platform.direct.common.persistence.format.DirectFormatContext;
 import me.whereareiam.intercept.persistence.format.MessageFormat;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
 import me.whereareiam.intercept.registry.ReservedKeyRegistry;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.registry.MessageFormatRegistry;
@@ -20,6 +21,7 @@ public final class DirectMessageFileLoader {
 	public MessageFileData load(
 			Path root,
 			Path file,
+			TranslationFileCodec codec,
 			String formatId,
 			boolean applyPrefix,
 			Locale defaultLocale,
@@ -29,18 +31,7 @@ public final class DirectMessageFileLoader {
 		if (file == null || !Files.isRegularFile(file))
 			return new MessageFileData();
 
-		ObjectNode data;
-		try {
-			Node loaded = Config.getDefaultReader().readNode(file.toString());
-			if (loaded instanceof ObjectNode objectNode) {
-				data = objectNode;
-			} else {
-				data = new ObjectNode();
-			}
-		} catch (Exception e) {
-			Logger.warn("Failed to load translation file {}: {}", file, e.getMessage());
-			return new MessageFileData();
-		}
+		ObjectNode data = readData(file, codec);
 
 		if (data.getValues().isEmpty())
 			return new MessageFileData();
@@ -70,6 +61,25 @@ public final class DirectMessageFileLoader {
 		}
 
 		return fileData;
+	}
+
+	private ObjectNode readData(Path file, TranslationFileCodec codec) {
+		if (codec == null) {
+			Logger.warn("No translation file codec available for file {}", file);
+			return new ObjectNode();
+		}
+
+		try {
+			Map<String, Object> raw = codec.read(file);
+			Node loaded = MessageFormatUtil.toNode(raw);
+			if (loaded instanceof ObjectNode objectNode) {
+				return objectNode;
+			}
+		} catch (Exception e) {
+			Logger.warn("Failed to load translation file {}: {}", file, e.getMessage());
+		}
+
+		return new ObjectNode();
 	}
 
 	private MessageFileData applyPrefix(MessageFileData data, String prefix) {
@@ -105,4 +115,3 @@ public final class DirectMessageFileLoader {
 		}
 	}
 }
-

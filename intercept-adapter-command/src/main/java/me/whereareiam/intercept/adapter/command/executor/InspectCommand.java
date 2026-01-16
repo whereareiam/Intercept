@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.annotation.Definition;
+import me.whereareiam.commandant.model.Console;
 import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
@@ -15,6 +16,7 @@ import org.incendo.cloud.annotations.Command;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -45,12 +47,20 @@ public class InspectCommand {
 	 */
 	@Nullable
 	private InterceptPlayer getInterceptPlayer(@NotNull Actor sender) {
-		if (!(sender instanceof InterceptPlayer interceptPlayer)) {
+		if (sender instanceof Console) {
 			sendErrorMessage(sender, "This command can only be used by players.");
 			return null;
 		}
 
-		return interceptPlayer;
+		if (sender instanceof InterceptPlayer interceptPlayer) return interceptPlayer;
+
+		Optional<InterceptPlayer> stored = playerRegistry.getPlayerData(sender.getUniqueId());
+		if (stored.isEmpty()) {
+			sendErrorMessage(sender, "This command can only be used by players.");
+			return null;
+		}
+
+		return stored.get();
 	}
 
 	/**

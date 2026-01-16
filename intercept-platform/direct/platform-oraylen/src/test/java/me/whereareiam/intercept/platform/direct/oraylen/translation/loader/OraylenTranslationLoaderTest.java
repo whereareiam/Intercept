@@ -2,6 +2,9 @@ package me.whereareiam.intercept.platform.direct.oraylen.translation.loader;
 
 import com.google.inject.Provider;
 import me.whereareiam.configura.Config;
+import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecRegistry;
+import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecResolver;
+import me.whereareiam.intercept.common.persistence.file.codec.YamlTranslationFileCodec;
 import me.whereareiam.intercept.common.persistence.format.DefaultTranslationFormatRegistry;
 import me.whereareiam.intercept.common.persistence.format.type.locale.LocaleFormat;
 import me.whereareiam.intercept.common.persistence.format.type.multilocale.MultiLocaleFormat;
@@ -9,10 +12,12 @@ import me.whereareiam.intercept.common.persistence.format.type.template.Template
 import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.model.messaging.file.MessageValue;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import me.whereareiam.intercept.registry.MessageFormatRegistry;
 import me.whereareiam.intercept.registry.ReservedKeyRegistry;
-import net.oraylen.api.translation.FileFormat;
 import net.oraylen.api.translation.TranslationSource;
+import net.oraylen.api.type.FileFormat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -39,10 +44,15 @@ class OraylenTranslationLoaderTest {
 		formatRegistry.register(new MultiLocaleFormat(), false);
 		formatRegistry.register(new TemplateFormat(), false);
 		ReservedKeyRegistry reservedKeyRegistry = new DefaultReservedKeyRegistry();
+		TranslationFileCodecRegistry codecRegistry = new DefaultTranslationFileCodecRegistry();
+		codecRegistry.register(new YamlTranslationFileCodec(), null, true);
+		TranslationFileCodecResolver codecResolver = new DefaultTranslationFileCodecResolver(codecRegistry);
 		loader = new OraylenTranslationLoader(
 				localeProvider,
 				formatRegistry,
-				reservedKeyRegistry
+				reservedKeyRegistry,
+				codecRegistry,
+				codecResolver
 		);
 	}
 

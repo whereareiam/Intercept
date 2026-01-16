@@ -20,7 +20,7 @@ public class PlatformSettingsTemplate implements TemplateProvider<PlatformSettin
 	@Override
 	public PlatformSettings supply(PlatformSettings settings) {
 		// Set defaults
-		settings.setLocale(Locale.US);
+		settings.setLocale(Locale.ENGLISH);
 
 		PlatformSettings.Serialization serialization = new PlatformSettings.Serialization();
 		serialization.setType("MINIMESSAGE");

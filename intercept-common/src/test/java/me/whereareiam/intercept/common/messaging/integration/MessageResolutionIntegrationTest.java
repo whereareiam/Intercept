@@ -1,10 +1,10 @@
 package me.whereareiam.intercept.common.messaging.integration;
 
 import me.whereareiam.intercept.Reloadable;
+import me.whereareiam.intercept.common.SemanticaTestHelper;
 import me.whereareiam.intercept.common.config.template.SettingsTemplate;
 import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
 import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
-import me.whereareiam.intercept.common.SemanticaTestHelper;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.registry.base.Registry;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
@@ -56,12 +56,12 @@ class MessageResolutionIntegrationTest {
 		// Setup messages
 		registerMessage("errors.no.permission", SemanticaTestHelper.localized(
 				Map.of(
-						Locale.US, "<ref:styles.prefix> <ref:styles.error.format message='You lack permission: <p:permission>'>",
+						Locale.ENGLISH, "<ref:styles.prefix> <ref:styles.error.format message='You lack permission: <p:permission>'>",
 						Locale.GERMANY, "<ref:styles.prefix> <ref:styles.error.format message='Keine Berechtigung: <p:permission>'>"
 				)));
 
 		// Resolve in English
-		String enResult = service.resolve("errors.no.permission", Locale.US,
+		String enResult = service.resolve("errors.no.permission", Locale.ENGLISH,
 				Map.of("permission", "intercept.admin"));
 		assertEquals("<#5DADE2>[Intercept]<reset> <red>? You lack permission: intercept.admin", enResult);
 
@@ -78,12 +78,12 @@ class MessageResolutionIntegrationTest {
 				"<ref:prefix> Player <p:player> is <if online==true><green>online<else><red>offline</if><if online==true> on server <p:server></if>"));
 
 		// Online player
-		String onlineResult = service.resolve("player.status", Locale.US,
+		String onlineResult = service.resolve("player.status", Locale.ENGLISH,
 				Map.of("player", "Steve", "online", true, "server", "lobby"));
 		assertEquals("[Server] Player Steve is <green>online on server lobby", onlineResult);
 
 		// Offline player
-		String offlineResult = service.resolve("player.status", Locale.US,
+		String offlineResult = service.resolve("player.status", Locale.ENGLISH,
 				Map.of("player", "Alex", "online", false));
 		assertEquals("[Server] Player Alex is <red>offline", offlineResult);
 	}
@@ -94,7 +94,7 @@ class MessageResolutionIntegrationTest {
 		registerMessage("wrapper", SemanticaTestHelper.template("[<ref:base.color><p:content>]"));
 		registerMessage("message", SemanticaTestHelper.template("<ref:wrapper content='Important'>"));
 
-		String result = service.resolve("message", Locale.US);
+		String result = service.resolve("message", Locale.ENGLISH);
 		assertEquals("[<yellow>Important]", result);
 	}
 
@@ -103,15 +103,15 @@ class MessageResolutionIntegrationTest {
 		registerMessage("complex", SemanticaTestHelper.template(
 				"<if rank==admin><red>[Admin]<else><if rank==mod><blue>[Mod]<else><gray>[Player]</if></if> <p:name>: <p:message>"));
 
-		String adminResult = service.resolve("complex", Locale.US,
+		String adminResult = service.resolve("complex", Locale.ENGLISH,
 				Map.of("rank", "admin", "name", "Steve", "message", "Hello"));
 		assertEquals("<red>[Admin] Steve: Hello", adminResult);
 
-		String modResult = service.resolve("complex", Locale.US,
+		String modResult = service.resolve("complex", Locale.ENGLISH,
 				Map.of("rank", "mod", "name", "Alex", "message", "Hi"));
 		assertEquals("<blue>[Mod] Alex: Hi", modResult);
 
-		String playerResult = service.resolve("complex", Locale.US,
+		String playerResult = service.resolve("complex", Locale.ENGLISH,
 				Map.of("rank", "player", "name", "Bob", "message", "Hey"));
 		assertEquals("<gray>[Player] Bob: Hey", playerResult);
 	}
@@ -121,11 +121,11 @@ class MessageResolutionIntegrationTest {
 		registerMessage("vip.welcome", SemanticaTestHelper.template(
 				"<if vip==true><gold>[VIP] </if>Welcome, <p:name>!"));
 
-		String vipResult = service.resolve("vip.welcome", Locale.US,
+		String vipResult = service.resolve("vip.welcome", Locale.ENGLISH,
 				Map.of("vip", true, "name", "Steve"));
 		assertEquals("<gold>[VIP] Welcome, Steve!", vipResult);
 
-		String normalResult = service.resolve("vip.welcome", Locale.US,
+		String normalResult = service.resolve("vip.welcome", Locale.ENGLISH,
 				Map.of("vip", false, "name", "Alex"));
 		assertEquals("Welcome, Alex!", normalResult);
 	}
@@ -137,7 +137,7 @@ class MessageResolutionIntegrationTest {
 		registerMessage("c", SemanticaTestHelper.template("<ref:b>C"));
 		registerMessage("final", SemanticaTestHelper.template("Value: <ref:c>"));
 
-		String result = service.resolve("final", Locale.US);
+		String result = service.resolve("final", Locale.ENGLISH);
 		assertEquals("Value: ABC", result);
 	}
 
@@ -147,7 +147,7 @@ class MessageResolutionIntegrationTest {
 				"Hello, <p:name>! Balance: <p:balance>"));
 
 		// Only provide one placeholder
-		String result = service.resolve("msg", Locale.US, Map.of("name", "Steve"));
+		String result = service.resolve("msg", Locale.ENGLISH, Map.of("name", "Steve"));
 		assertEquals("Hello, Steve! Balance: <p:balance>", result);
 	}
 
@@ -158,7 +158,7 @@ class MessageResolutionIntegrationTest {
 		registerMessage("error", SemanticaTestHelper.template(
 				"<ref:box title='Error' message='Something went wrong'>"));
 
-		String result = service.resolve("error", Locale.US);
+		String result = service.resolve("error", Locale.ENGLISH);
 		assertEquals("ÉÍÍÍ»\nº Error º\nº Something went wrong º\nÈÍÍÍ»", result);
 	}
 
@@ -167,10 +167,10 @@ class MessageResolutionIntegrationTest {
 		registerMessage("health.status", SemanticaTestHelper.template(
 				"Health: <if health==75><green>Good<else><red>Low</if> (<p:health>/100)"));
 
-		String goodHealth = service.resolve("health.status", Locale.US, Map.of("health", 75));
+		String goodHealth = service.resolve("health.status", Locale.ENGLISH, Map.of("health", 75));
 		assertEquals("Health: <green>Good (75/100)", goodHealth);
 
-		String lowHealth = service.resolve("health.status", Locale.US, Map.of("health", 25));
+		String lowHealth = service.resolve("health.status", Locale.ENGLISH, Map.of("health", 25));
 		assertEquals("Health: <red>Low (25/100)", lowHealth);
 	}
 

@@ -9,6 +9,7 @@ import me.whereareiam.commandant.CommandantKeys;
 import me.whereareiam.commandant.ExceptionHandlerRegistrar;
 import me.whereareiam.commandant.annotation.Definition;
 import me.whereareiam.commandant.model.message.ExceptionMessages;
+import me.whereareiam.intercept.adapter.command.serializer.ScopedSerializerEngine;
 import me.whereareiam.intercept.command.CommandService;
 import me.whereareiam.intercept.adapter.command.definition.CommandDefinitionAdapter;
 import me.whereareiam.intercept.adapter.command.executor.*;
@@ -19,6 +20,7 @@ import me.whereareiam.intercept.adapter.command.suggestion.PlayerSuggestionProvi
 import me.whereareiam.intercept.model.CommandDefinition;
 import me.whereareiam.intercept.model.config.Commands;
 import me.whereareiam.intercept.model.config.Messages;
+import me.whereareiam.intercept.util.Serializer;
 import me.whereareiam.keystone.Actor;
 import me.whereareiam.keystone.serializer.SerializerEngine;
 import org.incendo.cloud.Command;
@@ -161,7 +163,8 @@ public class DefaultCommandService implements CommandService {
 				? messagesProvider.get().getCommands().getExceptions()
 				: new ExceptionMessages();
 
-		ExceptionHandlerRegistrar.register(commandManager, exceptionMessages, serializer, Actor::getAudience);
+		SerializerEngine scopedSerializer = new ScopedSerializerEngine(serializer, Serializer.SCOPE);
+		ExceptionHandlerRegistrar.register(commandManager, exceptionMessages, scopedSerializer, Actor::getAudience);
 	}
 
 	private @NotNull AnnotationParser<Actor> createCommandAnnotationParser(

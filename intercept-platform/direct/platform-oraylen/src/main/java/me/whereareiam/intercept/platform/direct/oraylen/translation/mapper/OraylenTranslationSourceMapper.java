@@ -2,8 +2,8 @@ package me.whereareiam.intercept.platform.direct.oraylen.translation.mapper;
 
 import me.whereareiam.intercept.platform.direct.common.translation.source.DirectDefaultsProvider;
 import me.whereareiam.intercept.platform.direct.common.translation.source.DirectTranslationSourceEntry;
-import net.oraylen.api.translation.FileFormat;
 import net.oraylen.api.translation.TranslationSource;
+import net.oraylen.api.type.FileFormat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +19,14 @@ public final class OraylenTranslationSourceMapper {
 			String path = entry.path();
 			FileFormat format = entry.format();
 			String formatId = format != null ? format.name() : FileFormat.LOCALE.name();
+			String fileType = entry.fileType();
 			boolean multiLocale = format == FileFormat.MULTI_LOCALE;
 			DirectDefaultsProvider defaultsProvider = adaptDefaults(entry.defaultsProvider());
 
 			entries.add(new DirectTranslationSourceEntry(
 					path,
 					formatId,
+					fileType,
 					multiLocale,
 					entry.optional(),
 					defaultsProvider

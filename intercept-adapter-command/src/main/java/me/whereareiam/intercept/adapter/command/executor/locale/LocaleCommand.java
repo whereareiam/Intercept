@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import me.whereareiam.commandant.annotation.Definition;
+import me.whereareiam.commandant.model.Console;
 import me.whereareiam.intercept.model.config.Messages;
 import me.whereareiam.intercept.model.player.InterceptPlayer;
 import me.whereareiam.intercept.registry.PlayerRegistry;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Command that allows players to update their preferred locale.
@@ -61,12 +63,20 @@ public class LocaleCommand extends AbstractLocaleCommand {
 			@NotNull Actor sender,
 			@NotNull Messages.Commands.LocaleCommand localeMessages
 	) {
-		if (!(sender instanceof InterceptPlayer interceptPlayer)) {
+		if (sender instanceof Console) {
 			sendPlainMessage(sender, localeMessages.getPlayerOnly());
 			return null;
 		}
 
-		return interceptPlayer;
+		if (sender instanceof InterceptPlayer interceptPlayer) return interceptPlayer;
+
+		Optional<InterceptPlayer> stored = playerRegistry.getPlayerData(sender.getUniqueId());
+		if (stored.isEmpty()) {
+			sendPlainMessage(sender, localeMessages.getPlayerOnly());
+			return null;
+		}
+
+		return stored.get();
 	}
 }
 

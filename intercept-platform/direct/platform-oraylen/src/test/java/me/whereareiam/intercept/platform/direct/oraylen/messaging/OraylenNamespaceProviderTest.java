@@ -1,10 +1,15 @@
 package me.whereareiam.intercept.platform.direct.oraylen.messaging;
 
+import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecRegistry;
+import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecResolver;
+import me.whereareiam.intercept.common.persistence.file.codec.YamlTranslationFileCodec;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.OraylenNamespaceProvider;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.OraylenTranslationRegistry;
 import net.oraylen.api.Namespace;
-import net.oraylen.api.translation.FileFormat;
 import net.oraylen.api.translation.TranslationSource;
+import net.oraylen.api.type.FileFormat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -31,7 +36,15 @@ class OraylenNamespaceProviderTest {
 		Namespace namespace = Namespace.plugin("alpha");
 		registry.registerNamespace(namespace, tempDir, source, Set.of("alpha:key"));
 
-		OraylenNamespaceProvider provider = new OraylenNamespaceProvider(registry, () -> Locale.ENGLISH);
+		TranslationFileCodecRegistry codecRegistry = new DefaultTranslationFileCodecRegistry();
+		codecRegistry.register(new YamlTranslationFileCodec(), null, true);
+		TranslationFileCodecResolver codecResolver = new DefaultTranslationFileCodecResolver(codecRegistry);
+		OraylenNamespaceProvider provider = new OraylenNamespaceProvider(
+				registry,
+				() -> Locale.ENGLISH,
+				codecRegistry,
+				codecResolver
+		);
 		Map<String, Path> roots = provider.getNamespacePaths(tempDir);
 
 		Path expected = tempDir.resolve("messages").resolve("admin").normalize();

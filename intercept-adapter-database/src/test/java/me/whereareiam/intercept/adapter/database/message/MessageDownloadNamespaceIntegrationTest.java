@@ -4,18 +4,14 @@ import me.whereareiam.dialectica.type.DatabaseType;
 import me.whereareiam.intercept.Constants;
 import me.whereareiam.intercept.adapter.database.BaseTest;
 import me.whereareiam.intercept.adapter.database.message.coordinator.MessageDownloadCoordinator;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageEntryRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageExtensionRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageFileRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageTemplateRepository;
-import me.whereareiam.intercept.adapter.database.repository.message.MessageTranslationRepository;
-import me.whereareiam.intercept.persistence.MessageFileWriter;
-import me.whereareiam.intercept.registry.MessageFormatRegistry;
-import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
-import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
+import me.whereareiam.intercept.adapter.database.repository.message.*;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import me.whereareiam.intercept.model.messaging.snapshot.MessageSnapshot;
+import me.whereareiam.intercept.persistence.MessageFileWriter;
+import me.whereareiam.intercept.registry.MessageFormatRegistry;
+import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
+import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
 import me.whereareiam.intercept.type.message.MessageType;
 import me.whereareiam.intercept.util.NamespaceUtil;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,15 +20,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MessageDownloadNamespaceIntegrationTest extends BaseTest {
 	@ParameterizedTest
@@ -277,7 +267,7 @@ class MessageDownloadNamespaceIntegrationTest extends BaseTest {
 			String text
 	) {
 		long entryId = entryRepository.insert(fileId, entryKey, entryKey, MessageType.MESSAGE.name());
-		translationRepository.insert(entryId, Locale.US, text);
+		translationRepository.insert(entryId, Locale.ENGLISH, text);
 	}
 
 	private String buildKeyPrefix(String namespace, String filePath) {

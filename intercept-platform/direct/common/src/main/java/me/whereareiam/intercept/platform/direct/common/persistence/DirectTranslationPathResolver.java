@@ -1,16 +1,20 @@
 package me.whereareiam.intercept.platform.direct.common.persistence;
 
-import me.whereareiam.configura.type.Format;
 import me.whereareiam.intercept.util.MessageKeyUtil;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 
 public final class DirectTranslationPathResolver {
-	private final String extension;
+	private final List<String> extensions;
+	private final String defaultExtension;
 
-	public DirectTranslationPathResolver(Format format) {
-		this.extension = format == null ? "" : format.getExtension();
+	public DirectTranslationPathResolver(Iterable<String> extensions) {
+		this.extensions = normalizeExtensions(extensions);
+		this.defaultExtension = resolveDefaultExtension(this.extensions);
 	}
 
 	public boolean containsGlob(String path) {
@@ -36,8 +40,7 @@ public final class DirectTranslationPathResolver {
 
 	public boolean looksLikeFilePath(String rawPath, Locale defaultLocale) {
 		String lower = rawPath.toLowerCase(Locale.ROOT);
-		String extensionLower = extension.toLowerCase(Locale.ROOT);
-		if (!extensionLower.isBlank() && lower.endsWith(extensionLower)) return true;
+		if (hasSupportedExtension(lower)) return true;
 
 		Path path = Path.of(rawPath);
 		String fileName = path.getFileName() == null ? rawPath : path.getFileName().toString();
@@ -49,24 +52,28 @@ public final class DirectTranslationPathResolver {
 
 	public Path resolveExistingPath(Path path) {
 		if (path == null) return null;
-		if (java.nio.file.Files.exists(path)) return path;
+		if (Files.exists(path)) return path;
 		String raw = path.toString();
-		String lower = raw.toLowerCase(Locale.ROOT);
-		String extensionLower = extension.toLowerCase(Locale.ROOT);
-		if (!extensionLower.isBlank() && lower.endsWith(extensionLower)) return path;
+		String lower = raw.toLowerCase();
+		if (hasSupportedExtension(lower)) return path;
 
-		Path withExt = Path.of(raw + extension);
-		if (java.nio.file.Files.exists(withExt)) return withExt;
+		for (String extension : extensions) {
+			if (extension == null || extension.isBlank()) continue;
+			Path withExt = Path.of(raw + extension);
+			if (Files.exists(withExt)) return withExt;
+		}
 		return path;
 	}
 
 	public Path resolvePathWithFormat(Path path) {
 		if (path == null) return null;
 		String raw = path.toString();
-		String lower = raw.toLowerCase(Locale.ROOT);
-		String extensionLower = extension.toLowerCase(Locale.ROOT);
-		if (!extensionLower.isBlank() && lower.endsWith(extensionLower)) return path;
-		return Path.of(raw + extension);
+		String lower = raw.toLowerCase();
+		if (hasSupportedExtension(lower)) return path;
+
+		if (defaultExtension == null || defaultExtension.isBlank()) return path;
+
+		return Path.of(raw + defaultExtension);
 	}
 
 	public String formatLocale(Locale locale) {
@@ -74,6 +81,7 @@ public final class DirectTranslationPathResolver {
 		StringBuilder builder = new StringBuilder(locale.getLanguage());
 		if (!locale.getCountry().isEmpty()) builder.append('_').append(locale.getCountry());
 		if (!locale.getVariant().isEmpty()) builder.append('_').append(locale.getVariant());
+
 		return builder.toString();
 	}
 
@@ -93,5 +101,46 @@ public final class DirectTranslationPathResolver {
 		int index = name.lastIndexOf('.');
 		if (index <= 0) return name;
 		return name.substring(0, index);
+	}
+
+	public boolean hasSupportedExtension(Path path) {
+		if (path == null) return false;
+		String name = path.getFileName() == null ? "" : path.getFileName().toString().toLowerCase();
+		return hasSupportedExtension(name);
+	}
+
+	private boolean hasSupportedExtension(String lowerName) {
+		if (extensions.isEmpty()) return true;
+		for (String extension : extensions) {
+			if (extension == null || extension.isBlank()) continue;
+			if (lowerName.endsWith(extension)) return true;
+		}
+
+		return false;
+	}
+
+	private List<String> normalizeExtensions(Iterable<String> rawExtensions) {
+		if (rawExtensions == null) return List.of();
+		LinkedHashSet<String> normalized = new LinkedHashSet<>();
+
+		for (String extension : rawExtensions) {
+			if (extension == null) continue;
+			String trimmed = extension.trim();
+
+			if (trimmed.isEmpty()) continue;
+			String withDot = trimmed.startsWith(".") ? trimmed : "." + trimmed;
+			normalized.add(withDot.toLowerCase());
+		}
+
+		if (normalized.isEmpty()) return List.of();
+
+		return List.copyOf(normalized);
+	}
+
+	private String resolveDefaultExtension(List<String> extensions) {
+		if (extensions == null || extensions.isEmpty()) return ".yml";
+		String first = extensions.getFirst();
+
+		return first == null || first.isBlank() ? ".yml" : first;
 	}
 }

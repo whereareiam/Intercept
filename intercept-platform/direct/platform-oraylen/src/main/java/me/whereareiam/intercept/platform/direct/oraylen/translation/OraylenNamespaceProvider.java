@@ -4,10 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import me.whereareiam.configura.Config;
 import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
 import me.whereareiam.intercept.platform.direct.common.persistence.DirectTranslationPathResolver;
 import me.whereareiam.intercept.platform.direct.common.persistence.DirectTranslationSourceResolver;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
+import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
 import net.oraylen.api.Namespace;
 import net.oraylen.api.translation.TranslationSource;
 
@@ -27,14 +29,20 @@ import java.util.Set;
 public class OraylenNamespaceProvider implements PlatformNamespaceProvider {
 	private final OraylenTranslationRegistry registry;
 	private final Provider<Locale> defaultLocaleProvider;
+	private final TranslationFileCodecRegistry codecRegistry;
+	private final TranslationFileCodecResolver codecResolver;
 
 	@Inject
 	public OraylenNamespaceProvider(
 			OraylenTranslationRegistry registry,
-			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider
+			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
+			TranslationFileCodecRegistry codecRegistry,
+			TranslationFileCodecResolver codecResolver
 	) {
 		this.registry = registry;
 		this.defaultLocaleProvider = defaultLocaleProvider;
+		this.codecRegistry = codecRegistry;
+		this.codecResolver = codecResolver;
 	}
 
 	@Override
@@ -92,17 +100,12 @@ public class OraylenNamespaceProvider implements PlatformNamespaceProvider {
 		if (namespaces.isEmpty()) return Map.of();
 
 		Locale defaultLocale = defaultLocaleProvider.get();
-		DirectTranslationPathResolver pathResolver = new DirectTranslationPathResolver(Config.getDefaultReader().getFormat());
-		DirectTranslationSourceResolver sourceResolver = new DirectTranslationSourceResolver(
-				pathResolver,
-				Config.getDefaultReader().getFormat()
-		);
 
 		Map<String, Path> resolved = new LinkedHashMap<>();
 		for (Namespace namespace : namespaces) {
 			if (namespace == null) continue;
 			OraylenTranslationRegistry.NamespaceRegistration registration = registry.getNamespaceRegistration(namespace);
-			Path root = resolveNamespaceRoot(registration, defaultLocale, sourceResolver);
+			Path root = resolveNamespaceRoot(namespace, registration, defaultLocale);
 			if (root != null) {
 				resolved.put(namespace.value(), root);
 			}
@@ -112,9 +115,9 @@ public class OraylenNamespaceProvider implements PlatformNamespaceProvider {
 	}
 
 	private Path resolveNamespaceRoot(
+			Namespace namespace,
 			OraylenTranslationRegistry.NamespaceRegistration registration,
-			Locale defaultLocale,
-			DirectTranslationSourceResolver sourceResolver
+			Locale defaultLocale
 	) {
 		if (registration == null || registration.baseDirectory() == null || registration.source() == null) {
 			return null;
@@ -130,15 +133,52 @@ public class OraylenNamespaceProvider implements PlatformNamespaceProvider {
 		}
 
 		candidates.sort((left, right) -> Integer.compare(
-				sourceResolver.specificity(right.path(), defaultLocale),
-				sourceResolver.specificity(left.path(), defaultLocale)
+				specificity(namespace, right, defaultLocale),
+				specificity(namespace, left, defaultLocale)
 		));
 
 		for (TranslationSource.Source source : candidates) {
+			TranslationFileCodec codec = resolveCodec(namespace, source);
+			DirectTranslationPathResolver pathResolver = new DirectTranslationPathResolver(resolveExtensions(codec));
+			DirectTranslationSourceResolver sourceResolver = new DirectTranslationSourceResolver(pathResolver);
 			Path root = sourceResolver.resolveRoot(registration.baseDirectory(), source.path(), defaultLocale);
 			if (root != null) return root;
 		}
 
 		return null;
+	}
+
+	private int specificity(Namespace namespace, TranslationSource.Source source, Locale defaultLocale) {
+		if (source == null) return 0;
+		TranslationFileCodec codec = resolveCodec(namespace, source);
+		DirectTranslationPathResolver pathResolver = new DirectTranslationPathResolver(resolveExtensions(codec));
+		DirectTranslationSourceResolver sourceResolver = new DirectTranslationSourceResolver(pathResolver);
+		return sourceResolver.specificity(source.path(), defaultLocale);
+	}
+
+	private TranslationFileCodec resolveCodec(Namespace namespace, TranslationSource.Source source) {
+		String fileType = source == null ? null : source.fileType();
+		String path = source == null ? null : source.path();
+		String namespaceValue = namespace == null ? null : namespace.value();
+		if (codecResolver != null) {
+			TranslationFileCodec resolved = codecResolver.resolve(namespaceValue, path, fileType);
+			if (resolved != null) return resolved;
+		}
+		if (codecRegistry != null && fileType != null && !fileType.isBlank()) {
+			TranslationFileCodec resolved = codecRegistry.resolveById(fileType, namespaceValue).orElse(null);
+			if (resolved != null) return resolved;
+		}
+		return codecRegistry == null ? null : codecRegistry.getDefault();
+	}
+
+	private List<String> resolveExtensions(TranslationFileCodec codec) {
+		if (codec != null && codec.getFileExtensions() != null && !codec.getFileExtensions().isEmpty()) {
+			return codec.getFileExtensions();
+		}
+		TranslationFileCodec fallback = codecRegistry == null ? null : codecRegistry.getDefault();
+		if (fallback != null && fallback.getFileExtensions() != null && !fallback.getFileExtensions().isEmpty()) {
+			return fallback.getFileExtensions();
+		}
+		return List.of(".yml");
 	}
 }

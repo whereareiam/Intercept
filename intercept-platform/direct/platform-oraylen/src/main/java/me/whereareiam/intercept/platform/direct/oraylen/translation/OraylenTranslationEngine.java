@@ -2,31 +2,27 @@ package me.whereareiam.intercept.platform.direct.oraylen.translation;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
+import me.whereareiam.intercept.model.messaging.file.MessageFileData;
+import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.OraylenTranslationLoader;
 import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.mapper.OraylenTranslationEntryMapper;
 import me.whereareiam.intercept.translation.mapper.PlaceholderMapper;
-import me.whereareiam.intercept.platform.direct.oraylen.translation.loader.OraylenTranslationLoader;
 import me.whereareiam.intercept.util.Serializer;
-import me.whereareiam.keystone.serializer.SerializerEngine;
 import me.whereareiam.keystone.model.SerializerContent;
+import me.whereareiam.keystone.serializer.SerializerEngine;
 import me.whereareiam.semantica.model.SemanticLocale;
 import me.whereareiam.semantica.model.translation.entry.TranslationEntry;
 import me.whereareiam.semantica.translation.TranslationService;
 import me.whereareiam.semantica.translation.base.TranslationLocale;
-import me.whereareiam.intercept.model.messaging.file.MessageFileData;
 import net.kyori.adventure.text.Component;
 import net.oraylen.api.Namespace;
 import net.oraylen.api.translation.Placeholder;
 import net.oraylen.api.translation.TranslationContext;
-import net.oraylen.api.translation.TranslationEngine;
 import net.oraylen.api.translation.TranslationSource;
+import net.oraylen.api.translation.engine.TranslationEngine;
 
-import com.google.inject.name.Named;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class OraylenTranslationEngine implements TranslationEngine {
@@ -58,7 +54,7 @@ public final class OraylenTranslationEngine implements TranslationEngine {
 	}
 
 	@Override
-	public Component translate(String key, Locale locale, TranslationContext context) {
+	public Component component(String key, Locale locale, TranslationContext context) {
 		if (key == null) return Component.empty();
 
 		Locale effectiveLocale = locale != null ? locale : defaultLocaleProvider.get();
@@ -79,6 +75,16 @@ public final class OraylenTranslationEngine implements TranslationEngine {
 	}
 
 	@Override
+	public String string(String key, Locale locale, TranslationContext context) {
+		if (key == null) return null;
+		Locale effectiveLocale = locale != null ? locale : defaultLocaleProvider.get();
+		Map<String, Object> placeholders = placeholderMapper.map(context != null
+				? context.placeholders()
+				: null);
+		return translationService.resolve(key, effectiveLocale, placeholders);
+	}
+
+	@Override
 	public synchronized void register(Namespace namespace, Path baseDirectory, TranslationSource source) {
 		if (namespace == null || baseDirectory == null || source == null) return;
 
@@ -87,7 +93,7 @@ public final class OraylenTranslationEngine implements TranslationEngine {
 			unregister(namespace);
 		}
 
-		List<MessageFileData> documents = loader.load(baseDirectory, source);
+		List<MessageFileData> documents = loader.load(namespace.value(), baseDirectory, source);
 		Map<String, TranslationEntry> allEntries = new HashMap<>();
 
 		for (MessageFileData document : documents) {
