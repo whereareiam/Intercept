@@ -1,0 +1,137 @@
+name: Verify
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit, branch or tag to verify.
+        required: true
+        type: string
+      version:
+        description: Artifact version; defaults to <branch>-<short commit>.
+        required: false
+        type: string
+        default: ""
+      distribution:
+        description: Also upload the plugin and mod files as the intercept-plugins-<version> artifact.
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      version:
+        description: Artifact version that was verified.
+        value: ${{ jobs.build.outputs.version }}
+      commit:
+        description: Commit that was verified.
+        value: ${{ jobs.build.outputs.commit }}
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.identity.outputs.version }}
+      commit: ${{ steps.identity.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Resolve artifact identity
+        id: identity
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          commit="$(git rev-parse HEAD)"
+          version="${REQUESTED_VERSION#v}"
+          [[ -n "$version" ]] || version="${BRANCH//\//-}-${commit::7}"
+          [[ "$version" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || { echo "Invalid artifact version: $version" >&2; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      - uses: whereareiam/devops/primitive/setup/gradle@v3
+
+      - name: Build and test
+        env:
+          VERSION: ${{ steps.identity.outputs.version }}
+        run: ./gradlew --no-daemon test assembleDistribution
+
+      - uses: whereareiam/devops/primitive/report/junit/publish@v3
+        if: always()
+        with:
+          name: Test results
+          artifact-name: test-results
+
+      - name: Upload distribution
+        if: inputs.distribution
+        uses: actions/upload-artifact@v6
+        with:
+          name: intercept-plugins-${{ steps.identity.outputs.version }}
+          path: build/distribution/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - uses: whereareiam/devops/primitive/setup/gradle@v3
+
+      - name: Run the tests on database and Redis servers
+        run: ./gradlew --no-daemon integrationTest
+
+      - uses: whereareiam/devops/primitive/report/junit/publish@v3
+        if: always()
+        with:
+          name: Integration test results
+          artifact-name: test-results-integration
+
+  journeys:
+    name: Journeys (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # The suites of intercept-testing/build.gradle.kts, one per platform.
+        suite: [paper, velocity, neoforge]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - uses: whereareiam/devops/primitive/setup/gradle@v3
+
+      # The servers and prepared workspaces the build cache job on dev left, instead of downloading them again.
+      - uses: whereareiam/anvil-actions/setup@v1
+
+      - name: Run the ${{ matrix.suite }} journeys
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: ./gradlew --no-daemon ":intercept-testing:anvil${SUITE^}Test"
+
+      # A failed journey keeps its network, whose console logs tell what each server did.
+      - uses: whereareiam/devops/primitive/report/junit/publish@v3
+        if: always()
+        with:
+          name: Journey results (${{ matrix.suite }})
+          artifact-name: test-results-journeys-${{ matrix.suite }}
+          reports: |
+            **/build/reports/tests/**
+            intercept-testing/build/anvil/**/anvil-console.log

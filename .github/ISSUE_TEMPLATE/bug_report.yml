@@ -1,0 +1,96 @@
+name: Bug report
+description: Something in Intercept does not work as documented.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask on [Discord](https://discord.arcadeya.com) for setup help. Report vulnerabilities privately through the [security policy](https://github.com/whereareiam/Intercept/security/policy).
+
+  - type: input
+    id: version
+    attributes:
+      label: Intercept version
+      description: The version in the jar name, for example `1.0.0` or `dev-1a2b3c4`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build
+    attributes:
+      label: Build
+      options:
+        - Release (GitHub, Modrinth, or another store)
+        - Development build
+    validations:
+      required: true
+
+  - type: input
+    id: host
+    attributes:
+      label: Server or proxy and version
+      placeholder: Paper 26.3, Velocity 4.3.1 or NeoForge 21.1.252
+    validations:
+      required: true
+
+  - type: input
+    id: packetevents
+    attributes:
+      label: PacketEvents version
+      description: On Paper and Velocity; leave empty on NeoForge.
+      placeholder: 2.14.0
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - SQLite
+        - H2
+        - MySQL or MariaDB
+        - PostgreSQL
+    validations:
+      required: true
+
+  - type: dropdown
+    id: network
+    attributes:
+      label: Servers
+      options:
+        - One server
+        - Several servers on a shared database
+        - Several servers with Redis replication
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Put a message into messages/en/essentials.yml
+        2. Run /intercept publish ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Server log of the problem. Remove IP addresses you do not want to share.
+      render: text
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration
+      description: Relevant parts of settings.yml, interception.yml or a rule file. Remove passwords and tokens.
+      render: yaml

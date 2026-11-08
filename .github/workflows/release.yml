@@ -1,133 +1,100 @@
-name: Release build
+name: Release
+run-name: "${{ github.event_name == 'release' && format('Release {0}', github.event.release.tag_name) || format('Verify {0}', inputs.release-tag) }}"
 
 on:
   release:
-    types: [ created ]
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        description: Tag of an existing release to verify again, for example v1.0.0
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ github.event.release.tag_name || inputs.release-tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  prepare:
+  resolve:
+    name: Resolve release
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
-      name: ${{ steps.details.outputs.name }}
-      version: ${{ steps.details.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      name: ${{ steps.release.outputs.name }}
+      body: ${{ steps.release.outputs.body }}
+      url: ${{ steps.release.outputs.url }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Extract project details
-        id: details
-        run: |
-          echo "name=$(grep 'rootProject.name' settings.gradle.kts | awk -F "=" '{print $2}' | tr -d ' \"\n')" >> $GITHUB_OUTPUT
-          echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
-
-  test:
-    needs: prepare
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Validate gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'temurin'
-          check-latest: true
-
-      - name: Run tests
+      - name: Read release
+        id: release
         env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: ./gradlew test
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Test results
-          path: |
-            **/build/test-results/test/*.xml
-            **/build/reports/tests/test/
-
-      - name: Test summary
-        if: always()
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.release-tag }}
         run: |
-          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-          find . -name "TEST-*.xml" -type f | while read file; do
-            suite=$(grep -oP 'name="\K[^"]+' "$file" | head -1)
-            tests=$(grep -oP 'tests="\K[^"]+' "$file" | head -1)
-            failures=$(grep -oP 'failures="\K[^"]+' "$file" | head -1)
-            errors=$(grep -oP 'errors="\K[^"]+' "$file" | head -1)
-            echo "- **$suite**: $tests tests, $failures failures, $errors errors" >> $GITHUB_STEP_SUMMARY
-          done
+          set -euo pipefail
+          release="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG")"
+          # The release's name comes from the subtitle and its changes from the body.
+          if jq -e '(.body // "") | contains("[Short subtitle]") or contains("[1-2 sentence summary")' <<<"$release" >/dev/null; then
+            echo "::error::Release $TAG still has the subtitle or summary placeholder of the draft; fill in .github/release-notes.md or edit the release, then run this workflow again."
+            exit 1
+          fi
+          delimiter="release-$(openssl rand -hex 16)"
+          {
+            echo "tag=$(jq -r '.tag_name' <<<"$release")"
+            echo "name=$(jq -r '.name // ""' <<<"$release")"
+            echo "url=$(jq -r '.html_url' <<<"$release")"
+            echo "body<<$delimiter"
+            jq -r '.body // ""' <<<"$release"
+            echo "$delimiter"
+          } >> "$GITHUB_OUTPUT"
 
-  build:
-    needs: [prepare, test]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Validate gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'temurin'
-          check-latest: true
-
-      - name: Build project
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: ./gradlew build shadowJar
-
-      - name: Create output directory
-        run: mkdir output
-
-      - name: Move API
-        run: mv intercept-api/build/libs/intercept-api-${{ needs.prepare.outputs.version }}.jar output/${{ needs.prepare.outputs.name }}-API-${{ needs.prepare.outputs.version }}.jar
-
-      - name: Move platform jars
-        run: |
-          mv build/libs/${{ needs.prepare.outputs.name }}-${{ needs.prepare.outputs.version }}-PAPER.jar output/${{ needs.prepare.outputs.name }}-PAPER-${{ needs.prepare.outputs.version }}.jar
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            output/${{ needs.prepare.outputs.name }}-API-${{ needs.prepare.outputs.version }}.jar
-            output/${{ needs.prepare.outputs.name }}-PAPER-${{ needs.prepare.outputs.version }}.jar
-
-  publish:
-    needs: [prepare, test]
-    runs-on: ubuntu-latest
+  verify:
+    name: Verify
+    needs: resolve
     permissions:
       contents: read
+      checks: write
+    uses: ./.github/workflows/reusable-verify.yml
+    with:
+      ref: ${{ needs.resolve.outputs.tag }}
+      version: ${{ needs.resolve.outputs.tag }}
+      distribution: true
+
+  # A manual run only verifies again; Maven and the GitHub release keep what the release published.
+  publish:
+    name: Publish
+    needs: verify
+    if: github.event_name == 'release'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/reusable-publish.yml
+    with:
+      commit: ${{ needs.verify.outputs.commit }}
+      version: ${{ needs.verify.outputs.version }}
+
+  attach:
+    name: Attach files to the release
+    needs: [resolve, verify]
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/download-artifact@v6
         with:
-          java-version: 21
-          distribution: 'temurin'
-          check-latest: true
+          name: intercept-plugins-${{ needs.verify.outputs.version }}
+          path: distribution
 
-      - name: Publish API to Maven repository
+      - name: Upload files
         env:
-          PUBLISH_USER: ${{ secrets.PUBLISH_USER }}
-          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-          PUBLISH_REALM: release
-        run: ./gradlew --no-daemon publish
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" distribution/* --clobber --repo "$GITHUB_REPOSITORY"
