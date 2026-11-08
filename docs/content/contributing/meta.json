@@ -1,0 +1,11 @@
+{
+  "title": "Contributing",
+  "description": "Work on Intercept itself",
+  "icon": "GitPullRequest",
+  "root": true,
+  "pages": [
+    "building",
+    "testing",
+    "architecture"
+  ]
+}

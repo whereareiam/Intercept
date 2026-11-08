@@ -1,0 +1,17 @@
+{
+  "title": "Configuration reference",
+  "description": "Every setting, file by file",
+  "icon": "SlidersHorizontal",
+  "root": true,
+  "pages": [
+    "index",
+    "---Core---",
+    "settings",
+    "commands",
+    "interception",
+    "rules",
+    "---Storage and network---",
+    "persistence",
+    "replication"
+  ]
+}

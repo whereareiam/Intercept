@@ -1,0 +1,24 @@
+---
+title: commands.yml
+description: Every setting of commands.yml.
+---
+
+Each command has an entry under `commands`, named `language`, `publish` and `reload`.
+
+<Setting name="enabled" depth={3} takes="`true` or `false`" default="`true`" affects="whether the command exists">
+</Setting>
+
+<Setting name="aliases" depth={3} takes="a list of names" default="`[language, lang]`, `[publish]`, `[reload]`" affects="the command's names; `publish` and `reload` are subcommands of `/intercept` and take the first alias">
+</Setting>
+
+<Setting name="permission" depth={3} takes="a permission, or empty" default='`""` for `language`, `intercept.command.publish`, `intercept.command.reload`' affects="who may run the command">
+</Setting>
+
+<Setting name="usage" depth={3} takes="the arguments, such as `<language>`" default="`<language>` for `language`" affects="the arguments the command takes" flag="advanced">
+
+Keep the argument names; renaming one breaks the command.
+
+</Setting>
+
+<Setting name="description" depth={3} takes="a string" default="a short sentence" affects="the description in the command list">
+</Setting>

@@ -1,0 +1,41 @@
+---
+title: settings.yml
+description: Every setting of settings.yml.
+---
+
+<Setting name="instance" depth={2} takes="a string" default='`""`, a random name on each start' affects="the name of this server in Intercept's logs and replication">
+
+Give each server of a network its own name.
+
+</Setting>
+
+<Setting name="defaultLanguage" depth={2} takes="a language tag" default="`en`" affects="the language of a text that has none in the player's language">
+</Setting>
+
+<Setting name="languages" depth={2} takes="a list of language tags" default="`[en]`" affects="the languages players can choose with `/language`, and the organisation's bundles that are downloaded">
+</Setting>
+
+<Setting name="revisionPoll" depth={2} takes="a duration" default='`"30s"`' affects="how often a server checks the database for messages another server published">
+
+With Redis, publications arrive at once and polling only catches what Redis missed.
+
+</Setting>
+
+<Setting name="organisation.enabled" depth={2} takes="`true` or `false`" default="`false`" affects="whether the organisation's translations are downloaded">
+</Setting>
+
+<Setting name="organisation.url" depth={2} takes="a URL" default="`https://translations.oraylen.net/`" affects="where the bundles and their `manifest.json` are">
+</Setting>
+
+<Setting name="organisation.product" depth={2} takes="a string" default="`game`" affects="whose bundles this server uses">
+</Setting>
+
+<Setting name="organisation.namespaces" depth={2} takes="a list of strings" default="`[]`, all of them" affects="which key namespaces are kept, such as `oraylen` or `essentials`">
+</Setting>
+
+<Setting name="organisation.interval" depth={2} takes="a duration" default='`"5m"`' affects="how often to look for new bundles">
+
+The last downloaded bundles are kept in `cache/organisation/`, so a server starts with them when the address cannot
+be reached.
+
+</Setting>

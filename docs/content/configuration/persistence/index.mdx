@@ -1,0 +1,38 @@
+---
+title: persistence.yml
+description: Every setting of persistence.yml.
+---
+
+<Setting name="type" depth={2} takes="`SQLITE`, `H2`, `MYSQL` or `POSTGRES`" default="`SQLITE`" affects="where Intercept stores the network's messages and players' languages">
+
+`SQLITE` and `H2` are files of one server. A network needs `MYSQL` (MySQL or MariaDB) or `POSTGRES`, shared by every
+server.
+
+</Setting>
+
+<Setting name="file" depth={2} takes="a path" default="`intercept.db`" affects="the file of `SQLITE` or `H2`, relative to Intercept's folder">
+</Setting>
+
+<Setting name="host" depth={2} takes="a host name" default="`localhost`" affects="the database server">
+</Setting>
+
+<Setting name="port" depth={2} takes="a port" default="`5432`" affects="the database server's port; MySQL uses `3306`">
+</Setting>
+
+<Setting name="database" depth={2} takes="a name" default="`intercept`" affects="the database Intercept creates its tables in">
+</Setting>
+
+<Setting name="username" depth={2} takes="a name" default="`intercept`" affects="the user Intercept connects as">
+</Setting>
+
+<Setting name="password" depth={2} takes="a password" default='`""`' affects="the user's password" flag="warning">
+</Setting>
+
+<Setting name="pool.maximumSize" depth={3} takes="a number" default="`4`" affects="the most connections Intercept opens" flag="advanced">
+</Setting>
+
+<Setting name="pool.minimumIdle" depth={3} takes="a number" default="`1`" affects="the connections kept open while idle" flag="advanced">
+</Setting>
+
+<Setting name="pool.connectionTimeout" depth={3} takes="milliseconds" default="`10000`" affects="how long to wait for a connection" flag="advanced">
+</Setting>

@@ -1,162 +1,19 @@
 # Intercept
 
-> Intercept watches the components your server emits (chat, action bar, kick screens, and more) and routes them through
-> a translation-aware pipeline with tag and regex interception.
+Intercept is the translation database of a Minecraft network. It shows every message in the language each player
+chose, from one set of texts: the organisation's translations, the network's changes to them, and the exceptions of
+one server. It runs on Paper, Velocity and NeoForge.
 
-- [Features](#features)
-- [Developer](#developer)
-- [Platform coverage](#platform-coverage)
-- [Credits](#credits)
+- Players choose their language once with `/language`, for every server.
+- Admins change a text for the whole network with `/intercept publish`.
+- Plugins that only send English text are translated through markers and rules.
 
-## Features
+See the [documentation](docs/content/admins/index.md) to install and configure it.
 
-- Tag-based interception with configurable delimiters (default `<lang>`)
-- Optional regex interception with safety limits and caching
-- Per-component toggles for chat, action bar, and kick/disconnect
-- Command suite for reload, inspection, locale switching, and DB sync
-- Optional persistence via PostgreSQL/MariaDB with HikariCP tuning
+## Building
 
-## Use cases
-
-- Ship a fully multilingual server experience even when upstream plugins only ship one locale.
-- Translate plugins that expose no message configuration by intercepting their outbound components.
-- Layer consistent formatting/prefixing across mixed plugin ecosystems without forking them.
-
-## Platform coverage
-
-- [x] Paper 1.20+:
-    - [x] PacketEvents:
-        - [x] Action bar
-        - [x] Chat/Commands
-        - [x] Kick/Disconnect
-        - [ ] Boss bars
-        - [ ] Entity: Armor stand
-        - [ ] Entity: Display
-        - [ ] Inventories
-        - [ ] Motd
-        - [ ] Scoreboard
-        - [ ] Tab list
-        - [ ] Tags
-        - [ ] Titles
-    - [ ] ProtocolLib:
-        - [ ] Action bar
-        - [ ] Chat/Commands
-        - [ ] Kick/Disconnect
-        - [ ] Boss bars
-        - [ ] Entity: Armor stand
-        - [ ] Entity: Display
-        - [ ] Inventories
-        - [ ] Motd
-        - [ ] Scoreboard
-        - [ ] Tab list
-        - [ ] Tags
-        - [ ] Titles
-- [ ] Bukkit (legacy):
-    - [ ] PacketEvents:
-        - [ ] Action bar
-        - [ ] Chat/Commands
-        - [ ] Kick/Disconnect
-        - [ ] Boss bars
-        - [ ] Entity: Armor stand
-        - [ ] Entity: Display
-        - [ ] Inventories
-        - [ ] Motd
-        - [ ] Scoreboard
-        - [ ] Tab list
-        - [ ] Tags
-        - [ ] Titles
-    - [ ] ProtocolLib:
-        - [ ] Action bar
-        - [ ] Chat/Commands
-        - [ ] Kick/Disconnect
-        - [ ] Boss bars
-        - [ ] Entity: Armor stand
-        - [ ] Entity: Display
-        - [ ] Inventories
-        - [ ] Motd
-        - [ ] Scoreboard
-        - [ ] Tab list
-        - [ ] Tags
-        - [ ] Titles
-- [ ] Velocity:
-    - [ ] PacketEvents:
-        - [ ] Action bar
-        - [ ] Chat/Commands
-        - [ ] Kick/Disconnect
-        - [ ] Boss bars
-        - [ ] Motd
-        - [ ] Scoreboard
-        - [ ] Tab list
-        - [ ] Titles
-
-## Planned features
-- [ ] Permission-based selection of translations
-
-## Developer
-
-Add the API as `compileOnly` (runtime is provided by the platform jar).
-
-<details>
-<summary>Gradle (Kotlin DSL)</summary>
-
-```kotlin
-repositories {
-    maven("https://maven.whereareiam.me/release")
-    maven("https://maven.whereareiam.me/development")
-}
-
-dependencies {
-    compileOnly("me.whereareiam:intercept-api:<version>")
-}
+```bash
+./gradlew pluginJars
 ```
 
-</details>
-
-<details>
-<summary>Gradle (Groovy)</summary>
-
-```groovy
-repositories {
-    maven { url "https://maven.whereareiam.me/release" }
-    maven { url "https://maven.whereareiam.me/development" }
-}
-
-dependencies {
-    compileOnly "me.whereareiam:intercept-api:<version>"
-}
-```
-
-</details>
-
-<details>
-<summary>Maven</summary>
-
-```xml
-
-<repositories>
-    <repository>
-        <id>whereareiam-release</id>
-        <url>https://maven.whereareiam.me/release</url>
-    </repository>
-    <repository>
-        <id>whereareiam-development</id>
-        <url>https://maven.whereareiam.me/development</url>
-    </repository>
-</repositories>
-
-<dependencies>
-<dependency>
-    <groupId>me.whereareiam</groupId>
-    <artifactId>Intercept</artifactId>
-    <version>&lt;version&gt;</version>
-    <scope>provided</scope>
-</dependency>
-</dependencies>
-```
-
-</details>
-
-## Credits
-
-- Special thanks to the **Triton** project for blazing the trail on component interception; Intercept builds on those
-  ideas to cover use cases Triton didn’t target.
+Contributing starts at [building](docs/content/contributing/building/index.md).

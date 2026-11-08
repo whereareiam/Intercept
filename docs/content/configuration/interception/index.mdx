@@ -1,0 +1,16 @@
+---
+title: interception.yml
+description: Every setting of interception.yml.
+---
+
+`surfaces` has an entry for `CHAT`, `ACTION_BAR` and `KICK`. [Translating other plugins](../../admins/guides/interception/index.md)
+explains markers and rules.
+
+<Setting name="enabled" depth={3} takes="`true` or `false`" default="`true`" affects="whether system messages on this surface are translated">
+</Setting>
+
+<Setting name="marker" depth={3} takes="an opening, a name and a closing" default='`"<lang>"`' affects="what a marker looks like, such as `<lang key=...>` or `[t key=...]` for `[t]`">
+</Setting>
+
+<Setting name="rules" depth={3} takes="`true` or `false`" default="`true`" affects="whether rules apply on this surface">
+</Setting>

@@ -1,0 +1,9 @@
+{
+  "title": "Docs",
+  "pages": [
+    "admins",
+    "configuration",
+    "developers",
+    "contributing"
+  ]
+}

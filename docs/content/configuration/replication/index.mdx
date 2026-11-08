@@ -1,0 +1,30 @@
+---
+title: replication.yml
+description: Every setting of replication.yml.
+---
+
+[Several servers](../../admins/guides/network/index.md) explains what Redis changes.
+
+<Setting name="enabled" depth={2} takes="`true` or `false`" default="`false`" affects="whether this server tells the others about publications, reloads and language choices at once">
+</Setting>
+
+<Setting name="host" depth={2} takes="a host name" default="`localhost`" affects="the Redis server">
+</Setting>
+
+<Setting name="port" depth={2} takes="a port" default="`6379`" affects="the Redis server's port">
+</Setting>
+
+<Setting name="password" depth={2} takes="a password" default='`""`, none' affects="the Redis password" flag="warning">
+</Setting>
+
+<Setting name="ssl" depth={2} takes="`true` or `false`" default="`false`" affects="whether the connection is encrypted">
+</Setting>
+
+<Setting name="channel" depth={2} takes="a string" default="`intercept`" affects="the channel the servers of one network share" flag="advanced">
+
+Two networks on one Redis need different channels.
+
+</Setting>
+
+<Setting name="timeout" depth={2} takes="milliseconds" default="`5000`" affects="how long to wait for Redis" flag="advanced">
+</Setting>
