@@ -40,7 +40,7 @@ public class Settings {
 		private @NotNull String url = "https://translations.oraylen.net/";
 		@Comment("The product whose bundles this server uses.")
 		private @NotNull String product = "game";
-		@Comment("The key namespaces to keep, such as oraylen or essentials; empty keeps all.")
+		@Comment("The key namespaces to keep, such as server or essentials; empty keeps all.")
 		private @NotNull List<String> namespaces = new ArrayList<>();
 		@Comment("How often to look for new bundles.")
 		private @NotNull Duration interval = Duration.ofMinutes(5);

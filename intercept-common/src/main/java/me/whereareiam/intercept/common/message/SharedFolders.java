@@ -106,7 +106,7 @@ final class SharedFolders {
 		}
 	}
 
-	// The file's path is the prefix of its keys: "oraylen/format.yml" holds "oraylen.format.prefix" as "prefix".
+	// The file's path is the prefix of its keys: "server/format.yml" holds "server.format.prefix" as "prefix".
 	static @NotNull String relativeKey(@NotNull String file, @NotNull String key) {
 		String prefix = stem(file).replace('/', '.') + ".";
 		return key.startsWith(prefix) ? key.substring(prefix.length()) : key;

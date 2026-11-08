@@ -36,13 +36,13 @@ class DatabaseSharedStoreTest {
 			assertEquals(0, store.revision());
 
 			long first = store.apply(new SharedChanges(
-					List.of(message("oraylen.format.prefix", "A » "), message("essentials.motd", "Hi")),
+					List.of(message("server.format.prefix", "A » "), message("essentials.motd", "Hi")),
 					List.of(),
 					List.of(new SharedRule("essentials.yml", "x: 1\n", "Alice", NOW)),
 					List.of()
 			));
 			long second = store.apply(new SharedChanges(
-					List.of(message("oraylen.format.prefix", "B » ")),
+					List.of(message("server.format.prefix", "B » ")),
 					List.of(new SharedChanges.MessageKey(Locale.ENGLISH, "essentials.motd")),
 					List.of(),
 					List.of("essentials.yml")

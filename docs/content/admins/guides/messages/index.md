@@ -22,13 +22,13 @@ they hold, and keep texts that several plugins share in common files:
 ```text
 plugins/Intercept/messages/
   en/
-    oraylen/format.yml     prefix: "<gold>Oraylen</gold> » "      -> oraylen.format.prefix
-    essentials.yml         motd: "{@oraylen.format.prefix}Hello!" -> essentials.motd
+    server/format.yml     prefix: "<gold>Server</gold> » "     -> server.format.prefix
+    essentials.yml        motd: "{@server.format.prefix}Hello!" -> essentials.motd
   de/
     essentials.yml
 ```
 
-`{@oraylen.format.prefix}` puts another key's text into this one, so a change of the prefix reaches every message
+`{@server.format.prefix}` puts another key's text into this one, so a change of the prefix reaches every message
 that uses it.
 
 ## Change a text for the network
