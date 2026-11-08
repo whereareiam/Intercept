@@ -3,6 +3,8 @@ package me.whereareiam.intercept.platform;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.command.CommandSource;
 import me.whereareiam.intercept.language.LanguageApplier;
 import me.whereareiam.intercept.library.LibraryLoader;
@@ -16,14 +18,10 @@ import java.util.logging.Logger;
  * What a platform has to provide: its folder, its logger, how it loads libraries, how it applies a chosen language
  * and the Cloud command manager Intercept's commands go on.
  */
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PlatformConfiguration extends AbstractModule {
-	private final Path dataPath;
-	private final Logger logger;
-
-	protected PlatformConfiguration(@NotNull Path dataPath, @NotNull Logger logger) {
-		this.dataPath = dataPath;
-		this.logger = logger;
-	}
+	private final @NotNull Path dataPath;
+	private final @NotNull Logger logger;
 
 	@Override
 	protected final void configure() {

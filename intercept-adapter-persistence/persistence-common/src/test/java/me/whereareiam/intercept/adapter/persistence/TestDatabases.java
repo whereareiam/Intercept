@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.adapter.persistence;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.whereareiam.intercept.persistence.database.DatabaseType;
 import me.whereareiam.intercept.persistence.database.Persistence;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -14,11 +16,9 @@ import java.util.stream.Stream;
  * The databases store tests run on: H2 and SQLite always, and PostgreSQL in a container when
  * {@code intercept.test.databaseServers} is set, as {@code integrationTest} does.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TestDatabases {
 	private static PostgreSQLContainer postgres;
-
-	private TestDatabases() {
-	}
 
 	/**
 	 * Lists the databases to run on.

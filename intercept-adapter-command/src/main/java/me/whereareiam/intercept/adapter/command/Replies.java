@@ -2,6 +2,7 @@ package me.whereareiam.intercept.adapter.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.command.CommandSource;
 import me.whereareiam.intercept.language.LanguageService;
 import me.whereareiam.semantica.format.adventure.v5.TextArgument;
@@ -22,13 +23,9 @@ import java.util.UUID;
  * same tick a player changes their language.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class Replies {
-	private final LanguageService languages;
-
-	@Inject
-	public Replies(@NotNull LanguageService languages) {
-		this.languages = languages;
-	}
+	private final @NotNull LanguageService languages;
 
 	/**
 	 * Sends a key to a command's source.

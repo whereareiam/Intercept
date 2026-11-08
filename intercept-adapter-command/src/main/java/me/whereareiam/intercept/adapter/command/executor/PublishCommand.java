@@ -3,6 +3,7 @@ package me.whereareiam.intercept.adapter.command.executor;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.adapter.command.Replies;
 import me.whereareiam.intercept.command.CommandSource;
 import me.whereareiam.intercept.message.MessageService;
@@ -19,17 +20,11 @@ import java.util.logging.Logger;
  * {@code /intercept publish} sends the changes in {@code messages/} and {@code rules/} to every server.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class PublishCommand {
-	private final MessageService messages;
-	private final Replies replies;
-	private final Logger logger;
-
-	@Inject
-	public PublishCommand(@NotNull MessageService messages, @NotNull Replies replies, @Named("intercept") @NotNull Logger logger) {
-		this.messages = messages;
-		this.replies = replies;
-		this.logger = logger;
-	}
+	private final @NotNull MessageService messages;
+	private final @NotNull Replies replies;
+	private final @Named("intercept") @NotNull Logger logger;
 
 	/**
 	 * Adds the command's handler.

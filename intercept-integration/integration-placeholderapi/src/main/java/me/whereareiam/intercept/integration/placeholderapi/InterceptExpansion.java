@@ -2,6 +2,7 @@ package me.whereareiam.intercept.integration.placeholderapi;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.whereareiam.intercept.language.LanguageService;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
@@ -17,13 +18,9 @@ import java.util.Locale;
  * is its name in that language.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class InterceptExpansion extends PlaceholderExpansion implements Lifecycle {
-	private final LanguageService languages;
-
-	@Inject
-	public InterceptExpansion(@NotNull LanguageService languages) {
-		this.languages = languages;
-	}
+	private final @NotNull LanguageService languages;
 
 	@Override
 	public @NotNull Phase phase() {

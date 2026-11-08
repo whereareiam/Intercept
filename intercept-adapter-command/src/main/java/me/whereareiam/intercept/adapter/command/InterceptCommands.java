@@ -3,6 +3,7 @@ package me.whereareiam.intercept.adapter.command;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.commandant.Commandant;
 import me.whereareiam.commandant.CommandantKeys;
 import me.whereareiam.intercept.adapter.command.definition.CommandDefinition;
@@ -25,30 +26,16 @@ import java.util.function.Function;
  * switch {@code commands.yml} gives it.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class InterceptCommands implements Lifecycle {
 	private static final String ROOT = "intercept";
 
-	private final Provider<CommandManager<CommandSource>> manager;
-	private final Commands commands;
-	private final LanguageCommand language;
-	private final PublishCommand publish;
-	private final ReloadCommand reload;
+	private final @NotNull Provider<CommandManager<CommandSource>> manager;
+	private final @NotNull Commands commands;
+	private final @NotNull LanguageCommand language;
+	private final @NotNull PublishCommand publish;
+	private final @NotNull ReloadCommand reload;
 	private final CommandDefinitionAdapter adapter = new CommandDefinitionAdapter();
-
-	@Inject
-	public InterceptCommands(
-			@NotNull Provider<CommandManager<CommandSource>> manager,
-			@NotNull Commands commands,
-			@NotNull LanguageCommand language,
-			@NotNull PublishCommand publish,
-			@NotNull ReloadCommand reload
-	) {
-		this.manager = manager;
-		this.commands = commands;
-		this.language = language;
-		this.publish = publish;
-		this.reload = reload;
-	}
 
 	@Override
 	public @NotNull Phase phase() {

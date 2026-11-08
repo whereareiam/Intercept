@@ -13,6 +13,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDi
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSystemChatMessage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.interception.Surface;
 import me.whereareiam.intercept.interception.library.OutgoingMessages;
 import net.kyori.adventure.text.Component;
@@ -28,15 +29,10 @@ import java.util.UUID;
  * <p>Player chat travels in its own packet, signed by the sender, and is never touched.</p>
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class MessagePacketListener implements PacketListener {
-	private final OutgoingMessages messages;
-	private final ClientLocales locales;
-
-	@Inject
-	public MessagePacketListener(@NotNull OutgoingMessages messages, @NotNull ClientLocales locales) {
-		this.messages = messages;
-		this.locales = locales;
-	}
+	private final @NotNull OutgoingMessages messages;
+	private final @NotNull ClientLocales locales;
 
 	@Override
 	public void onPacketSend(@NotNull PacketSendEvent event) {
@@ -51,21 +47,30 @@ public final class MessagePacketListener implements PacketListener {
 
 			packet.setMessage(rewritten);
 			event.markForReEncode(true);
-		} else if (event.getPacketType() == PacketType.Play.Server.ACTION_BAR) {
+			return;
+		}
+
+		if (event.getPacketType() == PacketType.Play.Server.ACTION_BAR) {
 			WrapperPlayServerActionBar packet = new WrapperPlayServerActionBar(event);
 			Component rewritten = messages.rewrite(Surface.ACTION_BAR, packet.getActionBarText(), receiver, client);
 			if (rewritten == null) return;
 
 			packet.setActionBarText(rewritten);
 			event.markForReEncode(true);
-		} else if (event.getPacketType() == PacketType.Play.Server.DISCONNECT) {
+			return;
+		}
+
+		if (event.getPacketType() == PacketType.Play.Server.DISCONNECT) {
 			WrapperPlayServerDisconnect packet = new WrapperPlayServerDisconnect(event);
 			Component rewritten = messages.rewrite(Surface.KICK, packet.getReason(), receiver, client);
 			if (rewritten == null) return;
 
 			packet.setReason(rewritten);
 			event.markForReEncode(true);
-		} else if (event.getPacketType() == PacketType.Configuration.Server.DISCONNECT) {
+			return;
+		}
+
+		if (event.getPacketType() == PacketType.Configuration.Server.DISCONNECT) {
 			WrapperConfigServerDisconnect packet = new WrapperConfigServerDisconnect(event);
 			Component rewritten = messages.rewrite(Surface.KICK, packet.getReason(), receiver, client);
 			if (rewritten == null) return;
@@ -87,7 +92,10 @@ public final class MessagePacketListener implements PacketListener {
 
 			packet.setLocale(reported);
 			event.markForReEncode(true);
-		} else if (event.getPacketType() == PacketType.Configuration.Client.CLIENT_SETTINGS) {
+			return;
+		}
+
+		if (event.getPacketType() == PacketType.Configuration.Client.CLIENT_SETTINGS) {
 			WrapperConfigClientSettings packet = new WrapperConfigClientSettings(event);
 			String reported = locales.report(player, packet.getLocale());
 			if (reported.equals(packet.getLocale())) return;

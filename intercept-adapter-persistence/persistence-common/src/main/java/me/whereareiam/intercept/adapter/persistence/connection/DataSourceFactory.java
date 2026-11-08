@@ -2,6 +2,8 @@ package me.whereareiam.intercept.adapter.persistence.connection;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.whereareiam.intercept.persistence.database.DatabaseType;
 import me.whereareiam.intercept.persistence.database.Persistence;
 import org.jetbrains.annotations.NotNull;
@@ -11,10 +13,8 @@ import java.nio.file.Path;
 /**
  * Builds the connection pool for the configured database.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DataSourceFactory {
-	private DataSourceFactory() {
-	}
-
 	/**
 	 * Builds a pool. It connects lazily, so a database that is down when the server starts is retried.
 	 *

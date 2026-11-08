@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.common.translation;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.model.shared.SharedMessage;
 import me.whereareiam.intercept.model.shared.SharedSnapshot;
 import me.whereareiam.semantica.source.Source;
@@ -8,12 +10,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The messages the network shares at one revision, as a layer of the catalog.
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class SharedSource implements Source {
-	private final SharedSnapshot snapshot;
-
-	SharedSource(@NotNull SharedSnapshot snapshot) {
-		this.snapshot = snapshot;
-	}
+	private final @NotNull SharedSnapshot snapshot;
 
 	@Override
 	public @NotNull String getName() {

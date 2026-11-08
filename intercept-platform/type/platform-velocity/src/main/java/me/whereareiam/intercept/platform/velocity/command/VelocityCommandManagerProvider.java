@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.ProxyServer;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.command.CommandSource;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
@@ -16,16 +17,11 @@ import org.jetbrains.annotations.NotNull;
  * Builds Cloud's Velocity command manager.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class VelocityCommandManagerProvider implements Provider<CommandManager<CommandSource>> {
-	private final PluginContainer container;
-	private final ProxyServer proxy;
+	private final @NotNull PluginContainer container;
+	private final @NotNull ProxyServer proxy;
 	private CommandManager<CommandSource> manager;
-
-	@Inject
-	public VelocityCommandManagerProvider(@NotNull PluginContainer container, @NotNull ProxyServer proxy) {
-		this.container = container;
-		this.proxy = proxy;
-	}
 
 	@Override
 	public synchronized CommandManager<CommandSource> get() {

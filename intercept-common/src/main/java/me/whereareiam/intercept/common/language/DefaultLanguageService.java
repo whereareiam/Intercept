@@ -2,6 +2,7 @@ package me.whereareiam.intercept.common.language;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.common.translation.DefaultTranslationService;
 import me.whereareiam.intercept.language.LanguageApplier;
 import me.whereareiam.intercept.language.LanguageService;
@@ -22,26 +23,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * Keeps the choices of the players on this instance in memory, stores each choice and replicates it.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class DefaultLanguageService implements LanguageService, Lifecycle {
-	private final LanguageStore store;
-	private final LanguageApplier applier;
-	private final ReplicationService replication;
-	private final DefaultTranslationService translations;
+	private final @NotNull LanguageStore store;
+	private final @NotNull LanguageApplier applier;
+	private final @NotNull ReplicationService replication;
+	private final @NotNull DefaultTranslationService translations;
 	private final Map<UUID, Locale> chosen = new ConcurrentHashMap<>();
 	private final Set<UUID> loaded = ConcurrentHashMap.newKeySet();
-
-	@Inject
-	public DefaultLanguageService(
-			@NotNull LanguageStore store,
-			@NotNull LanguageApplier applier,
-			@NotNull ReplicationService replication,
-			@NotNull DefaultTranslationService translations
-	) {
-		this.store = store;
-		this.applier = applier;
-		this.replication = replication;
-		this.translations = translations;
-	}
 
 	@Override
 	public @NotNull Phase phase() {

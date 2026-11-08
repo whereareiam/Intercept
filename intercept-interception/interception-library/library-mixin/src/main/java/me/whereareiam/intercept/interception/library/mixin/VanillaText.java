@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.interception.library.mixin;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.HolderLookup;
@@ -9,10 +11,8 @@ import org.jetbrains.annotations.NotNull;
  * Converts between the game's text and Adventure's through their shared JSON form; NeoForge on Minecraft 1.21.1 has
  * no Adventure platform that converts directly.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class VanillaText {
-	private VanillaText() {
-	}
-
 	/**
 	 * Converts the game's text to Adventure's.
 	 *

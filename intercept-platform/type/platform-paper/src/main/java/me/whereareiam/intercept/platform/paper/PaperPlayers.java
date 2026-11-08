@@ -2,6 +2,7 @@ package me.whereareiam.intercept.platform.paper;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageService;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import org.bukkit.event.EventHandler;
@@ -18,15 +19,10 @@ import org.jetbrains.annotations.NotNull;
  * and forgets it when they leave.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class PaperPlayers implements Listener, Lifecycle {
-	private final Plugin plugin;
-	private final LanguageService languages;
-
-	@Inject
-	public PaperPlayers(@NotNull Plugin plugin, @NotNull LanguageService languages) {
-		this.plugin = plugin;
-		this.languages = languages;
-	}
+	private final @NotNull Plugin plugin;
+	private final @NotNull LanguageService languages;
 
 	@Override
 	public @NotNull Phase phase() {

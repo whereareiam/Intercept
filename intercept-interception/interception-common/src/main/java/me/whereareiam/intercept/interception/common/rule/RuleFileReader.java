@@ -2,6 +2,7 @@ package me.whereareiam.intercept.interception.common.rule;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.intercept.interception.Surface;
@@ -37,14 +38,10 @@ import java.util.regex.PatternSyntaxException;
  *   replace: match
  * </pre>
  */
+@RequiredArgsConstructor
 public final class RuleFileReader {
-	private final Configura configura;
-	private final Logger logger;
-
-	public RuleFileReader(@NotNull Configura configura, @NotNull Logger logger) {
-		this.configura = configura;
-		this.logger = logger;
-	}
+	private final @NotNull Configura configura;
+	private final @NotNull Logger logger;
 
 	/**
 	 * Reads every rule of the files, skipping and logging the ones that cannot be used.

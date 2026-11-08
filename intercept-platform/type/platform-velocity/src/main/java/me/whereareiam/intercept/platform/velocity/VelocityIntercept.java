@@ -7,6 +7,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.attache.platform.velocity.VelocityLibraryManager;
 import org.slf4j.Logger;
 
@@ -17,20 +18,13 @@ import java.nio.file.Path;
  * itself starts in {@link VelocityRuntime}. Velocity's own Guice builds this class, so it is injected through
  * {@code jakarta.inject}, which Intercept's relocated Guice leaves alone. {@code velocity-plugin.json} declares it.
  */
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class VelocityIntercept {
 	private final ProxyServer proxy;
 	private final PluginContainer container;
 	private final Logger logger;
-	private final Path dataPath;
+	private final @DataDirectory Path dataPath;
 	private VelocityRuntime runtime;
-
-	@Inject
-	public VelocityIntercept(ProxyServer proxy, PluginContainer container, Logger logger, @DataDirectory Path dataPath) {
-		this.proxy = proxy;
-		this.container = container;
-		this.logger = logger;
-		this.dataPath = dataPath;
-	}
 
 	@Subscribe
 	public void onInitialize(ProxyInitializeEvent event) {

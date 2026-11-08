@@ -28,10 +28,12 @@ dependencies {
     "probeImplementation"(libs.semantica.syntax.icu)
     "probeImplementation"(libs.semantica.format.adventure.v5) { exclude(group = "net.kyori") }
 
+    anvilCompileOnly(libs.lombok)
     anvilRuntimeOnly(libs.anvil.protocol.mcprotocol)
     // The database and Redis run in Docker containers beside the servers.
     anvilRuntimeOnly(libs.docker.java.core)
     anvilRuntimeOnly(libs.docker.java.transport)
+    anvilAnnotationProcessor(libs.lombok)
 }
 
 /**

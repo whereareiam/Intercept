@@ -2,6 +2,7 @@ package me.whereareiam.intercept.adapter.command.executor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.adapter.command.Replies;
 import me.whereareiam.intercept.command.CommandSource;
 import me.whereareiam.intercept.message.MessageService;
@@ -19,19 +20,13 @@ import java.util.Map;
  * reloads too.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class ReloadCommand {
 	private static final String EVERYWHERE = "everywhere";
 
-	private final MessageService messages;
-	private final ReplicationService replication;
-	private final Replies replies;
-
-	@Inject
-	public ReloadCommand(@NotNull MessageService messages, @NotNull ReplicationService replication, @NotNull Replies replies) {
-		this.messages = messages;
-		this.replication = replication;
-		this.replies = replies;
-	}
+	private final @NotNull MessageService messages;
+	private final @NotNull ReplicationService replication;
+	private final @NotNull Replies replies;
 
 	/**
 	 * Adds the command's flag and handler.
