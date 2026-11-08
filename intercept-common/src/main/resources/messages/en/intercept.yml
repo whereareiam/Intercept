@@ -1,0 +1,16 @@
+language:
+  chosen: "<gray>Your language is now <white>{language}</white>."
+  reset: "<gray>You see messages in your client's language again."
+  unavailable: "<red>{language} is not available. Choose one of: {languages}"
+  player-chosen: "<gray>{player} now sees <white>{language}</white>."
+  player-reset: "<gray>{player} sees their client's language again."
+  player-unknown: "<red>{player} is not online."
+publish:
+  done: "<gray>Published revision <white>{revision}</white>: {changed, plural, one {# message} other {# messages}} changed, {removed, plural, one {# removed} other {# removed}}, {rules, plural, one {# rule file} other {# rule files}}."
+  nothing: "<gray>Nothing to publish: messages/ and rules/ match the network."
+  failed: "<red>Cannot publish: {reason}"
+reload:
+  done: "<gray>Reloaded messages and rules."
+  everywhere: "<gray>Reloaded, and asked every other server to reload."
+command:
+  players-only: "<red>Only players can choose a language for themselves."

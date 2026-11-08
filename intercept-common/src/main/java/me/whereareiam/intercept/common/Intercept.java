@@ -1,79 +1,64 @@
 package me.whereareiam.intercept.common;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import me.whereareiam.intercept.command.CommandService;
-import me.whereareiam.intercept.Constants;
-import me.whereareiam.intercept.InterceptAPI;
-import me.whereareiam.intercept.PlatformInteractor;
-import me.whereareiam.intercept.common.logging.WelcomeBannerPrinter;
-import me.whereareiam.intercept.common.persistence.DefaultTranslationDataService;
-import me.whereareiam.intercept.common.updater.UpdateScheduler;
-import me.whereareiam.intercept.database.DatabaseService;
-import me.whereareiam.intercept.event.EventListener;
-import me.whereareiam.intercept.event.EventManager;
-import me.whereareiam.intercept.event.base.EventOrder;
-import me.whereareiam.intercept.event.base.IntercepticEvent;
-import me.whereareiam.intercept.event.lifecycle.InterceptBootstrappedEvent;
-import me.whereareiam.intercept.event.lifecycle.InterceptReadyEvent;
-import me.whereareiam.intercept.event.lifecycle.InterceptShutdownEvent;
-import me.whereareiam.intercept.event.lifecycle.InterceptStartedEvent;
-import me.whereareiam.intercept.listener.ListenerRegistrar;
-import me.whereareiam.intercept.logging.Logger;
-import me.whereareiam.intercept.logging.LoggingHelper;
-import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.util.EventUtil;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import me.whereareiam.intercept.lifecycle.Lifecycle;
+import org.jetbrains.annotations.NotNull;
 
-public class Intercept implements EventListener {
-	private final Injector injector;
+import java.util.ArrayDeque;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Starts Intercept's parts phase by phase and stops them in reverse.
+ */
+@Singleton
+public final class Intercept {
+	private final List<Lifecycle> parts;
+	private final Logger logger;
+	private final Deque<Lifecycle> started = new ArrayDeque<>();
 
 	@Inject
-	public Intercept(
-			EventManager eventManager,
-			Injector injector
-	) {
-		this.injector = injector;
-		eventManager.register(this);
+	public Intercept(@NotNull Set<Lifecycle> parts, @Named("intercept") @NotNull Logger logger) {
+		this.parts = parts.stream()
+				.sorted(Comparator.comparing(Lifecycle::phase))
+				.toList();
+		this.logger = logger;
 	}
 
-	@IntercepticEvent
-	public void onBootstrapped(InterceptBootstrappedEvent event) {
-		Constants.SERVER_VERSION = injector.getInstance(PlatformInteractor.class).getServerVersion();
-		Logger.init(injector.getInstance(LoggingHelper.class));
-
-		// Load settings early so dependent modules can initialize based on config
-		injector.getInstance(Settings.class);
-
-		// Initialize database service early to register event listeners before InterceptReadyEvent
-		injector.getInstance(DatabaseService.class);
-
-		// Initialize the public API for external plugins
-		InterceptAPI.initialize(injector);
+	/**
+	 * Starts every part. When one fails, the parts already started are stopped and the failure is thrown.
+	 *
+	 * @throws IllegalStateException when a part cannot start
+	 */
+	public synchronized void start() {
+		for (Lifecycle part : parts) {
+			try {
+				part.start();
+				started.push(part);
+			} catch (Exception failure) {
+				stop();
+				throw new IllegalStateException("Cannot start " + part.getClass().getSimpleName(), failure);
+			}
+		}
 	}
 
-	@IntercepticEvent(EventOrder.LOW)
-	public void onReady(InterceptReadyEvent event) {
-		injector.getInstance(ListenerRegistrar.class).registerListeners();
-
-		// Initialize messages system
-		injector.getInstance(DefaultTranslationDataService.class).initialize();
-
-		// Initialize commands
-		injector.getInstance(CommandService.class);
-	}
-
-	@IntercepticEvent(EventOrder.HIGHEST)
-	public void onReadyFinal(InterceptReadyEvent event) {
-		injector.getInstance(WelcomeBannerPrinter.class).print();
-		injector.getInstance(UpdateScheduler.class).start();
-
-		// Fire InterceptStartedEvent to signal complete startup
-		EventUtil.callEvent(new InterceptStartedEvent());
-	}
-
-	@IntercepticEvent
-	public void onShutdown(InterceptShutdownEvent event) {
-		// Shutdown the public API
-		InterceptAPI.shutdown();
+	/**
+	 * Stops every started part, the last started first.
+	 */
+	public synchronized void stop() {
+		while (!started.isEmpty()) {
+			Lifecycle part = started.pop();
+			try {
+				part.stop();
+			} catch (RuntimeException failure) {
+				logger.log(Level.WARNING, "Cannot stop " + part.getClass().getSimpleName(), failure);
+			}
+		}
 	}
 }

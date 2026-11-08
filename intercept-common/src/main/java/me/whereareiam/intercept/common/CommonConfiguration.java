@@ -1,286 +1,53 @@
 package me.whereareiam.intercept.common;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.multibindings.OptionalBinder;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
-import me.whereareiam.configura.Config;
-import me.whereareiam.configura.reader.ConfigReader;
+import me.whereareiam.configura.Configura;
+import me.whereareiam.configura.feature.comment.CommentFeature;
 import me.whereareiam.configura.type.Format;
-import me.whereareiam.configura.writer.ConfigWriter;
-import me.whereareiam.intercept.Reloadable;
-import me.whereareiam.intercept.common.config.resolver.FileSystemConfigurationTypeResolver;
-import me.whereareiam.intercept.common.event.EventController;
-import me.whereareiam.intercept.common.persistence.DefaultTranslationDataService;
-import me.whereareiam.intercept.common.persistence.DefaultTranslationFileWriter;
-import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecRegistry;
-import me.whereareiam.intercept.common.persistence.file.DefaultTranslationFileCodecResolver;
-import me.whereareiam.intercept.common.persistence.file.codec.JsonTranslationFileCodec;
-import me.whereareiam.intercept.common.persistence.file.codec.YamlTranslationFileCodec;
-import me.whereareiam.intercept.common.persistence.format.DefaultTranslationFormatRegistry;
-import me.whereareiam.intercept.common.provider.DefaultPlatformNamespaceProvider;
-import me.whereareiam.intercept.common.provider.DefaultTranslationServiceProvider;
-import me.whereareiam.intercept.common.provider.IntegrationProvider;
-import me.whereareiam.intercept.common.provider.ReloadableProvider;
-import me.whereareiam.intercept.common.provider.config.CommandsProvider;
-import me.whereareiam.intercept.common.provider.config.MessagesProvider;
-import me.whereareiam.intercept.common.provider.config.PersistenceProvider;
-import me.whereareiam.intercept.common.provider.config.SettingsProvider;
-import me.whereareiam.intercept.common.registry.DefaultMessageRegistry;
-import me.whereareiam.intercept.common.registry.DefaultPlayerRegistry;
-import me.whereareiam.intercept.common.registry.DefaultReservedKeyRegistry;
-import me.whereareiam.intercept.common.registry.InterceptTranslationRegistry;
-import me.whereareiam.intercept.common.tag.DefaultTagReplacementService;
-import me.whereareiam.intercept.common.translation.NamespacedTranslationService;
-import me.whereareiam.intercept.common.translation.loader.NoopTranslationLoader;
-import me.whereareiam.intercept.common.translation.namespace.DefaultNamespaceResolver;
-import me.whereareiam.intercept.common.updater.provider.GitHubProvider;
-import me.whereareiam.intercept.common.updater.provider.ModrinthProvider;
-import me.whereareiam.intercept.common.updater.provider.SpigotMCProvider;
-import me.whereareiam.intercept.config.ConfigurationTypeResolver;
-import me.whereareiam.intercept.event.EventManager;
-import me.whereareiam.intercept.integration.Integration;
-import me.whereareiam.intercept.logging.BannerContributor;
-import me.whereareiam.intercept.model.config.Commands;
-import me.whereareiam.intercept.model.config.Messages;
-import me.whereareiam.intercept.model.config.Persistence;
+import me.whereareiam.intercept.common.config.SettingsProvider;
+import me.whereareiam.intercept.common.language.DefaultLanguageService;
+import me.whereareiam.intercept.common.message.DefaultMessageService;
+import me.whereareiam.intercept.common.replication.LocalReplicationService;
+import me.whereareiam.intercept.common.translation.DefaultTranslationService;
+import me.whereareiam.intercept.language.LanguageService;
+import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.message.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
-import me.whereareiam.intercept.persistence.MessageFileWriter;
-import me.whereareiam.intercept.persistence.TranslationDataService;
-import me.whereareiam.intercept.persistence.file.TranslationFileCodec;
-import me.whereareiam.intercept.persistence.file.TranslationFileCodecRegistry;
-import me.whereareiam.intercept.persistence.file.TranslationFileCodecResolver;
-import me.whereareiam.intercept.persistence.file.TranslationFileCodecScope;
-import me.whereareiam.intercept.registry.MessageFormatRegistry;
-import me.whereareiam.intercept.registry.MessageRegistry;
-import me.whereareiam.intercept.registry.PlayerRegistry;
-import me.whereareiam.intercept.registry.ReservedKeyRegistry;
-import me.whereareiam.intercept.registry.base.Registry;
-import me.whereareiam.intercept.tag.TagReplacementService;
-import me.whereareiam.intercept.translation.PlatformNamespaceProvider;
-import me.whereareiam.intercept.translation.TranslationLoader;
-import me.whereareiam.intercept.translation.namespace.NamespaceResolver;
-import me.whereareiam.intercept.type.ProviderType;
-import me.whereareiam.intercept.updater.UpdateProvider;
-import me.whereareiam.intercept.util.EventUtil;
-import me.whereareiam.intercept.util.Serializer;
-import me.whereareiam.keystone.serializer.SerializerEngine;
-import me.whereareiam.semantica.SemanticaConfiguration;
-import me.whereareiam.semantica.SemanticaLogger;
-import me.whereareiam.semantica.TagConfiguration;
-import me.whereareiam.semantica.locale.LocaleParser;
-import me.whereareiam.semantica.model.SemanticLocale;
-import me.whereareiam.semantica.translation.TranslationRegistry;
-import me.whereareiam.semantica.translation.TranslationService;
+import me.whereareiam.intercept.replication.ReplicationService;
+import me.whereareiam.intercept.translation.TranslationService;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Locale;
-import java.util.Set;
-
-@SuppressWarnings("unused")
-public class CommonConfiguration extends AbstractModule {
-	private final Path dataPath;
-
-	public CommonConfiguration(Path dataPath) {
-		this.dataPath = dataPath;
-	}
-
+/**
+ * Binds what every platform shares: settings, the catalog, shared messages and languages. Platforms add their own
+ * configuration; persistence and replication add theirs.
+ */
+public final class CommonConfiguration extends AbstractModule {
 	@Override
 	protected void configure() {
-		requestInjection(this);
-
-		// Configuration
-		bind(ConfigurationTypeResolver.class)
-				.to(FileSystemConfigurationTypeResolver.class)
-				.asEagerSingleton();
-
-		// Configs
-		bind(SettingsProvider.class).asEagerSingleton();
 		bind(Settings.class).toProvider(SettingsProvider.class);
-		bind(PersistenceProvider.class).asEagerSingleton();
-		bind(Persistence.class).toProvider(PersistenceProvider.class);
-		bind(MessagesProvider.class).asEagerSingleton();
-		bind(Messages.class).toProvider(MessagesProvider.class);
-		bind(CommandsProvider.class).asEagerSingleton();
-		bind(Commands.class).toProvider(CommandsProvider.class);
+		bind(TranslationService.class).to(DefaultTranslationService.class);
+		bind(MessageService.class).to(DefaultMessageService.class);
+		bind(LanguageService.class).to(DefaultLanguageService.class);
 
-		// Services
-		OptionalBinder.newOptionalBinder(
-				binder(),
-				Key.get(Locale.class, Names.named("defaultLocale"))
-		).setDefault().toInstance(Locale.ENGLISH);
-		bind(EventManager.class).to(EventController.class);
-		bind(EventUtil.class).asEagerSingleton();
-		bind(PlayerRegistry.class).to(DefaultPlayerRegistry.class);
+		OptionalBinder.newOptionalBinder(binder(), ReplicationService.class)
+				.setDefault()
+				.to(LocalReplicationService.class);
 
-		// Plugin
-		bind(Intercept.class).asEagerSingleton();
-
-		// Messages system
-		bind(TagReplacementService.class)
-				.to(DefaultTagReplacementService.class);
-		bind(MessageRegistry.class).to(DefaultMessageRegistry.class);
-		OptionalBinder.newOptionalBinder(binder(), TranslationRegistry.class)
-				.setDefault().to(InterceptTranslationRegistry.class);
-		OptionalBinder.newOptionalBinder(
-				binder(),
-				Key.get(new TypeLiteral<TranslationService<Locale>>() {})
-		).setDefault().toProvider(DefaultTranslationServiceProvider.class);
-		OptionalBinder.newOptionalBinder(binder(), PlatformNamespaceProvider.class)
-				.setDefault().to(DefaultPlatformNamespaceProvider.class);
-		bind(NamespaceResolver.class)
-				.to(DefaultNamespaceResolver.class)
-				.asEagerSingleton();
-		OptionalBinder.newOptionalBinder(binder(), MessageFormatRegistry.class)
-				.setDefault().to(DefaultTranslationFormatRegistry.class);
-		OptionalBinder.newOptionalBinder(binder(), ReservedKeyRegistry.class)
-				.setDefault().to(DefaultReservedKeyRegistry.class);
-		OptionalBinder.newOptionalBinder(binder(), TranslationFileCodecRegistry.class)
-				.setDefault().to(DefaultTranslationFileCodecRegistry.class);
-		OptionalBinder.newOptionalBinder(binder(), TranslationFileCodecResolver.class)
-				.setDefault().to(DefaultTranslationFileCodecResolver.class);
-		OptionalBinder.newOptionalBinder(binder(), TranslationLoader.class)
-				.setDefault().to(NoopTranslationLoader.class);
-		OptionalBinder.newOptionalBinder(binder(), MessageFileWriter.class)
-				.setDefault().to(DefaultTranslationFileWriter.class);
-		bind(TranslationDataService.class).to(DefaultTranslationDataService.class);
-
-		// Updater
-		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.MODRINTH.toString()))
-				.to(ModrinthProvider.class);
-		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.GITHUB.toString()))
-				.to(GitHubProvider.class);
-		bind(UpdateProvider.class).annotatedWith(Names.named(ProviderType.SPIGOT.toString()))
-				.to(SpigotMCProvider.class);
-
-		// Other
-		bind(new TypeLiteral<Registry<Integration>>() {
-		}).to(IntegrationProvider.class).asEagerSingleton();
-		bind(new TypeLiteral<Set<Integration>>() {
-		}).toProvider(IntegrationProvider.class).asEagerSingleton();
-
-		bind(new TypeLiteral<Registry<Reloadable>>() {
-		}).to(ReloadableProvider.class).asEagerSingleton();
-		bind(new TypeLiteral<Set<Reloadable>>() {
-		}).annotatedWith(Names.named("reloadables")).toProvider(ReloadableProvider.class).asEagerSingleton();
-
-		Multibinder.newSetBinder(binder(), BannerContributor.class);
-	}
-
-	@Inject
-	void initializeSerializationHelper(Provider<SerializerEngine> serializerProvider) {
-		Serializer.initialize(serializerProvider);
-	}
-
-	@Inject
-	void initializeConfigura(
-			ConfigurationTypeResolver resolver,
-			TranslationFileCodecRegistry codecRegistry
-	) {
-		Format format = resolver.getConfigurationType();
-		ConfigReader reader = Config.getDefaultReader().withFormat(format);
-		ConfigWriter writer = Config.getDefaultWriter().withFormat(format);
-		Config.setReader(reader);
-		Config.setWriter(writer);
-
-		if (codecRegistry != null) {
-			TranslationFileCodec yaml = new YamlTranslationFileCodec();
-			TranslationFileCodec json = new JsonTranslationFileCodec();
-			boolean setYamlDefault = format == Format.YAML;
-			boolean setJsonDefault = format == Format.JSON;
-
-			codecRegistry.register(yaml, TranslationFileCodecScope.global(), setYamlDefault);
-			codecRegistry.register(json, TranslationFileCodecScope.global(), setJsonDefault);
-		}
-	}
-
-	@Inject
-	void initializeEventUtil(EventManager eventManager) {
-		EventUtil.initialize(eventManager);
+		Multibinder<Lifecycle> lifecycles = Multibinder.newSetBinder(binder(), Lifecycle.class);
+		lifecycles.addBinding().to(DefaultTranslationService.class);
+		lifecycles.addBinding().to(DefaultMessageService.class);
+		lifecycles.addBinding().to(DefaultLanguageService.class);
 	}
 
 	@Provides
 	@Singleton
-	Path provideBasePath() {
-		return ensureDirectory(dataPath, "data");
-	}
-
-	@Provides
-	@Singleton
-	@Named("dataPath")
-	Path provideNamedDataPath() {
-		return ensureDirectory(dataPath, "data");
-	}
-
-	@Provides
-	@Singleton
-	@Named("messagesPath")
-	Path provideMessagesPath(@Named("dataPath") Path dataPath) {
-		return ensureDirectory(dataPath.resolve("messages"), "messages");
-	}
-
-	@Provides
-	@Singleton
-	SemanticaLogger provideSemanticaLogger() {
-		return new InterceptSemanticaLogger();
-	}
-
-	@Provides
-	@Singleton
-	LocaleParser<Locale> provideLocaleParser() {
-		return SemanticLocale::wrap;
-	}
-
-	@Provides
-	@Singleton
-	SemanticaConfiguration<Locale> provideSemanticaConfiguration(
-			Provider<Settings> settingsProvider,
-			@Named("defaultLocale") Provider<Locale> defaultLocaleProvider,
-			LocaleParser<Locale> localeParser,
-			SemanticaLogger logger
-	) {
-		Settings settings = settingsProvider.get();
-		Settings.Performance.Cache cache = settings.getPerformance().getCache();
-		Locale defaultLocale = defaultLocaleProvider.get();
-
-		return SemanticaConfiguration.<Locale>builder()
-				.defaultLocale(SemanticLocale.wrap(defaultLocale))
-				.tagConfiguration(TagConfiguration.defaults())
-				.performance(SemanticaConfiguration.PerformanceSettings.builder()
-						.cache(SemanticaConfiguration.PerformanceSettings.CacheSettings.builder()
-								.enabled(cache.isEnabled())
-								.semiStaticSize(cache.getSemiStaticSize())
-								.dynamicSize(cache.getDynamicSize())
-								.semiStaticExpireMinutes(cache.getSemiStaticExpireMinutes())
-								.dynamicExpireMinutes(cache.getDynamicExpireMinutes())
-								.build())
-						.prerenderStatic(settings.getPerformance().isPrerenderStatic())
-						.buildDependencyGraph(settings.getPerformance().isBuildDependencyGraph())
-						.logTimings(false)
-						.build())
-				.localeParser(localeParser)
-				.logger(logger)
+	Configura configura() {
+		return Configura.builder()
+				.format(Format.YAML)
+				.feature(CommentFeature.defaults())
 				.build();
-	}
-
-	@Provides
-	@Singleton
-	NamespacedTranslationService provideNamespaceAwareTranslationService(
-			TranslationService<Locale> baseService,
-			Provider<Settings> settingsProvider
-	) {
-		return new NamespacedTranslationService(baseService, settingsProvider);
-	}
-
-	private Path ensureDirectory(Path path, String label) {
-		try {
-			Files.createDirectories(path);
-			return path;
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to create " + label + " directory", e);
-		}
 	}
 }
