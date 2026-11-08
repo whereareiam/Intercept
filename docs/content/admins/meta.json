@@ -1,0 +1,15 @@
+{
+  "title": "Server admins",
+  "description": "Install, configure and run Intercept",
+  "icon": "Server",
+  "root": true,
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "installation",
+    "---Guides---",
+    "...guides",
+    "---Help---",
+    "troubleshooting"
+  ]
+}

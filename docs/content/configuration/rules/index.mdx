@@ -1,0 +1,24 @@
+---
+title: rules/*.yml
+description: Every field of a rule.
+---
+
+A rule file maps names to rules. A rule's full name is its file and its name, such as `essentials/no-permission`.
+
+<Setting name="pattern" depth={2} takes="a regular expression" affects="which messages the rule translates, matched against their plain text">
+</Setting>
+
+<Setting name="key" depth={2} takes="a key" affects="the text that replaces the match">
+</Setting>
+
+<Setting name="arguments" depth={2} takes="names mapped to group numbers or group names" default="`{}`" affects="the values the key's text receives">
+</Setting>
+
+<Setting name="surfaces" depth={2} takes="a list of `chat`, `action-bar`, `kick`" default="`[chat]`" affects="where the rule applies">
+</Setting>
+
+<Setting name="priority" depth={2} takes="a number" default="`0`" affects="the order rules are tried in, highest first">
+</Setting>
+
+<Setting name="replace" depth={2} takes="`match` or `whole`" default="`match`" affects="whether the match or the whole message is replaced">
+</Setting>

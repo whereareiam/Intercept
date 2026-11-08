@@ -1,0 +1,47 @@
+{
+  "name": "Intercept",
+  "description": "Every message on the network, in the language each player chose.",
+  "state": {
+    "bundling": {
+      "captions": [
+        "Asking the network what this key means.",
+        "Teaching the action bar German.",
+        "Publishing a comma to every server.",
+        "Checking which translator is the authority today.",
+        "Finding markers in other people's messages."
+      ]
+    }
+  },
+  "urls": {
+    "github": "https://github.com/whereareiam/Intercept"
+  },
+  "links": [
+    {
+      "type": "icon",
+      "label": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/whereareiam/Intercept",
+      "external": true
+    },
+    {
+      "type": "icon",
+      "label": "Discord",
+      "icon": "discord",
+      "url": "https://discord.arcadeya.com",
+      "external": true
+    }
+  ],
+  "i18n": {
+    "default": "en",
+    "languages": {
+      "en": { "label": "English" }
+    }
+  },
+  "versions": {
+    "home": "dev",
+    "include": [
+      { "type": "branch", "pattern": "release/*" },
+      { "type": "tag", "pattern": "*" }
+    ]
+  }
+}

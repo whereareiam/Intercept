@@ -1,0 +1,9 @@
+{
+  "title": "Developers",
+  "description": "Make your plugin's messages translatable",
+  "icon": "Code",
+  "root": true,
+  "pages": [
+    "index"
+  ]
+}
