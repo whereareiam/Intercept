@@ -3,228 +3,46 @@ package me.whereareiam.intercept.model.config;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import me.whereareiam.configura.feature.comment.api.annotation.Comment;
+import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Main configuration settings class for the Intercept plugin.
- * Contains all configurable options and their default values.
- *
- * <p>Configuration sections include:</p>
- * <ul>
- *   <li>Debug level for logging</li>
- *   <li>Translation settings</li>
- *   <li>Update checker configuration</li>
- *   <li>Performance configuration</li>
- *   <li>Command configuration</li>
- * </ul>
+ * The contents of {@code settings.yml}.
  */
 @Getter
 @Setter
 @ToString
 public class Settings {
-	/**
-	 * Debug level for logging
-	 */
-	private int level;
+	@Comment("A name for this instance in logs; empty uses a random one.")
+	private @NotNull String instance = "";
+	@Comment("The language of players who choose none and whose client's language has no translation.")
+	private @NotNull String defaultLanguage = "en";
+	@Comment("The languages players may choose, as language tags.")
+	private @NotNull List<String> languages = new ArrayList<>(List.of("en"));
+	@Comment("How often to check the database for messages another server published, in case replication misses it.")
+	private @NotNull Duration revisionPoll = Duration.ofSeconds(30);
+	private @NotNull Organisation organisation = new Organisation();
 
 	/**
-	 * Translation configuration
-	 */
-	private Translation translation;
-
-	/**
-	 * Update checker configuration
-	 */
-	private Updater updater;
-
-	/**
-	 * Performance configuration
-	 */
-	private Performance performance;
-
-	/**
-	 * Command configuration
-	 */
-	private Commands commands;
-
-	/**
-	 * Configuration for the plugin's updater checker.
-	 * Controls updater notifications and checking behavior.
+	 * The organisation's translation bundles, built from its translations repository.
 	 */
 	@Getter
 	@Setter
 	@ToString
-	public static class Updater {
-		/**
-		 * Whether to check for plugin updates
-		 */
-		private boolean checkForUpdates;
-
-		/**
-		 * Whether to show updater notifications
-		 */
-		private boolean warnAboutUpdates;
-
-		/**
-		 * Whether to warn about local builds
-		 */
-		private boolean warnAboutLocalBuilds;
-
-		/**
-		 * Whether to warn about development builds
-		 */
-		private boolean warnAboutDevBuilds;
-
-		/**
-		 * Update check interval in minutes
-		 */
-		private int interval;
-	}
-
-	/**
-	 * Performance configuration for the plugin.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Performance {
-		/**
-		 * Cache configuration
-		 */
-		private Cache cache;
-
-		/**
-		 * Whether to pre-render static messages at load time
-		 */
-		private boolean prerenderStatic;
-
-		/**
-		 * Whether to build dependency graph for optimization
-		 */
-		private boolean buildDependencyGraph;
-
-		/**
-		 * Cache configuration for messages.
-		 */
-		@Getter
-		@Setter
-		@ToString
-		public static class Cache {
-			/**
-			 * Whether caching is enabled
-			 */
-			private boolean enabled;
-
-			/**
-			 * Maximum size for semi-static cache
-			 */
-			private int semiStaticSize;
-
-			/**
-			 * Maximum size for dynamic cache
-			 */
-			private int dynamicSize;
-
-			/**
-			 * Cache expiration in minutes for semi-static cache
-			 */
-			private int semiStaticExpireMinutes;
-
-			/**
-			 * Cache expiration in minutes for dynamic cache
-			 */
-			private int dynamicExpireMinutes;
-
-			/**
-			 * Cache expiration in minutes for render cache
-			 */
-			private int expireMinutes;
-		}
-	}
-
-	/**
-	 * Command configuration for the plugin.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Commands {
-		/**
-		 * Whether to use modern Brigadier-based command system (Paper 1.20.5+)
-		 */
-		private boolean useBrigadier;
-
-		/**
-		 * Whether to register asynchronous completions when available
-		 */
-		private boolean useAsyncCompletions;
-	}
-
-	/**
-	 * Configuration for translation tag processing.
-	 */
-	@Getter
-	@Setter
-	@ToString
-	public static class Translation {
-		/**
-		 * Translation tag configuration.
-		 */
-		private Tag tag;
-
-		/**
-		 * Namespace visibility configuration.
-		 */
-		private Namespaces namespaces;
-
-		/**
-		 * Configuration for translation tag processing.
-		 */
-		@Getter
-		@Setter
-		@ToString
-		public static class Tag {
-			/**
-			 * Tag format for internal Intercept messages (commands, etc.)
-			 * <p>
-			 * Examples: "{@code <lang>}", "{@code [tr]}", "{@code {i18n}}"
-			 * <p>
-			 * Note: Component interception (chat, action bar, etc.) uses per-component
-			 * tag configuration in the Interception section.
-			 */
-			private String format;
-
-			/**
-			 * Whether to automatically process translation tags in Serializer.
-			 * <p>
-			 * When enabled, messages containing translation tags will be automatically
-			 * translated during serialization through the MessageDecorator pipeline.
-			 */
-			private boolean autoProcess;
-		}
-
-		/**
-		 * Configuration for message namespaces.
-		 */
-		@Getter
-		@Setter
-		@ToString
-		public static class Namespaces {
-			/**
-			 * Whether to append namespaces to exposed keys.
-			 */
-			private boolean appendToKeys;
-
-			/**
-			 * Extra namespaces to include for storage.
-			 */
-			private List<String> extra;
-
-			/**
-			 * Optional runtime namespace filter.
-			 */
-			private List<String> load;
-		}
+	public static class Organisation {
+		@Comment("Whether to download the organisation's bundles.")
+		private boolean enabled;
+		@Comment("Where the bundles and their manifest.json are served.")
+		private @NotNull String url = "https://translations.oraylen.net/";
+		@Comment("The product whose bundles this server uses.")
+		private @NotNull String product = "game";
+		@Comment("The key namespaces to keep, such as oraylen or essentials; empty keeps all.")
+		private @NotNull List<String> namespaces = new ArrayList<>();
+		@Comment("How often to look for new bundles.")
+		private @NotNull Duration interval = Duration.ofMinutes(5);
 	}
 }
