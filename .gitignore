@@ -6,3 +6,10 @@
 .gradle/
 build/
 bin/
+
+# documentation build
+.scriptorium/
+node_modules/
+
+# NeoForge run folders
+runs/

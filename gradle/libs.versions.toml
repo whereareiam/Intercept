@@ -2,124 +2,167 @@
 
 # plugins
 shadow = "9.3.0"
-buildconfig = "5.7.1"
+toolkit = "0.3.0"
+freefair = "9.5.0"
+moddev = "2.0.148"
+anvil = "dev-532ecfb"
 
 # compile time processing
 lombok = "1.18.42"
 
 # general
+attache = "1.1.0"
+configura = "2.1.0"
+commandant = "1.0.0"
+dialectica = "4.0.1"
+strata = "3.2.0"
+semantica = "dev"
+
 guice = "7.0.0"
 annotations = "26.0.1"
-configura = "dev-edb606f"
-attache = "dev-69791b2"
-keystone = "dev-176fd53"
-commandant = "dev-5a79a8e"
-semantica = "dev-ffdb76d"
-dialectica = "dev-97e4633"
-junit = "6.0.0"
-mockito = "5.20.0"
-testcontainers = "2.0.2"
+jedis = "7.0.0"
+
+# adventure
+adventure = "5.2.0"
+option = "1.1.0"
+jspecify = "1.0.0"
+icu4j = "79.1"
+slf4j = "2.0.17"
 
 # cloud
 cloud-core = "2.0.0"
-cloud-paper = "2.0.0-beta.13"
-cloud-cooldown = "1.0.0-rc.1"
-cloud-minecraft-extras = "2.0.0-beta.13"
+cloud-minecraft = "2.0.1"
+cloud-neoforge = "2.0.0-beta.9"
 
-# platform api versions
-velocity = "3.4.0-SNAPSHOT"
-spigot = "1.21.8-R0.1-SNAPSHOT"
-paper = "1.21.8-R0.1-SNAPSHOT"
-oraylen = "dev"
+# platform api
+paper = "26.3.build.205-stable"
+velocity = "4.3.1"
+minecraft = "1.21.1"
+neoforge = "21.1.252"
 
-# platform hooks
-packetevents = "2.10.1"
+# interception
+packetevents = "2.14.0"
 
-# platform integrations
-placeholderAPI = "2.11.6"
-
-# adventure
-adventure = "4.25.0"
-adventure-platform-bukkit = "4.4.1"
+# integrations
+placeholderapi = "2.11.6"
 
 # database
-jdbi = "3.50.0"
+jdbi = "3.51.0"
 hikaricp = "7.0.2"
 postgresql = "42.7.8"
 mariadb = "3.5.6"
+sqlite = "3.45.3.0"
+h2 = "2.4.240"
+
+# testing
+junit = "6.0.1"
+mockito = "5.20.0"
+testcontainers = "2.0.2"
+testcontainers-redis = "2.2.4"
+docker-java = "3.7.1"
 
 [libraries]
 
 # compile time processing
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
+lombok-plugin = { group = "io.freefair.gradle", name = "lombok-plugin", version.ref = "freefair" }
+shadow = { group = "com.gradleup.shadow", name = "shadow-gradle-plugin", version.ref = "shadow" }
+toolkit-publish-maven = { group = "me.whereareiam.toolkit", name = "publish-maven", version.ref = "toolkit" }
 
 # general
+attache-common = { group = "me.whereareiam", name = "attache-common", version.ref = "attache" }
+attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }
+attache-velocity = { group = "me.whereareiam", name = "attache-velocity", version.ref = "attache" }
+configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
+configura-feature-comment = { group = "me.whereareiam.configura.feature", name = "comment", version.ref = "configura" }
+configura-feature-polymorphic = { group = "me.whereareiam.configura.feature", name = "polymorphic", version.ref = "configura" }
+commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
+strata = { group = "me.whereareiam", name = "strata", version.ref = "strata" }
+strata-adapter-database = { group = "me.whereareiam", name = "strata-adapter-database", version.ref = "strata" }
+strata-adapter-database-jdbi = { group = "me.whereareiam", name = "strata-adapter-database-jdbi", version.ref = "strata" }
+strata-adapter-database-dialectica = { group = "me.whereareiam", name = "strata-adapter-database-dialectica", version.ref = "strata" }
+dialectica = { group = "me.whereareiam", name = "dialectica", version.ref = "dialectica" }
+dialectica-bundle = { group = "me.whereareiam", name = "dialectica-bundle", version.ref = "dialectica" }
+dialectica-adapter-jdbi = { group = "me.whereareiam", name = "dialectica-adapter-jdbi", version.ref = "dialectica" }
+semantica-api = { group = "me.whereareiam.semantica", name = "semantica-api", version.ref = "semantica" }
+semantica-common = { group = "me.whereareiam.semantica", name = "semantica-common", version.ref = "semantica" }
+semantica-syntax-icu = { group = "me.whereareiam.semantica", name = "syntax-icu", version.ref = "semantica" }
+semantica-source-file = { group = "me.whereareiam.semantica", name = "source-file", version.ref = "semantica" }
+semantica-source-http = { group = "me.whereareiam.semantica", name = "source-http", version.ref = "semantica" }
+semantica-format-common = { group = "me.whereareiam.semantica", name = "format-common", version.ref = "semantica" }
+semantica-format-adventure-common = { group = "me.whereareiam.semantica", name = "format-adventure-common", version.ref = "semantica" }
+semantica-format-adventure-v5 = { group = "me.whereareiam.semantica", name = "format-adventure-v5", version.ref = "semantica" }
+jedis = { group = "redis.clients", name = "jedis", version.ref = "jedis" }
+
 guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
-configura = { group = "me.whereareiam", name = "configura", version.ref = "configura" }
-keystone = { group = "me.whereareiam", name = "keystone", version.ref = "keystone" }
-commandant = { group = "me.whereareiam", name = "commandant", version.ref = "commandant" }
-semantica = { group = "me.whereareiam", name = "semantica", version.ref = "semantica" }
-dialectica = { group = "me.whereareiam", name = "dialectica", version.ref = "dialectica" }
-
-# attache
-attache-paper = { group = "me.whereareiam", name = "attache-paper", version.ref = "attache" }
-attache-common = { group = "me.whereareiam", name = "attache-common", version.ref = "attache" }
-
-# testing
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
-junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher" }
-mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
-mockito-junit = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
-testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
-testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
-testcontainers-mariadb = { group = "org.testcontainers", name = "testcontainers-mariadb", version.ref = "testcontainers" }
-
-# cloud
-cloud-core = { group = "org.incendo", name = "cloud-core", version.ref = "cloud-core" }
-cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud-core" }
-cloud-cooldowns = { group = "org.incendo", name = "cloud-processors-cooldown", version.ref = "cloud-cooldown" }
-cloud-paper = { group = "org.incendo", name = "cloud-paper", version.ref = "cloud-paper" }
-cloud-minecraft-extras = { group = "org.incendo", name = "cloud-minecraft-extras", version.ref = "cloud-minecraft-extras" }
-
-# platform api
-velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
-spigot = { group = "org.spigotmc", name = "spigot-api", version.ref = "spigot" }
-paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
-oraylen = { group = "net.oraylen", name = "oraylen", version.ref = "oraylen" }
-
-# platform hooks
-packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
-packetevents-velocity = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
-
-# platform integrations
-placeholderAPI = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderAPI" }
 
 # adventure
 adventure = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventure-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
-adventure-legacy = { group = "net.kyori", name = "adventure-text-serializer-legacy", version.ref = "adventure" }
 adventure-plain = { group = "net.kyori", name = "adventure-text-serializer-plain", version.ref = "adventure" }
 adventure-gson = { group = "net.kyori", name = "adventure-text-serializer-gson", version.ref = "adventure" }
-adventure-platform-bukkit = { group = "net.kyori", name = "adventure-platform-bukkit", version.ref = "adventure-platform-bukkit" }
+adventure-json = { group = "net.kyori", name = "adventure-text-serializer-json", version.ref = "adventure" }
+adventure-commons = { group = "net.kyori", name = "adventure-text-serializer-commons", version.ref = "adventure" }
+adventure-key = { group = "net.kyori", name = "adventure-key", version.ref = "adventure" }
+option = { group = "net.kyori", name = "option", version.ref = "option" }
+jspecify = { group = "org.jspecify", name = "jspecify", version.ref = "jspecify" }
+icu4j = { group = "com.ibm.icu", name = "icu4j", version.ref = "icu4j" }
+slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+
+# cloud
+cloud-core = { group = "org.incendo", name = "cloud-core", version.ref = "cloud-core" }
+cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud-core" }
+cloud-paper = { group = "org.incendo", name = "cloud-paper", version.ref = "cloud-minecraft" }
+cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version.ref = "cloud-minecraft" }
+cloud-neoforge = { group = "org.incendo", name = "cloud-neoforge", version.ref = "cloud-neoforge" }
+
+# platform api
+paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+# interception
+packetevents-api = { group = "com.github.retrooper", name = "packetevents-api", version.ref = "packetevents" }
+
+# integrations
+placeholderapi = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderapi" }
 
 # database
 jdbi-core = { group = "org.jdbi", name = "jdbi3-core", version.ref = "jdbi" }
-jdbi-sqlobject = { group = "org.jdbi", name = "jdbi3-sqlobject", version.ref = "jdbi" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+
+# testing
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+junit-platform = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-junit = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
+docker-java-core = { group = "com.github.docker-java", name = "docker-java-core", version.ref = "docker-java" }
+docker-java-transport = { group = "com.github.docker-java", name = "docker-java-transport-zerodep", version.ref = "docker-java" }
+anvil-protocol-mcprotocol = { group = "me.whereareiam.anvil", name = "protocol-mcprotocol", version.ref = "anvil" }
+testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgresql = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
+testcontainers-redis = { group = "com.redis", name = "testcontainers-redis", version.ref = "testcontainers-redis" }
 
 [bundles]
 
-testing = ["junit-jupiter", "mockito-core", "mockito-junit", "testcontainers-junit"]
-database = ["jdbi-core", "jdbi-sqlobject", "hikaricp", "postgresql", "mariadb"]
-adventure = ["adventure", "adventure-minimessage", "adventure-legacy", "adventure-plain", "adventure-gson"]
-bukkit = ["spigot", "adventure-platform-bukkit"]
-paper = ["paper", "cloud-core", "cloud-paper"]
-velocity = ["velocity", "packetevents-velocity"]
+adventure = ["adventure", "adventure-minimessage", "adventure-plain"]
+semantica = ["semantica-api", "semantica-common", "semantica-syntax-icu", "semantica-source-file", "semantica-source-http", "semantica-format-adventure-v5"]
+cloud = ["cloud-core", "cloud-annotations"]
 
 [plugins]
 
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
-buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
+moddev = { id = "net.neoforged.moddev", version.ref = "moddev" }
+attache = { id = "me.whereareiam.attache", version.ref = "attache" }
+toolkit-distribution = { id = "me.whereareiam.toolkit.distribution", version.ref = "toolkit" }
+toolkit-versioning = { id = "me.whereareiam.toolkit.versioning", version.ref = "toolkit" }
+anvil = { id = "me.whereareiam.anvil", version.ref = "anvil" }
+anvil-junit = { id = "me.whereareiam.anvil.junit", version.ref = "anvil" }
+anvil-capability-default = { id = "me.whereareiam.anvil.capability.default", version.ref = "anvil" }
+anvil-platform-paper = { id = "me.whereareiam.anvil.platform.paper", version.ref = "anvil" }
+anvil-platform-velocity = { id = "me.whereareiam.anvil.platform.velocity", version.ref = "anvil" }
+anvil-platform-neoforge = { id = "me.whereareiam.anvil.platform.neoforge", version.ref = "anvil" }
