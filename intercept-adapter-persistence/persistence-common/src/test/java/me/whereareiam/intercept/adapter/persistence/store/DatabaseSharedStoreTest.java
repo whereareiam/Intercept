@@ -63,6 +63,22 @@ class DatabaseSharedStoreTest {
 
 	@ParameterizedTest
 	@MethodSource("me.whereareiam.intercept.adapter.persistence.TestDatabases#types")
+	void aMessageForEveryLanguageKeepsItsLanguage(DatabaseType type) {
+		DefaultDatabaseService database = TestDatabases.open(type, folder);
+		try {
+			DatabaseSharedStore store = new DatabaseSharedStore(database);
+			SharedMessage link = new SharedMessage(Locale.ROOT, "identica.login.failed", "identica.yml", "{@game.account.login-failed}", "Alice", NOW);
+
+			store.apply(new SharedChanges(List.of(link), List.of(), List.of(), List.of()));
+
+			assertEquals(Locale.ROOT, store.load().getMessages().getFirst().getLanguage());
+		} finally {
+			database.stop();
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("me.whereareiam.intercept.adapter.persistence.TestDatabases#types")
 	void emptyChangesLeaveTheRevision(DatabaseType type) {
 		DefaultDatabaseService database = TestDatabases.open(type, folder);
 		try {

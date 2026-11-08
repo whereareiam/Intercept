@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.model.shared.SharedMessage;
 import me.whereareiam.intercept.model.shared.SharedSnapshot;
 import me.whereareiam.semantica.source.Source;
+import me.whereareiam.semantica.source.file.FileSource;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 /**
  * The messages the network shares at one revision, as a layer of the catalog.
@@ -23,7 +26,8 @@ final class SharedSource implements Source {
 	public @NotNull Content load() {
 		Content.Builder content = Content.builder();
 		for (SharedMessage message : snapshot.getMessages()) {
-			String origin = message.getLanguage().toLanguageTag() + "/" + message.getFile();
+			String folder = Locale.ROOT.equals(message.getLanguage()) ? FileSource.ROOT_FOLDER : message.getLanguage().toLanguageTag();
+			String origin = folder + "/" + message.getFile();
 			content.put(message.getLanguage(), message.getKey(), message.getText(), origin);
 		}
 
