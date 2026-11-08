@@ -1,0 +1,11 @@
+{
+  "id": "intercept",
+  "name": "Intercept",
+  "version": "${version}",
+  "description": "Translates every message on the network, in the language each player chose.",
+  "authors": ["whereareiam"],
+  "dependencies": [
+    {"id": "packetevents", "optional": true}
+  ],
+  "main": "me.whereareiam.intercept.platform.velocity.VelocityIntercept"
+}
