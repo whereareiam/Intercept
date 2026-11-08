@@ -29,10 +29,10 @@ class SharedFoldersTest {
 	void aRevisionWrittenToTheFoldersHasNothingPending() throws Exception {
 		SharedFolders folders = new SharedFolders(configura, dataPath);
 
-		folders.write(revision(1, "<gold>Oraylen</gold> » "), SharedFolders.Pending.NONE);
+		folders.write(revision(1, "<gold>Server</gold> » "), SharedFolders.Pending.NONE);
 
 		assertTrue(folders.pending().isEmpty());
-		assertTrue(Files.readString(dataPath.resolve("messages/en/oraylen/format.yml")).contains("prefix"));
+		assertTrue(Files.readString(dataPath.resolve("messages/en/server/format.yml")).contains("prefix"));
 		assertEquals("pattern: \"x\"\n", Files.readString(dataPath.resolve("rules/essentials.yml")));
 	}
 
@@ -41,12 +41,12 @@ class SharedFoldersTest {
 		SharedFolders folders = new SharedFolders(configura, dataPath);
 		folders.write(revision(1, "old"), SharedFolders.Pending.NONE);
 
-		Files.writeString(dataPath.resolve("messages/en/oraylen/format.yml"), "prefix: \"new\"\n");
+		Files.writeString(dataPath.resolve("messages/en/server/format.yml"), "prefix: \"new\"\n");
 		Files.writeString(dataPath.resolve("messages/en/essentials.yml"), "motd: \"Hello\"\n");
 		Files.delete(dataPath.resolve("rules/essentials.yml"));
 
 		SharedFolders.Pending pending = folders.pending();
-		assertEquals("new", pending.messages().get(new SharedFolders.MessageId(Locale.ENGLISH, "oraylen.format.prefix")).text());
+		assertEquals("new", pending.messages().get(new SharedFolders.MessageId(Locale.ENGLISH, "server.format.prefix")).text());
 		assertEquals("essentials.yml", pending.messages().get(new SharedFolders.MessageId(Locale.ENGLISH, "essentials.motd")).file());
 		assertEquals(List.of("essentials.yml"), pending.removedRules());
 	}
@@ -62,21 +62,21 @@ class SharedFoldersTest {
 		SharedFolders.Pending pending = folders.pending();
 		assertEquals(1, pending.messages().size());
 		assertTrue(pending.messages().containsKey(new SharedFolders.MessageId(Locale.ENGLISH, "essentials.motd")));
-		assertTrue(Files.readString(dataPath.resolve("messages/en/oraylen/format.yml")).contains("from another server"));
+		assertTrue(Files.readString(dataPath.resolve("messages/en/server/format.yml")).contains("from another server"));
 	}
 
 	@Test
 	void aKeyIsWrittenRelativeToItsFile() {
-		assertEquals("prefix", SharedFolders.relativeKey("oraylen/format.yml", "oraylen.format.prefix"));
-		assertEquals("format.prefix", SharedFolders.relativeKey("oraylen.yml", "oraylen.format.prefix"));
+		assertEquals("prefix", SharedFolders.relativeKey("server/format.yml", "server.format.prefix"));
+		assertEquals("format.prefix", SharedFolders.relativeKey("server.yml", "server.format.prefix"));
 		assertEquals("essentials.yml", SharedFolders.file("en", "essentials.motd"));
-		assertEquals("oraylen/format.yml", SharedFolders.file("en/oraylen/format.yml", "oraylen.format.prefix"));
+		assertEquals("server/format.yml", SharedFolders.file("en/server/format.yml", "server.format.prefix"));
 	}
 
 	private static SharedSnapshot revision(long revision, String prefix) {
 		return new SharedSnapshot(
 				revision,
-				List.of(new SharedMessage(Locale.ENGLISH, "oraylen.format.prefix", "oraylen/format.yml", prefix, "Alice", NOW)),
+				List.of(new SharedMessage(Locale.ENGLISH, "server.format.prefix", "server/format.yml", prefix, "Alice", NOW)),
 				List.of(new SharedRule("essentials.yml", "pattern: \"x\"\n", "Alice", NOW))
 		);
 	}

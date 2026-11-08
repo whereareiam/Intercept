@@ -34,7 +34,7 @@ When changing behavior:
 - `intercept-integration/integration-placeholderapi`
   `%intercept_language%` on Paper.
 - `intercept-platform/*`
-  `common` holds `PlatformConfiguration` (what a platform provides) and `InterceptInjector`. `type/platform-paper`, `type/platform-velocity` and `type/platform-neoforge` are the platforms; `bundle` packs Paper and Velocity into one jar. Oraylen's Minestom core comes later as `type/platform-oraylen`.
+  `common` holds `PlatformConfiguration` (what a platform provides) and `InterceptInjector`. `type/platform-paper`, `type/platform-velocity` and `type/platform-neoforge` are the platforms; `bundle` packs Paper and Velocity into one jar.
 - `intercept-testing`
   Live journeys through Anvil on real Paper, Velocity and NeoForge networks. Not part of the shipped plugin.
 - `build-logic/`
