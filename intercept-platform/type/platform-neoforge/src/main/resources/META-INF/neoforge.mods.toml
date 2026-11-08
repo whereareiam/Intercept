@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "All rights reserved"
+
+[[mods]]
+modId = "intercept"
+version = "${version}"
+displayName = "Intercept"
+description = "Translates every message on the network, in the language each player chose"
+authors = "whereareiam"
+# Intercept runs on the server alone: a client neither needs it nor is compared with it.
+displayTest = "IGNORE_ALL_VERSION"
+
+[[mixins]]
+config = "intercept.mixins.json"
+
+[[dependencies.intercept]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.intercept]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.21.2)"
+ordering = "NONE"
+side = "SERVER"

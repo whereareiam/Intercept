@@ -1,9 +1,8 @@
-repositories {
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+plugins {
+    id("module-host")
 }
 
 dependencies {
-    "compileOnly"(rootProject.libs.spigot)
-    "compileOnly"(rootProject.libs.placeholderAPI)
+    compileOnly(libs.paper)
+    compileOnly(libs.placeholderapi)
 }

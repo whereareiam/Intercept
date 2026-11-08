@@ -1,0 +1,17 @@
+name: Intercept
+main: me.whereareiam.intercept.platform.paper.PaperIntercept
+version: '${version}'
+api-version: '1.21'
+description: Translates every message on the network, in the language each player chose.
+authors:
+  - whereareiam
+dependencies:
+  server:
+    packetevents:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
