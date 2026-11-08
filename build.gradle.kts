@@ -1,73 +1,44 @@
-defaultTasks("shadowJar")
+import me.whereareiam.attache.plugin.gradle.extension.AttacheExtension
+import me.whereareiam.toolkit.versioning.extension.ToolkitVersioningExtension
 
-allprojects {
-    version = (System.getenv("VERSION") ?: "dev")
-    group = "me.whereareiam"
-
-    apply(plugin = "java-library")
-    apply(plugin = "maven-publish")
-
-    tasks.withType<JavaCompile> {
-        sourceCompatibility = JavaVersion.VERSION_17.toString()
-        targetCompatibility = JavaVersion.VERSION_17.toString()
-    }
+plugins {
+    alias(libs.plugins.attache)
+    alias(libs.plugins.toolkit.distribution)
+    alias(libs.plugins.toolkit.versioning)
 }
 
-subprojects {
-    repositories {
-        // mavenLocal()
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven("https://maven.whereareiam.me/development")
-        maven("https://maven.whereareiam.me/release")
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
+allprojects {
+    version = rootProject.extensions
+        .getByType(ToolkitVersioningExtension::class.java)
+        .resolvedVersion()
+        .get()
+}
 
-    dependencies {
-        // lombok
-        "compileOnly"(rootProject.libs.lombok)
-        "annotationProcessor"(rootProject.libs.lombok)
+extensions.configure<AttacheExtension>("attache") {
+    transitive.set(true)
 
-        // general
-        "compileOnly"(rootProject.libs.guice)
-        "compileOnly"(rootProject.libs.annotations)
-        "compileOnly"(rootProject.libs.configura)
-        "compileOnly"(rootProject.libs.commandant)
-        "compileOnly"(rootProject.libs.keystone)
-        "compileOnly"(rootProject.libs.semantica)
-        "compileOnly"(rootProject.libs.dialectica)
-        "compileOnly"(rootProject.libs.bundles.adventure)
-        "implementation"(rootProject.libs.attache.common)
+    mavenLocal()
+    repository("https://registry.whereareiam.me/maven/packages")
+}
 
-        // test
-        "testImplementation"(rootProject.libs.guice)
-        "testImplementation"(rootProject.libs.annotations)
-        "testImplementation"(rootProject.libs.configura)
-        "testImplementation"(rootProject.libs.commandant)
-        "testImplementation"(rootProject.libs.keystone)
-        "testImplementation"(rootProject.libs.semantica)
-        "testImplementation"(rootProject.libs.dialectica)
-        "testImplementation"(rootProject.libs.bundles.adventure)
-        "testImplementation"(rootProject.libs.bundles.testing)
-        "testRuntimeOnly"(rootProject.libs.junit.platform)
-    }
+defaultTasks("pluginJars")
 
-    tasks.withType<Test> {
-        useJUnitPlatform()
-    }
+tasks.register("pluginJars") {
+    group = "build"
+    description = "Builds the Paper and Velocity plugin jars, the bundle of both and the NeoForge mod."
 
-    extensions.configure<PublishingExtension> {
-        repositories {
-            maven {
-                val realm = (System.getenv("PUBLISH_REALM")
-                    ?: if ((System.getenv("VERSION") ?: "dev").contains("dev", true)) "development" else "release")
-                    .lowercase()
-                url = uri("https://maven.whereareiam.me/$realm")
-                credentials {
-                    username = System.getenv("PUBLISH_USER") ?: ""
-                    password = System.getenv("PUBLISH_TOKEN") ?: ""
-                }
-            }
-        }
-    }
+    dependsOn(
+        ":platform-paper:shadowJar",
+        ":platform-velocity:shadowJar",
+        ":platform-neoforge:shadowJar",
+        ":intercept-platform:bundle:shadowJar"
+    )
+}
+
+// Files a development build or a release ships; assembleDistribution writes them to build/distribution.
+toolkitDistribution {
+    file("BUNDLE", ":intercept-platform:bundle", "shadowJar")
+    file("PAPER", ":platform-paper", "shadowJar")
+    file("VELOCITY", ":platform-velocity", "shadowJar")
+    file("NEOFORGE", ":platform-neoforge", "shadowJar")
 }
