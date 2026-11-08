@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.whereareiam.intercept.interception.library.mixin.hook",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "PacketSendMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
