@@ -1,8 +1,18 @@
-dependencies {
-    "compileOnly"(project(":intercept-api"))
+plugins {
+    id("module-java")
+    alias(libs.plugins.attache)
+}
 
-    "compileOnly"(libs.cloud.core)
-    "compileOnly"(libs.cloud.annotations)
-    "compileOnly"(libs.cloud.cooldowns)
-    "compileOnly"(libs.cloud.minecraft.extras)
+dependencies {
+    compileOnly(libs.bundles.cloud)
+    compileOnly(libs.commandant)
+    compileOnly(libs.semantica.format.adventure.v5)
+
+    attache(libs.cloud.core)
+    attache(libs.cloud.annotations)
+    attache(libs.commandant)
+
+    testImplementation(libs.bundles.cloud)
+    testImplementation(libs.commandant)
+    testImplementation(libs.bundles.semantica)
 }
