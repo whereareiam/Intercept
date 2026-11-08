@@ -17,21 +17,21 @@ A plugin whose messages you can edit can ask for a key with a marker in its text
 
 Intercept replaces the marker with the text of `essentials.motd` in the player's language, with `{player}` filled
 in. Values without spaces need no quotes: `<lang key=essentials.motd player=Alice>`. The marker's shape is set per
-surface in `interception.yml`.
+kind of message in `interception.yml`.
 
 ## Rules
 
 For text you cannot edit, a rule recognises the message and names the key that replaces it. Put rules into
-`rules/`, one file per plugin, and publish them like messages:
+`translations/rules/`, one file per plugin, and publish them like messages:
 
 ```yaml
-# rules/essentials.yml
+# translations/rules/essentials.yml
 no-permission:
   pattern: "You don't have permission: ([\\w.]+)"
   key: essentials.permission.missing
   arguments:
     permission: 1
-  surfaces: [chat, action-bar]
+  in: [chat, action-bar]
   priority: 10
   replace: match
 ```
@@ -42,6 +42,6 @@ no-permission:
 - Rules with a higher `priority` are tried first; the first that matches wins. A message with a marker is not
   checked against rules.
 
-A rule in `local/rules/` with the same file and name replaces the network's rule on that server.
+A rule in `translations/local/rules/` with the same file and name replaces the network's rule on that server.
 
 See [rule files](../../../configuration/rules/index.mdx) for every field.

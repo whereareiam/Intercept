@@ -22,9 +22,9 @@ When changing behavior:
 - `intercept-api`
   Only what several families share: `LanguageService` and `LanguageApplier`, `TranslationService`, `MessageService`, the persistence ports `SharedStore` and `LanguageStore`, `ReplicationService` and its messages, `Lifecycle`, `CommandSource`, `LibraryLoader` and `settings.yml`. Consumers depend on the family api they need, never on one global api.
 - `intercept-common`
-  The catalog (one Semantica with the layers defaults, remote, shared, local, registered as semantica's authority in Adventure's `GlobalTranslator`), the shared messages and their folders (`messages/` with a folder per language and `all/` for the root locale, `rules/`, `cache/shared/`), polling and publishing, and players' languages.
+  The catalog (one Semantica with the layers defaults, remote, shared, local, registered as semantica's authority in Adventure's `GlobalTranslator`), the shared messages and their folders (`translations/` with a folder per language and `all/` for the root locale, `translations/rules/`, `.cache/shared/`), polling and publishing, and players' languages.
 - `intercept-interception/*`
-  The interception family. `interception-api` holds surfaces, `MessageInterceptor` and `interception.yml`; `interception-common` markers and rules; `interception` the wiring. `interception-library/common` is what every packet library does with an outgoing message; `library-packetevents` serves Paper and Velocity, `library-mixin` NeoForge through a Mixin on the game's packet sending.
+  The interception family. `interception-api` holds `Surface` (chat, action bar, kick), `MessageInterceptor` and `interception.yml`; `interception-common` markers and rules; `interception` the wiring. `interception-library/common` is what every packet library does with an outgoing message; `library-packetevents` serves Paper and Velocity, `library-mixin` NeoForge through a Mixin on the game's packet sending.
 - `intercept-adapter-command`
   `/language` and `/intercept publish|reload`, on Cloud with Commandant's definitions from `commands.yml`.
 - `intercept-adapter-persistence/*`

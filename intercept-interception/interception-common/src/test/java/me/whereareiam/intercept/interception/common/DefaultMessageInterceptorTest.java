@@ -65,7 +65,7 @@ class DefaultMessageInterceptorTest {
 	void aMessageWithoutMarkersOrRulesAndATurnedOffSurfaceAreLeftAlone() {
 		assertNull(interceptor.intercept(Surface.CHAT, Component.text("Hello"), Locale.ENGLISH));
 
-		interception.surface(Surface.KICK).setEnabled(false);
+		interception.of(Surface.KICK).setEnabled(false);
 		assertNull(interceptor.intercept(Surface.KICK, Component.text("<lang key=a.b>"), Locale.ENGLISH));
 	}
 

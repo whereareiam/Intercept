@@ -96,9 +96,9 @@ public final class Network {
 				.asset(asset("intercept-settings-" + instance, SETTINGS.formatted(instance), folder.resolve("settings.yml")))
 				.asset(asset("intercept-persistence", PERSISTENCE, folder.resolve("persistence.yml")))
 				.asset(asset("intercept-replication", REPLICATION, folder.resolve("replication.yml")))
-				.asset(asset("intercept-english", ENGLISH, folder.resolve(Path.of("local", "messages", "en", "test.yml"))))
-				.asset(asset("intercept-german", GERMAN, folder.resolve(Path.of("local", "messages", "de", "test.yml"))))
-				.asset(asset("intercept-german-own", GERMAN_INTERCEPT, folder.resolve(Path.of("local", "messages", "de", "intercept.yml"))));
+				.asset(asset("intercept-english", ENGLISH, folder.resolve(Path.of("translations", "local", "en", "test.yml"))))
+				.asset(asset("intercept-german", GERMAN, folder.resolve(Path.of("translations", "local", "de", "test.yml"))))
+				.asset(asset("intercept-german-own", GERMAN_INTERCEPT, folder.resolve(Path.of("translations", "local", "de", "intercept.yml"))));
 	}
 
 	/**

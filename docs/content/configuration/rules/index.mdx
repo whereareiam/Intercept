@@ -1,5 +1,5 @@
 ---
-title: rules/*.yml
+title: translations/rules/*.yml
 description: Every field of a rule.
 ---
 
@@ -14,7 +14,7 @@ A rule file maps names to rules. A rule's full name is its file and its name, su
 <Setting name="arguments" depth={2} takes="names mapped to group numbers or group names" default="`{}`" affects="the values the key's text receives">
 </Setting>
 
-<Setting name="surfaces" depth={2} takes="a list of `chat`, `action-bar`, `kick`" default="`[chat]`" affects="where the rule applies">
+<Setting name="in" depth={2} takes="a list of `chat`, `action-bar`, `kick`" default="`[chat]`" affects="which kinds of message the rule applies to">
 </Setting>
 
 <Setting name="priority" depth={2} takes="a number" default="`0`" affects="the order rules are tried in, highest first">

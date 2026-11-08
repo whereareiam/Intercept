@@ -23,7 +23,7 @@ class RuleFileReaderTest {
 			  key: essentials.permission.missing
 			  arguments:
 			    permission: 1
-			  surfaces: [chat, action-bar]
+			  in: [chat, action-bar]
 			  priority: 10
 			  replace: whole
 			broken:

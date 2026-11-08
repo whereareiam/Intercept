@@ -58,7 +58,7 @@ public final class DefaultMessageInterceptor implements MessageInterceptor {
 
 	@Override
 	public @Nullable Component intercept(@NotNull Surface surface, @NotNull Component message, @NotNull Locale language) {
-		Interception.SurfaceSettings settings = interception.get().surface(surface);
+		Interception.MessageKind settings = interception.get().of(surface);
 		if (!settings.isEnabled()) return null;
 
 		String plain = PlainTextComponentSerializer.plainText().serialize(message);
