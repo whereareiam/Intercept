@@ -16,7 +16,7 @@ configura = "2.1.0"
 commandant = "1.0.0"
 dialectica = "4.0.1"
 strata = "3.2.0"
-semantica = "dev"
+semantica = "dev-a03801c"
 
 guice = "7.0.0"
 annotations = "26.0.1"

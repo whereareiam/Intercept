@@ -12,7 +12,7 @@ Give each server of a network its own name.
 <Setting name="defaultLanguage" depth={2} takes="a language tag" default="`en`" affects="the language of a text that has none in the player's language">
 </Setting>
 
-<Setting name="languages" depth={2} takes="a list of language tags" default="`[en]`" affects="the languages players can choose with `/language`, and the organisation's bundles that are downloaded">
+<Setting name="languages" depth={2} takes="a list of language tags" default="`[en]`" affects="the languages players can choose with `/language`, and the remote bundles that are downloaded">
 </Setting>
 
 <Setting name="revisionPoll" depth={2} takes="a duration" default='`"30s"`' affects="how often a server checks the database for messages another server published">
@@ -21,21 +21,32 @@ With Redis, publications arrive at once and polling only catches what Redis miss
 
 </Setting>
 
-<Setting name="organisation.enabled" depth={2} takes="`true` or `false`" default="`false`" affects="whether the organisation's translations are downloaded">
+<Setting name="remote.enabled" depth={2} takes="`true` or `false`" default="`false`" affects="whether translation bundles are downloaded">
+
+Remote bundles are semantica bundles served over HTTP, such as the ones an organisation's translations repository
+builds. Their texts win over Intercept's and the plugins' own texts and lose to `messages/` and `local/messages/`.
+Intercept keeps them off, with a warning, while `url` or `product` is empty.
+
 </Setting>
 
-<Setting name="organisation.url" depth={2} takes="a URL" default="`https://translations.oraylen.net/`" affects="where the bundles and their `manifest.json` are">
+<Setting name="remote.url" depth={2} takes="a URL" default="empty" affects="where the bundles and their `manifest.json` are">
 </Setting>
 
-<Setting name="organisation.product" depth={2} takes="a string" default="`game`" affects="whose bundles this server uses">
+<Setting name="remote.product" depth={2} takes="a string" default="empty" affects="whose bundles this server uses, such as the name of its game mode">
+
+Each product has one bundle per language, `<product>/<language>.json`.
+
 </Setting>
 
-<Setting name="organisation.namespaces" depth={2} takes="a list of strings" default="`[]`, all of them" affects="which key namespaces are kept, such as `server` or `essentials`">
+<Setting name="remote.prefixes" depth={2} takes="a list of key prefixes" default="`[]`, all of them" affects="which keys of the bundles are kept, such as `game` or `lobby`">
+
+A prefix matches whole key segments: `game` keeps `game.menu.title`, not `gamemode.title`.
+
 </Setting>
 
-<Setting name="organisation.interval" depth={2} takes="a duration" default='`"5m"`' affects="how often to look for new bundles">
+<Setting name="remote.interval" depth={2} takes="a duration" default='`"5m"`' affects="how often to look for new bundles">
 
-The last downloaded bundles are kept in `cache/organisation/`, so a server starts with them when the address cannot
-be reached.
+The last downloaded bundles are kept in `cache/remote/`, so a server starts with them when the address cannot be
+reached.
 
 </Setting>

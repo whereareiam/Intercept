@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Renders keys from the network's catalog: the organisation's bundles, the shared messages and this server's local
+ * Renders keys from the network's catalog: the remote bundles, the shared messages and this server's local
  * messages, highest last.
  */
 public interface TranslationService {
@@ -34,7 +34,7 @@ public interface TranslationService {
 	@NotNull Component render(@NotNull String key, @NotNull Map<String, ?> arguments, @NotNull Locale language);
 
 	/**
-	 * Reloads every layer, including the organisation's bundles.
+	 * Reloads every layer, including the remote bundles.
 	 */
 	void reload();
 }

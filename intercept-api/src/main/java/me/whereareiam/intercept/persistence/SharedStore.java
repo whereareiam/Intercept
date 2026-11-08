@@ -5,7 +5,7 @@ import me.whereareiam.intercept.model.shared.SharedSnapshot;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Stores what the network shares: messages changed from the organisation's text and rule files, at a revision that
+ * Stores what the network shares: messages changed from the remote text and rule files, at a revision that
  * goes up with every publication.
  */
 public interface SharedStore {

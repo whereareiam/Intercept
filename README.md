@@ -1,8 +1,8 @@
 # Intercept
 
 Intercept is the translation database of a Minecraft network. It shows every message in the language each player
-chose, from one set of texts: the organisation's translations, the network's changes to them, and the exceptions of
-one server. It runs on Paper, Velocity and NeoForge.
+chose, from one set of texts: the plugins' own texts or bundles from an organisation's translations repository, the
+network's changes to them, and the exceptions of one server. It runs on Paper, Velocity and NeoForge.
 
 - Players choose their language once with `/language`, for every server.
 - Admins change a text for the whole network with `/intercept publish`.
