@@ -66,6 +66,22 @@ class SharedFoldersTest {
 	}
 
 	@Test
+	void aMessageForEveryLanguageIsReadFromAndWrittenToAll() throws Exception {
+		SharedFolders folders = new SharedFolders(configura, dataPath);
+		folders.write(revision(1, "old"), SharedFolders.Pending.NONE);
+		Files.createDirectories(dataPath.resolve("messages/all"));
+		Files.writeString(dataPath.resolve("messages/all/identica.yml"), "login:\n  failed: \"{@server.format.prefix}{@game.account.login-failed}\"\n");
+
+		SharedFolders.Pending pending = folders.pending();
+		SharedFolders.MessageId id = new SharedFolders.MessageId(Locale.ROOT, "identica.login.failed");
+		assertEquals("identica.yml", pending.messages().get(id).file());
+
+		folders.write(revision(2, "old"), pending);
+		assertTrue(Files.readString(dataPath.resolve("messages/all/identica.yml")).contains("game.account.login-failed"));
+		assertEquals("all", SharedFolders.folder(Locale.ROOT));
+	}
+
+	@Test
 	void aKeyIsWrittenRelativeToItsFile() {
 		assertEquals("prefix", SharedFolders.relativeKey("server/format.yml", "server.format.prefix"));
 		assertEquals("format.prefix", SharedFolders.relativeKey("server.yml", "server.format.prefix"));

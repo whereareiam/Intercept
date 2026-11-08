@@ -24,7 +24,8 @@ import java.util.stream.Stream;
 
 /**
  * The shared folders on disk: {@code messages/} and {@code rules/}, which an administrator edits, and an untouched
- * copy of the same revision in {@code cache/shared/}, which tells what the administrator changed.
+ * copy of the same revision in {@code cache/shared/}, which tells what the administrator changed. {@code messages/}
+ * holds a folder per language and {@code all/} for messages of every language.
  */
 final class SharedFolders {
 	private final Configura configura;
@@ -90,7 +91,7 @@ final class SharedFolders {
 
 		Map<Path, ObjectNode> files = new TreeMap<>();
 		content.messages().forEach((id, text) -> {
-			Path file = copy.messages().resolve(id.language().toLanguageTag()).resolve(text.file());
+			Path file = copy.messages().resolve(folder(id.language())).resolve(text.file());
 			ObjectNode node = files.computeIfAbsent(file, ignored -> configura.mapper().createObjectNode());
 			node.put(relativeKey(text.file(), id.key()), text.text());
 		});
@@ -104,6 +105,11 @@ final class SharedFolders {
 			Files.createDirectories(file.getParent());
 			Files.writeString(file, rule.getValue(), StandardCharsets.UTF_8);
 		}
+	}
+
+	// Messages for every language, such as a plugin's key made of references to neutral keys, live in all/.
+	static @NotNull String folder(@NotNull Locale language) {
+		return Locale.ROOT.equals(language) ? FileSource.ROOT_FOLDER : language.toLanguageTag();
 	}
 
 	// The file's path is the prefix of its keys: "server/format.yml" holds "server.format.prefix" as "prefix".
