@@ -49,7 +49,7 @@ final class VelocityJourneyTest {
 	void aMessagePublishedOnOneProxyReachesTheOther(ScenarioContext anvil) {
 		Journey onB = Journey.join(anvil, "Alice", B);
 
-		Journey.write(anvil, A, FOLDER.resolve(Path.of("messages", "en", "test.yml")), "news: \"Fresh news for {player}\"\n");
+		Journey.write(anvil, A, FOLDER.resolve(Path.of("translations", "en", "test.yml")), "news: \"Fresh news for {player}\"\n");
 		Journey.run(anvil, A, "intercept publish");
 
 		Journey.tell(anvil, LOBBY_B, "Alice", "<lang key=test.news player=Alice>");

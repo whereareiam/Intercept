@@ -8,7 +8,7 @@ intercept-api                     contracts several families share: languages, t
                                   persistence and replication ports, lifecycle, command sources
 intercept-common                  the catalog (one Semantica), shared messages and their folders, languages
 intercept-interception/
-  interception-api                surfaces, the interceptor, interception.yml
+  interception-api                Surface, the interceptor, interception.yml
   interception-common             markers and rules
   interception                    wiring
   interception-library/
@@ -33,13 +33,13 @@ its `-api` holds contracts and its `-common` the logic.
 ## The catalog
 
 One Semantica per instance, with four layers, lowest first: Intercept's own texts from the jar, the remote
-bundles over HTTP, the shared layer from the database, and `local/messages/`. Its translator is registered in
+bundles over HTTP, the shared layer from the database, and `translations/local/`. Its translator is registered in
 Adventure's global translator as semantica's authority: every other semantica translator yields the keys the
 authority has, because Adventure keeps its translators in an unordered set.
 
 ## Publishing
 
-`messages/` and `rules/` are a working copy of the shared layer; `cache/shared/` holds the same revision untouched.
+`translations/` and `translations/rules/` are a working copy of the shared layer; `.cache/shared/` holds the same revision untouched.
 `/intercept publish` sends the difference to the database in one transaction that raises the revision, then
 replicates the revision. Every instance loads a newer revision when Redis announces it or polling finds it, writes
 it to both copies and keeps unpublished edits on top.

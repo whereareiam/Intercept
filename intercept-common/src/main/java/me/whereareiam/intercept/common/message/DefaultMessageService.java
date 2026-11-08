@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.intercept.common.translation.DefaultTranslationService;
+import me.whereareiam.intercept.common.Folders;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import me.whereareiam.intercept.message.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
@@ -65,7 +66,7 @@ public final class DefaultMessageService implements MessageService, Lifecycle {
 			@NotNull DefaultTranslationService translations,
 			@NotNull Provider<Settings> settings,
 			@NotNull Configura configura,
-			@Named("dataPath") @NotNull Path dataPath,
+			@NotNull Folders folders,
 			@Named("intercept") @NotNull Logger logger
 	) {
 		this.store = store;
@@ -73,8 +74,8 @@ public final class DefaultMessageService implements MessageService, Lifecycle {
 		this.translations = translations;
 		this.settings = settings;
 		this.logger = logger;
-		this.folders = new SharedFolders(configura, dataPath);
-		this.localRules = dataPath.resolve("local").resolve("rules");
+		this.folders = new SharedFolders(configura, folders);
+		this.localRules = folders.localRules();
 	}
 
 	@Override

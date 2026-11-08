@@ -7,6 +7,7 @@ import com.google.inject.name.Named;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.configura.Configura;
+import me.whereareiam.intercept.common.Folders;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.shared.SharedSnapshot;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
 
 /**
  * Owns the one Semantica on this instance. Its layers, lowest first: Intercept's own defaults, the remote
- * bundles, the shared messages from the database and this server's {@code local/messages/}.
+ * bundles, the shared messages from the database and this server's {@code translations/local/}.
  *
  * <p>Its translator is registered in Adventure's {@link GlobalTranslator} as the authority, so the translators that
  * plugins register for their own keys step aside whenever the network has the key.</p>
@@ -59,7 +60,7 @@ public final class DefaultTranslationService implements TranslationService, Life
 
 	private final @NotNull Provider<Settings> settings;
 	private final @NotNull Configura configura;
-	private final @Named("dataPath") @NotNull Path dataPath;
+	private final @NotNull Folders folders;
 	private final @Named("intercept") @NotNull Logger logger;
 	private final AdventureRenderer renderer = AdventureRenderer.of(TagPolicy.defaults());
 
@@ -82,7 +83,7 @@ public final class DefaultTranslationService implements TranslationService, Life
 				.defaultLocale(Locale.forLanguageTag(settings.getDefaultLanguage()))
 				.layer(Layer.owned(DEFAULTS, FileSource.of(defaults, configura), Layer.DEFAULTS))
 				.layer(Layer.owned(SHARED, new SharedSource(SharedSnapshot.EMPTY), Layer.OVERRIDES))
-				.layer(Layer.owned(LOCAL, FileSource.of(dataPath.resolve("local").resolve("messages"), configura), LOCAL_PRIORITY))
+				.layer(Layer.owned(LOCAL, FileSource.builder(folders.local(), configura).skip(Folders.RULES).build(), LOCAL_PRIORITY))
 				.check(renderer.check())
 				.issues(issue -> logger.warning(issue.toString()))
 				.watch(true);
@@ -176,13 +177,13 @@ public final class DefaultTranslationService implements TranslationService, Life
 				.prefixes(bundles.getPrefixes().toArray(String[]::new))
 				.locales(languages())
 				.interval(bundles.getInterval())
-				.cache(dataPath.resolve("cache").resolve("remote"))
+				.cache(folders.cache("remote"))
 				.build();
 	}
 
 	// Intercept's own texts ship in the jar; they are copied out so the file source reads them like any folder.
 	private Path writeDefaults() throws IOException {
-		Path folder = dataPath.resolve("cache").resolve("defaults");
+		Path folder = folders.cache("defaults");
 		for (String file : DEFAULT_FILES) {
 			Path target = folder.resolve(file);
 			Files.createDirectories(target.getParent());

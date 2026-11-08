@@ -2,6 +2,7 @@ package me.whereareiam.intercept.common.message;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import me.whereareiam.configura.Configura;
+import me.whereareiam.intercept.common.Folders;
 import me.whereareiam.intercept.model.shared.SharedMessage;
 import me.whereareiam.intercept.model.shared.SharedRule;
 import me.whereareiam.intercept.model.shared.SharedSnapshot;
@@ -23,21 +24,21 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 /**
- * The shared folders on disk: {@code messages/} and {@code rules/}, which an administrator edits, and an untouched
- * copy of the same revision in {@code cache/shared/}, which tells what the administrator changed. {@code messages/}
- * holds a folder per language and {@code all/} for messages of every language.
+ * The shared folders on disk: {@code translations/}, with a folder per language, {@code all/} for messages of every
+ * language and {@code rules/}, which an administrator edits, and an untouched copy of the same revision in
+ * {@code .cache/shared/}, which tells what the administrator changed.
  */
 final class SharedFolders {
 	private final Configura configura;
 	private final Copy working;
 	private final Copy base;
 
-	SharedFolders(@NotNull Configura configura, @NotNull Path dataPath) {
+	SharedFolders(@NotNull Configura configura, @NotNull Folders folders) {
 		this.configura = configura;
-		this.working = new Copy(dataPath.resolve("messages"), dataPath.resolve("rules"));
+		this.working = new Copy(folders.translations(), folders.rules());
 
-		Path cache = dataPath.resolve("cache").resolve("shared");
-		this.base = new Copy(cache.resolve("messages"), cache.resolve("rules"));
+		Path cache = folders.cache("shared");
+		this.base = new Copy(cache, cache.resolve("rules"));
 	}
 
 	/**
@@ -66,7 +67,10 @@ final class SharedFolders {
 
 	private Content read(Copy copy) throws IOException {
 		Map<MessageId, FileText> messages = new LinkedHashMap<>();
-		Source.Content content = FileSource.of(copy.messages(), configura).load();
+		Source.Content content = FileSource.builder(copy.messages(), configura)
+				.skip(Folders.NOT_LANGUAGES.toArray(String[]::new))
+				.build()
+				.load();
 		for (Locale language : content.getLocales()) {
 			content.entries(language).forEach((key, entry) -> messages.put(
 					new MessageId(language, key),
@@ -86,7 +90,7 @@ final class SharedFolders {
 	}
 
 	private void write(Copy copy, Content content) throws IOException {
-		clear(copy.messages());
+		clearLanguages(copy.messages());
 		clear(copy.rules());
 
 		Map<Path, ObjectNode> files = new TreeMap<>();
@@ -129,6 +133,25 @@ final class SharedFolders {
 	private static String stem(String file) {
 		int dot = file.lastIndexOf('.');
 		return dot < 0 ? file : file.substring(0, dot);
+	}
+
+	// The messages folder also holds rules/ and local/, which are not languages and are left alone.
+	private static void clearLanguages(Path folder) throws IOException {
+		if (!Files.isDirectory(folder)) return;
+
+		for (Path language : children(folder)) {
+			String name = language.getFileName().toString();
+			if (!Files.isDirectory(language) || name.startsWith(".") || Folders.NOT_LANGUAGES.contains(name)) continue;
+
+			clear(language);
+			Files.deleteIfExists(language);
+		}
+	}
+
+	private static List<Path> children(Path folder) throws IOException {
+		try (Stream<Path> children = Files.list(folder)) {
+			return children.toList();
+		}
 	}
 
 	private static void clear(Path folder) throws IOException {

@@ -24,7 +24,7 @@ With Redis, publications arrive at once and polling only catches what Redis miss
 <Setting name="remote.enabled" depth={2} takes="`true` or `false`" default="`false`" affects="whether translation bundles are downloaded">
 
 Remote bundles are semantica bundles served over HTTP, such as the ones an organisation's translations repository
-builds. Their texts win over Intercept's and the plugins' own texts and lose to `messages/` and `local/messages/`.
+builds. Their texts win over Intercept's and the plugins' own texts and lose to `translations/` and `translations/local/`.
 Intercept keeps them off, with a warning, while `url` or `product` is empty.
 
 </Setting>
@@ -46,7 +46,7 @@ A prefix matches whole key segments: `game` keeps `game.menu.title`, not `gamemo
 
 <Setting name="remote.interval" depth={2} takes="a duration" default='`"5m"`' affects="how often to look for new bundles">
 
-The last downloaded bundles are kept in `cache/remote/`, so a server starts with them when the address cannot be
+The last downloaded bundles are kept in `.cache/remote/`, so a server starts with them when the address cannot be
 reached.
 
 </Setting>

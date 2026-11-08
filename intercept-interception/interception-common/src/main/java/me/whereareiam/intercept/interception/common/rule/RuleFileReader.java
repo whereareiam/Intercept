@@ -27,13 +27,13 @@ import java.util.regex.PatternSyntaxException;
  * Reads rule files. A rule in a local file replaces the shared rule with the same file and name.
  *
  * <pre>
- * # rules/essentials.yml
+ * # translations/rules/essentials.yml
  * no-permission:
  *   pattern: "You don't have permission: ([\\w.]+)"
  *   key: essentials.permission.missing
  *   arguments:
  *     permission: 1
- *   surfaces: [chat, action-bar]
+ *   in: [chat, action-bar]
  *   priority: 10
  *   replace: match
  * </pre>
@@ -93,8 +93,8 @@ public final class RuleFileReader {
 		}
 
 		Set<Surface> surfaces = EnumSet.noneOf(Surface.class);
-		if (definition.getSurfaces().isEmpty()) surfaces.add(Surface.CHAT);
-		for (String surface : definition.getSurfaces())
+		if (definition.getIn().isEmpty()) surfaces.add(Surface.CHAT);
+		for (String surface : definition.getIn())
 			surfaces.add(Surface.valueOf(surface.toUpperCase(Locale.ROOT).replace('-', '_')));
 
 		Map<String, String> arguments = new LinkedHashMap<>();
@@ -118,7 +118,7 @@ public final class RuleFileReader {
 		private String pattern;
 		private String key;
 		private Map<String, Object> arguments = new LinkedHashMap<>();
-		private List<String> surfaces = new ArrayList<>();
+		private List<String> in = new ArrayList<>();
 		private int priority;
 		private String replace = "match";
 	}

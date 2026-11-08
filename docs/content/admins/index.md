@@ -18,10 +18,10 @@ It runs on Paper, on Velocity and on NeoForge for Minecraft 1.21.1.
 
 ## What admins do
 
-- Change a text for the whole network in `messages/` on any server and run `/intercept publish`. Every other server
+- Change a text for the whole network in `translations/` on any server and run `/intercept publish`. Every other server
   shows the new text within seconds.
-- Change a text for one server only in `local/messages/`.
-- Translate another plugin's English messages with rules in `rules/`.
+- Change a text for one server only in `translations/local/`.
+- Translate another plugin's English messages with rules in `translations/rules/`.
 
 ## Where to start
 
