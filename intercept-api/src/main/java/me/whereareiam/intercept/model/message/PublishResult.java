@@ -16,7 +16,7 @@ public class PublishResult {
 	 */
 	int changedMessages;
 	/**
-	 * Messages removed, including those set back to the organisation's text.
+	 * Messages removed, including those set back to the remote text.
 	 */
 	int removedMessages;
 	/**

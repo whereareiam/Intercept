@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.Locale;
 
 /**
- * A message the network changed from the organisation's text.
+ * A message the network changed from the remote text.
  */
 @Value
 public class SharedMessage {

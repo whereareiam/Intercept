@@ -9,7 +9,7 @@ import me.whereareiam.dialectica.entity.annotation.Length;
 import me.whereareiam.dialectica.entity.annotation.Table;
 
 /**
- * A message the network changed from the organisation's text.
+ * A message the network changed from the remote text.
  */
 @Getter
 @Setter

@@ -3,7 +3,7 @@
 ## Intercept At A Glance
 
 Intercept is the **translation database of a Minecraft network**. It answers every translatable key from one catalog
-(the organisation's bundles, the network's shared messages, a server's local messages), in the language each player
+(remote bundles, the network's shared messages, a server's local messages), in the language each player
 chose, and translates system messages of plugins that only send text.
 
 When changing behavior:
@@ -22,7 +22,7 @@ When changing behavior:
 - `intercept-api`
   Only what several families share: `LanguageService` and `LanguageApplier`, `TranslationService`, `MessageService`, the persistence ports `SharedStore` and `LanguageStore`, `ReplicationService` and its messages, `Lifecycle`, `CommandSource`, `LibraryLoader` and `settings.yml`. Consumers depend on the family api they need, never on one global api.
 - `intercept-common`
-  The catalog (one Semantica with the layers defaults, organisation, shared, local, registered as semantica's authority in Adventure's `GlobalTranslator`), the shared messages and their folders (`messages/`, `rules/`, `cache/shared/`), polling and publishing, and players' languages.
+  The catalog (one Semantica with the layers defaults, remote, shared, local, registered as semantica's authority in Adventure's `GlobalTranslator`), the shared messages and their folders (`messages/`, `rules/`, `cache/shared/`), polling and publishing, and players' languages.
 - `intercept-interception/*`
   The interception family. `interception-api` holds surfaces, `MessageInterceptor` and `interception.yml`; `interception-common` markers and rules; `interception` the wiring. `interception-library/common` is what every packet library does with an outgoing message; `library-packetevents` serves Paper and Velocity, `library-mixin` NeoForge through a Mixin on the game's packet sending.
 - `intercept-adapter-command`

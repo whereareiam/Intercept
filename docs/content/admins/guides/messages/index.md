@@ -8,7 +8,7 @@ these places, the first that has it wins:
 
 1. `local/messages/<language>/` of this server
 2. the network's shared messages, in `messages/<language>/` on every server
-3. the organisation's translations, when `organisation` is turned on in `settings.yml`
+3. the remote bundles, when [`remote`](../../../configuration/settings/index.mdx) is turned on in `settings.yml`
 4. the plugin that sends the message, with its own texts
 
 So a text you change in Intercept's folders wins over the one a plugin ships, and a change for one server wins over
@@ -37,7 +37,7 @@ that uses it.
 2. Run `/intercept publish`.
 
 Intercept stores the change with your name and the time, and every server of the network shows it within a few
-seconds. Only what you changed is stored: a text you set back to the organisation's is removed from the network's
+seconds. Only what you changed is stored: a text you set back to the remote bundles' is removed from the network's
 changes.
 
 `messages/` on every server always shows what the network has. When another server publishes while you are
@@ -51,5 +51,5 @@ server.
 
 ## Undo a change
 
-Delete the line from `messages/` and run `/intercept publish`; the network shows the organisation's or the plugin's
-text again. For a local change, delete it from `local/messages/` and run `/intercept reload`.
+Delete the line from `messages/` and run `/intercept publish`; the network shows the remote bundles' or the
+plugin's text again. For a local change, delete it from `local/messages/` and run `/intercept reload`.

@@ -40,8 +40,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Owns the organisation's one Semantica on this instance. Its layers, lowest first: Intercept's own defaults, the
- * organisation's bundles, the shared messages from the database and this server's {@code local/messages/}.
+ * Owns the one Semantica on this instance. Its layers, lowest first: Intercept's own defaults, the remote
+ * bundles, the shared messages from the database and this server's {@code local/messages/}.
  *
  * <p>Its translator is registered in Adventure's {@link GlobalTranslator} as the authority, so the translators that
  * plugins register for their own keys step aside whenever the network has the key.</p>
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class DefaultTranslationService implements TranslationService, Lifecycle {
 	public static final String DEFAULTS = "defaults";
-	public static final String ORGANISATION = "organisation";
+	public static final String REMOTE = "remote";
 	public static final String SHARED = "shared";
 	public static final String LOCAL = "local";
 
@@ -65,7 +65,7 @@ public final class DefaultTranslationService implements TranslationService, Life
 
 	private Semantica semantica;
 	private Translator translator;
-	private RememberingSource organisation;
+	private RememberingSource remote;
 
 	@Override
 	public @NotNull Phase phase() {
@@ -87,12 +87,7 @@ public final class DefaultTranslationService implements TranslationService, Life
 				.issues(issue -> logger.warning(issue.toString()))
 				.watch(true);
 
-		Settings.Organisation bundles = settings.getOrganisation();
-		if (bundles.isEnabled()) {
-			organisation = new RememberingSource(organisationSource(bundles));
-			builder.layer(Layer.owned(ORGANISATION, organisation, Layer.SHARED));
-		}
-
+		addRemote(builder, settings.getRemote());
 		semantica = builder.build();
 		translator = AdventureTranslator.authority(semantica, renderer);
 		GlobalTranslator.translator().addSource(translator);
@@ -133,16 +128,16 @@ public final class DefaultTranslationService implements TranslationService, Life
 	}
 
 	/**
-	 * Returns the organisation's text for a key, as last downloaded.
+	 * Returns the remote text for a key, as last downloaded.
 	 *
 	 * @param language the language
 	 * @param key      the key
-	 * @return the text, or empty when the organisation has none or its bundles are off
+	 * @return the text, or empty when the remote bundles have none or are off
 	 */
-	public @NotNull Optional<String> organisationText(@NotNull Locale language, @NotNull String key) {
-		if (organisation == null) return Optional.empty();
+	public @NotNull Optional<String> remoteText(@NotNull Locale language, @NotNull String key) {
+		if (remote == null) return Optional.empty();
 
-		Source.Entry entry = organisation.last().entries(language).get(key);
+		Source.Entry entry = remote.last().entries(language).get(key);
 		return Optional.ofNullable(entry).map(Source.Entry::text);
 	}
 
@@ -164,13 +159,24 @@ public final class DefaultTranslationService implements TranslationService, Life
 		return current;
 	}
 
-	private HttpSource organisationSource(Settings.Organisation bundles) {
+	private void addRemote(Semantica.Builder builder, Settings.Remote bundles) {
+		if (!bundles.isEnabled()) return;
+		if (bundles.getUrl().isBlank() || bundles.getProduct().isBlank()) {
+			logger.warning("Remote bundles are enabled in settings.yml but have no url or product; they stay off");
+			return;
+		}
+
+		remote = new RememberingSource(remoteSource(bundles));
+		builder.layer(Layer.owned(REMOTE, remote, Layer.SHARED));
+	}
+
+	private HttpSource remoteSource(Settings.Remote bundles) {
 		return HttpSource.builder(URI.create(bundles.getUrl()))
 				.product(bundles.getProduct())
-				.namespaces(bundles.getNamespaces().toArray(String[]::new))
+				.prefixes(bundles.getPrefixes().toArray(String[]::new))
 				.locales(languages())
 				.interval(bundles.getInterval())
-				.cache(dataPath.resolve("cache").resolve("organisation"))
+				.cache(dataPath.resolve("cache").resolve("remote"))
 				.build();
 	}
 
@@ -197,7 +203,7 @@ public final class DefaultTranslationService implements TranslationService, Life
 	}
 
 	/**
-	 * Keeps what a source loaded last, so a publication can compare a message with the organisation's text.
+	 * Keeps what a source loaded last, so a publication can compare a message with the remote text.
 	 */
 	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 	private static final class RememberingSource implements Source {

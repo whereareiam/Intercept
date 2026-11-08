@@ -194,11 +194,11 @@ public final class DefaultMessageService implements MessageService, Lifecycle {
 		pending.removedMessages().forEach(id -> removed.add(new SharedChanges.MessageKey(id.language(), id.key())));
 
 		pending.messages().forEach((id, text) -> {
-			// A message set back to the organisation's text is no longer a change of the network's.
-			boolean organisationText = translations.organisationText(id.language(), id.key())
+			// A message set back to the remote text is no longer a change of the network's.
+			boolean remoteText = translations.remoteText(id.language(), id.key())
 					.map(text.text()::equals)
 					.orElse(false);
-			if (organisationText) {
+			if (remoteText) {
 				if (isShared(id)) removed.add(new SharedChanges.MessageKey(id.language(), id.key()));
 				return;
 			}

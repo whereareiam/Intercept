@@ -4,8 +4,8 @@ description: What Intercept does on a network and where to start.
 ---
 
 Intercept is the translation database of a Minecraft network. Every server and proxy it runs on shows each
-message in the language the player chose, from one set of texts: the organisation's translations, the changes the
-network made to them, and a few changes of one server.
+message in the language the player chose, from one set of texts: the plugins' own texts or downloaded translation
+bundles, the changes the network made to them, and a few changes of one server.
 
 It runs on Paper, on Velocity and on NeoForge for Minecraft 1.21.1.
 

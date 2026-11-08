@@ -32,7 +32,7 @@ its `-api` holds contracts and its `-common` the logic.
 
 ## The catalog
 
-One Semantica per instance, with four layers, lowest first: Intercept's own texts from the jar, the organisation's
+One Semantica per instance, with four layers, lowest first: Intercept's own texts from the jar, the remote
 bundles over HTTP, the shared layer from the database, and `local/messages/`. Its translator is registered in
 Adventure's global translator as semantica's authority: every other semantica translator yields the keys the
 authority has, because Adventure keeps its translators in an unordered set.
