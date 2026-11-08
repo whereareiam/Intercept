@@ -2,6 +2,7 @@ package me.whereareiam.intercept.interception.library.mixin;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.interception.Surface;
 import me.whereareiam.intercept.interception.library.OutgoingMessages;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
@@ -28,15 +29,11 @@ import java.util.UUID;
  * the game's own keys itself.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class PacketTranslation implements Lifecycle {
 	private static volatile @Nullable PacketTranslation active;
 
-	private final OutgoingMessages messages;
-
-	@Inject
-	public PacketTranslation(@NotNull OutgoingMessages messages) {
-		this.messages = messages;
-	}
+	private final @NotNull OutgoingMessages messages;
 
 	/**
 	 * Rewrites a packet on its way to a player; called by the Mixin for every packet.

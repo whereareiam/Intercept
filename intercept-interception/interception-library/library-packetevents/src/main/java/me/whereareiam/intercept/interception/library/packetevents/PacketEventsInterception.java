@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.event.PacketListenerCommon;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,14 +13,10 @@ import org.jetbrains.annotations.NotNull;
  * Registers Intercept's packet listener with PacketEvents while Intercept runs.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class PacketEventsInterception implements Lifecycle {
-	private final MessagePacketListener listener;
+	private final @NotNull MessagePacketListener listener;
 	private PacketListenerCommon registered;
-
-	@Inject
-	public PacketEventsInterception(@NotNull MessagePacketListener listener) {
-		this.listener = listener;
-	}
 
 	@Override
 	public @NotNull Phase phase() {

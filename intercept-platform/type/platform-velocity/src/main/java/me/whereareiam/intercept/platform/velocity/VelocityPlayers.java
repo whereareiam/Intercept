@@ -9,6 +9,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageService;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import org.jetbrains.annotations.NotNull;
@@ -17,17 +18,11 @@ import org.jetbrains.annotations.NotNull;
  * Reads a player's chosen language while they log in and sets it as their effective locale once they are in.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class VelocityPlayers implements Lifecycle {
-	private final ProxyServer proxy;
-	private final Object plugin;
-	private final LanguageService languages;
-
-	@Inject
-	public VelocityPlayers(@NotNull ProxyServer proxy, @Named("plugin") @NotNull Object plugin, @NotNull LanguageService languages) {
-		this.proxy = proxy;
-		this.plugin = plugin;
-		this.languages = languages;
-	}
+	private final @NotNull ProxyServer proxy;
+	private final @Named("plugin") @NotNull Object plugin;
+	private final @NotNull LanguageService languages;
 
 	@Override
 	public @NotNull Phase phase() {

@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import me.whereareiam.intercept.model.config.Settings;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
  * plugins register for their own keys step aside whenever the network has the key.</p>
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class DefaultTranslationService implements TranslationService, Lifecycle {
 	public static final String DEFAULTS = "defaults";
 	public static final String ORGANISATION = "organisation";
@@ -54,28 +57,15 @@ public final class DefaultTranslationService implements TranslationService, Life
 	private static final int LOCAL_PRIORITY = Layer.OVERRIDES + 100;
 	private static final String[] DEFAULT_FILES = {"en/intercept.yml"};
 
-	private final Provider<Settings> settings;
-	private final Configura configura;
-	private final Path dataPath;
-	private final Logger logger;
+	private final @NotNull Provider<Settings> settings;
+	private final @NotNull Configura configura;
+	private final @Named("dataPath") @NotNull Path dataPath;
+	private final @Named("intercept") @NotNull Logger logger;
 	private final AdventureRenderer renderer = AdventureRenderer.of(TagPolicy.defaults());
 
 	private Semantica semantica;
 	private Translator translator;
 	private RememberingSource organisation;
-
-	@Inject
-	public DefaultTranslationService(
-			@NotNull Provider<Settings> settings,
-			@NotNull Configura configura,
-			@Named("dataPath") @NotNull Path dataPath,
-			@Named("intercept") @NotNull Logger logger
-	) {
-		this.settings = settings;
-		this.configura = configura;
-		this.dataPath = dataPath;
-		this.logger = logger;
-	}
 
 	@Override
 	public @NotNull Phase phase() {
@@ -209,13 +199,10 @@ public final class DefaultTranslationService implements TranslationService, Life
 	/**
 	 * Keeps what a source loaded last, so a publication can compare a message with the organisation's text.
 	 */
+	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 	private static final class RememberingSource implements Source {
 		private final Source source;
 		private volatile Content last = Content.empty();
-
-		private RememberingSource(Source source) {
-			this.source = source;
-		}
 
 		@Override
 		public @NotNull String getName() {

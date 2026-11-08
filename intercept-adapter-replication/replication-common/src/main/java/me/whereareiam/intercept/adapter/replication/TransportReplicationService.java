@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.library.LibraryLoader;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import me.whereareiam.intercept.model.config.Settings;
@@ -27,28 +28,16 @@ import java.util.logging.Logger;
  * otherwise.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class TransportReplicationService implements ReplicationService, Lifecycle {
-	private final Provider<Replication> replication;
-	private final Provider<Settings> settings;
-	private final LibraryLoader libraries;
-	private final Logger logger;
+	private final @NotNull Provider<Replication> replication;
+	private final @NotNull Provider<Settings> settings;
+	private final @NotNull LibraryLoader libraries;
+	private final @Named("intercept") @NotNull Logger logger;
 	private final Map<Class<?>, List<Consumer<Replicated>>> listeners = new ConcurrentHashMap<>();
 
 	private String instance;
 	private ReplicationTransport transport;
-
-	@Inject
-	public TransportReplicationService(
-			@NotNull Provider<Replication> replication,
-			@NotNull Provider<Settings> settings,
-			@NotNull LibraryLoader libraries,
-			@Named("intercept") @NotNull Logger logger
-	) {
-		this.replication = replication;
-		this.settings = settings;
-		this.libraries = libraries;
-		this.logger = logger;
-	}
 
 	@Override
 	public @NotNull Phase phase() {

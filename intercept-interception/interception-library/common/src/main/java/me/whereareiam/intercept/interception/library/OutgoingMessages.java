@@ -3,6 +3,7 @@ package me.whereareiam.intercept.interception.library;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.interception.MessageInterceptor;
 import me.whereareiam.intercept.interception.Surface;
 import me.whereareiam.intercept.language.LanguageService;
@@ -20,17 +21,11 @@ import java.util.logging.Logger;
  * interceptor translate it. A failure leaves the message as it was, so a broken rule never drops a message.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class OutgoingMessages {
-	private final MessageInterceptor interceptor;
-	private final LanguageService languages;
-	private final Logger logger;
-
-	@Inject
-	public OutgoingMessages(@NotNull MessageInterceptor interceptor, @NotNull LanguageService languages, @Named("intercept") @NotNull Logger logger) {
-		this.interceptor = interceptor;
-		this.languages = languages;
-		this.logger = logger;
-	}
+	private final @NotNull MessageInterceptor interceptor;
+	private final @NotNull LanguageService languages;
+	private final @Named("intercept") @NotNull Logger logger;
 
 	/**
 	 * Translates one outgoing message.

@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.testing.network;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.whereareiam.anvil.api.model.process.ContainerProcess;
 import me.whereareiam.anvil.api.model.workspace.AssetSource;
 import me.whereareiam.anvil.api.model.workspace.WorkspaceAsset;
@@ -15,6 +17,7 @@ import java.nio.file.Path;
  * German for Intercept's own reply to {@code /language}. {@code test.news} exists nowhere until a journey publishes
  * it.</p>
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Network {
 	public static final String POSTGRES = "postgres";
 	public static final String REDIS = "redis";
@@ -47,9 +50,6 @@ public final class Network {
 			language:
 			  chosen: "<gray>Deine Sprache ist jetzt <white>{language}</white>."
 			""";
-
-	private Network() {
-	}
 
 	/**
 	 * The database every instance stores in.

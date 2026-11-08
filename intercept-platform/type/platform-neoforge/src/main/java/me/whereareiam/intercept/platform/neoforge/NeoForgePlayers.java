@@ -2,6 +2,7 @@ package me.whereareiam.intercept.platform.neoforge;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageService;
 import me.whereareiam.intercept.lifecycle.Lifecycle;
 import net.neoforged.bus.api.EventPriority;
@@ -13,13 +14,9 @@ import org.jetbrains.annotations.NotNull;
  * Reads a player's chosen language as they log in and forgets it when they leave.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class NeoForgePlayers implements Lifecycle {
-	private final LanguageService languages;
-
-	@Inject
-	public NeoForgePlayers(@NotNull LanguageService languages) {
-		this.languages = languages;
-	}
+	private final @NotNull LanguageService languages;
 
 	@Override
 	public @NotNull Phase phase() {

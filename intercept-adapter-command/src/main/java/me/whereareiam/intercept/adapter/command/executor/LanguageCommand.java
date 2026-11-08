@@ -2,6 +2,7 @@ package me.whereareiam.intercept.adapter.command.executor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.adapter.command.Replies;
 import me.whereareiam.intercept.command.CommandSource;
 import me.whereareiam.intercept.language.LanguageService;
@@ -23,17 +24,12 @@ import java.util.stream.Collectors;
  * to the client's language.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class LanguageCommand {
 	private static final String RESET = "reset";
 
-	private final LanguageService languages;
-	private final Replies replies;
-
-	@Inject
-	public LanguageCommand(@NotNull LanguageService languages, @NotNull Replies replies) {
-		this.languages = languages;
-		this.replies = replies;
-	}
+	private final @NotNull LanguageService languages;
+	private final @NotNull Replies replies;
 
 	/**
 	 * Adds the command's argument and handler.

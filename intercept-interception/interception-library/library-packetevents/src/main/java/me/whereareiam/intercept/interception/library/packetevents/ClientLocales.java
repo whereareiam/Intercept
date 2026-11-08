@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageApplier;
 import me.whereareiam.intercept.language.LanguageService;
 import me.whereareiam.semantica.format.adventure.MinecraftLocales;
@@ -28,16 +29,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>The language service is looked up lazily: it applies choices through this class.</p>
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class ClientLocales implements LanguageApplier {
-	private final Provider<LanguageService> languages;
-	private final boolean rewrite;
+	private final @NotNull Provider<LanguageService> languages;
+	private final @Named("rewriteClientLocale") boolean rewrite;
 	private final Map<UUID, Reported> reported = new ConcurrentHashMap<>();
-
-	@Inject
-	public ClientLocales(@NotNull Provider<LanguageService> languages, @Named("rewriteClientLocale") boolean rewrite) {
-		this.languages = languages;
-		this.rewrite = rewrite;
-	}
 
 	/**
 	 * Returns the language a player's client reported.

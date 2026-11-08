@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.dialectica.Dialectica;
 import me.whereareiam.dialectica.adapter.jdbi.DialecticaPlugin;
 import me.whereareiam.dialectica.adapter.jdbi.entity.EntityAccess;
@@ -28,28 +29,16 @@ import java.util.logging.Logger;
  * Opens the database in the persistence phase, installs Intercept's schema and closes the pool when Intercept stops.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class DefaultDatabaseService implements DatabaseService, Lifecycle {
-	private final Provider<Persistence> persistence;
-	private final Path dataPath;
-	private final LibraryLoader libraries;
-	private final Logger logger;
+	private final @NotNull Provider<Persistence> persistence;
+	private final @Named("dataPath") @NotNull Path dataPath;
+	private final @NotNull LibraryLoader libraries;
+	private final @Named("intercept") @NotNull Logger logger;
 
 	private HikariDataSource dataSource;
 	private Jdbi jdbi;
 	private SchemaInstaller installer;
-
-	@Inject
-	public DefaultDatabaseService(
-			@NotNull Provider<Persistence> persistence,
-			@Named("dataPath") @NotNull Path dataPath,
-			@NotNull LibraryLoader libraries,
-			@Named("intercept") @NotNull Logger logger
-	) {
-		this.persistence = persistence;
-		this.dataPath = dataPath;
-		this.libraries = libraries;
-		this.logger = logger;
-	}
 
 	@Override
 	public @NotNull Phase phase() {

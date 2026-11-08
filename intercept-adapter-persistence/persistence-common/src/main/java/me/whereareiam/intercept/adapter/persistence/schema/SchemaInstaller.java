@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.adapter.persistence.schema;
 
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.persistence.database.DatabaseSchema;
 import me.whereareiam.strata.MigrationStream;
 import me.whereareiam.strata.Strata;
@@ -19,14 +20,10 @@ import java.util.logging.Logger;
  * Brings schemas up to date through Strata: a new database gets the latest tables, an existing one its missing
  * migrations.
  */
+@RequiredArgsConstructor
 public final class SchemaInstaller {
-	private final Jdbi jdbi;
-	private final Logger logger;
-
-	public SchemaInstaller(@NotNull Jdbi jdbi, @NotNull Logger logger) {
-		this.jdbi = jdbi;
-		this.logger = logger;
-	}
+	private final @NotNull Jdbi jdbi;
+	private final @NotNull Logger logger;
 
 	/**
 	 * Installs one schema.

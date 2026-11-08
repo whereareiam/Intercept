@@ -1,5 +1,7 @@
 package me.whereareiam.intercept.adapter.replication;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.whereareiam.intercept.model.replication.LanguageChosen;
 import me.whereareiam.intercept.model.replication.Replicated;
 import me.whereareiam.intercept.model.replication.ReloadRequested;
@@ -14,11 +16,9 @@ import java.util.UUID;
  * Writes replicated messages as one line of fields separated by spaces, starting with the sending instance and the
  * message type: {@code <instance> language <uuid> <tag or ->}.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MessageCodec {
 	private static final String NONE = "-";
-
-	private MessageCodec() {
-	}
 
 	/**
 	 * Encodes a message.

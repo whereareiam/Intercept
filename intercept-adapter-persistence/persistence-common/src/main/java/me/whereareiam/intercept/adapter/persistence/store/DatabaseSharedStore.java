@@ -2,6 +2,7 @@ package me.whereareiam.intercept.adapter.persistence.store;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.dialectica.Dialectica;
 import me.whereareiam.dialectica.adapter.jdbi.entity.EntityAccess;
 import me.whereareiam.dialectica.adapter.jdbi.entity.EntityRowMapper;
@@ -26,13 +27,9 @@ import java.util.Locale;
  * transaction, so an instance that reads the new revision reads all of its rows.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class DatabaseSharedStore implements SharedStore {
-	private final DatabaseService database;
-
-	@Inject
-	public DatabaseSharedStore(@NotNull DatabaseService database) {
-		this.database = database;
-	}
+	private final @NotNull DatabaseService database;
 
 	@Override
 	public @NotNull SharedSnapshot load() {

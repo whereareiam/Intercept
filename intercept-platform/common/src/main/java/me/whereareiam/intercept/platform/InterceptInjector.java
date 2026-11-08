@@ -3,6 +3,8 @@ package me.whereareiam.intercept.platform;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.whereareiam.intercept.adapter.command.CommandConfiguration;
 import me.whereareiam.intercept.adapter.persistence.PersistenceConfiguration;
 import me.whereareiam.intercept.adapter.replication.ReplicationConfiguration;
@@ -17,10 +19,8 @@ import java.util.List;
  * Puts Intercept together on a platform: the shared parts, persistence, replication, interception and commands,
  * and the platform's own configuration.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class InterceptInjector {
-	private InterceptInjector() {
-	}
-
 	/**
 	 * Creates the injector.
 	 *

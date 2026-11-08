@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.command.CommandSource;
 import org.bukkit.plugin.Plugin;
 import org.incendo.cloud.CommandManager;
@@ -16,14 +17,10 @@ import org.jetbrains.annotations.NotNull;
  * Builds Cloud's Paper command manager, registered through Paper's Brigadier commands.
  */
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class PaperCommandManagerProvider implements Provider<CommandManager<CommandSource>> {
-	private final Plugin plugin;
+	private final @NotNull Plugin plugin;
 	private CommandManager<CommandSource> manager;
-
-	@Inject
-	public PaperCommandManagerProvider(@NotNull Plugin plugin) {
-		this.plugin = plugin;
-	}
 
 	@Override
 	public synchronized CommandManager<CommandSource> get() {
