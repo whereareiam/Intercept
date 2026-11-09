@@ -36,7 +36,7 @@ When changing behavior:
 - `intercept-platform/*`
   `common` holds `PlatformConfiguration` (what a platform provides) and `InterceptInjector`. `type/platform-paper`, `type/platform-velocity` and `type/platform-neoforge` are the platforms; `bundle` packs Paper and Velocity into one jar.
 - `intercept-testing`
-  Live journeys through Anvil on real Paper, Velocity and NeoForge networks. Not part of the shipped plugin.
+  Live scenarios through Anvil on real Paper, Velocity and NeoForge networks. Not part of the shipped plugin.
 - `build-logic/`
   `module-java` (Java 21, Lombok, common dependencies), `module-host` (Java 25 for Paper 26.3 and Velocity 4.3, the first hosts on Adventure 5), `module-api` (a published `-api` module), `packaging-publication`, `packaging-relocations`, `packaging-shaded-jar`, `packaging-platform-jar` and `packaging-bundle-jar`.
 - `docs/content/`
@@ -80,16 +80,17 @@ When changing behavior:
 - `./gradlew pluginJars`
 - `./gradlew test assembleDistribution` (the quick part of the CI checks)
 - `./gradlew integrationTest` (tests that start containers)
-- `./gradlew :intercept-testing:anvilPaperTest`, `anvilVelocityTest`, `anvilNeoforgeTest` (journeys; they need Docker for PostgreSQL and Redis)
+- `./gradlew :intercept-testing:anvil` (every scenario), or one suite: `anvilInterceptionTest`, `anvilLanguageTest`, `anvilTranslationTest`, `anvilPublishingTest` (they need Docker)
 
 Live tests:
 
-- each platform has a scenario of two instances on PostgreSQL and Redis containers: `PaperNetwork`, `VelocityNetwork`, `NeoForgeNetwork`
-- a journey class carries its platform's tag (`paper`, `velocity`, `neoforge`), which is its suite
-- `Journey` connects a player to one instance (the same name on two instances is one player), runs commands, waits for chat text, and runs console commands or writes files on an instance
+- packages by behaviour (`interception`, `language`, `translation`, `publishing`), one class per behaviour; the class's tag is its suite, and `environment/ScenarioSuitesTest` checks every scenario is in exactly one
+- `@InterceptNetwork(platform = ..., remote = ...)` starts two instances on PostgreSQL and Redis containers (`environment/`); a scenario meant for every platform is one private method with a test per platform (`onPaper`, `onVelocity`, `onNeoForge`)
+- `player/Player` connects a player to one instance (the same name on two instances is one player), runs commands and waits for chat text; `player/Administrator` writes files into Intercept's folder, publishes, runs console commands and sends system messages as a plugin would
+- `fixture/` holds the texts every network starts with and the remote bundles
 - the Paper network has the probe, a plugin with its own semantica translator, to show the authority at work
-- a failed journey keeps its network under `intercept-testing/build/anvil/`; read the `anvil-console.log` files there
-- add or update a journey when a change affects what a player sees
+- a failed scenario keeps its network under `intercept-testing/build/anvil/`; read the `anvil-console.log` files there
+- add or update a scenario when a change affects what a player sees
 
 See `docs/content/contributing/testing/`.
 
@@ -105,14 +106,14 @@ See `docs/content/contributing/testing/`.
 
 ### Pull Request Checks
 
-- Every pull request gets the metadata check (title and label) and the checks: `test` and `assembleDistribution`, `integrationTest`, and one job per journey suite (`paper`, `velocity`, `neoforge`).
+- Every pull request gets the metadata check (title and label) and the checks: `test` and `assembleDistribution`, `integrationTest`, and one job per scenario suite (`interception`, `language`, `translation`, `publishing`).
 - The `dev` ruleset requires every one of these checks, so no pull request merges with a failing or missing check unless an administrator bypasses it.
 - Dependabot groups minor and patch updates into one pull request per ecosystem, and `dependabot-auto-merge.yml` turns on auto-merge for it, so it merges once the checks pass; a major update gets a pull request of its own and waits for review. The merge goes through a GitHub App, because a merge by `GITHUB_TOKEN` would not start the workflows of the push to `dev`; its `MERGE_APP_CLIENT_ID` and `MERGE_APP_PRIVATE_KEY` are Dependabot secrets, since a run Dependabot starts gets no Actions secrets. When the checks gain or rename a job, update the required checks of the ruleset.
 - Label a pull request with exactly one of `feature`, `change`, `bug`, `dependencies`, or with `skip-changelog`; `major` may accompany a category.
-- A run keeps as artifacts only what someone downloads: `intercept-plugins-<version>` from a development build or release, and `test-results`, `test-results-integration` or `test-results-journeys-<suite>` when a test failed.
+- A run keeps as artifacts only what someone downloads: `intercept-plugins-<version>` from a development build or release, and `test-results`, `test-results-integration` or `test-results-scenarios-<suite>` when a test failed.
 - Development builds are started manually and publish a branch-qualified version. A published GitHub release publishes Maven artifacts and attaches the distribution; a manual run of the release workflow only verifies the release again.
 - Entry workflows only select a trigger and call `reusable-verify.yml` and `reusable-publish.yml`; shared steps come from `whereareiam/devops`.
-- The Gradle build cache is on. Pull requests only read caches, so `build-cache.yml` compiles on every push to `dev` and writes the Gradle cache, and runs one journey of each suite so `whereareiam/anvil-actions/setup` saves the servers and workspaces the journey jobs restore; when the checks start running other tasks before their tests, add those tasks to its command.
+- The Gradle build cache is on. Pull requests only read caches, so `build-cache.yml` compiles on every push to `dev` and writes the Gradle cache, and runs the marker scenarios once on each platform so `whereareiam/anvil-actions/setup` saves the servers and workspaces the scenario jobs restore; when the checks start running other tasks before their tests, add those tasks to its command.
 
 ### Issues
 

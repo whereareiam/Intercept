@@ -17,8 +17,8 @@ permissions:
 jobs:
   # Pull requests read the caches of dev but never write them, so the checks would compile everything and
   # download Anvil's servers again. A job restores the latest Gradle entry of a job with its own id first, which
-  # makes the journey jobs, the longest of the checks, pick this one.
-  journeys:
+  # makes the scenario jobs, the longest of the checks, pick this one.
+  scenarios:
     name: Prepare for the checks
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -32,13 +32,10 @@ jobs:
       - uses: whereareiam/anvil-actions/setup@v1
 
       # Every cacheable task the checks run before their tests.
-      - name: Compile the project, its tests and journeys
+      - name: Compile the project, its tests and scenarios
         run: ./gradlew --no-daemon testClasses assembleDistribution anvilClasses :intercept-testing:probeJar
 
-      # One journey of each suite starts the servers that suite uses, so Anvil saves them for the journey jobs.
-      - name: Prepare the servers of the journeys
-        run: >-
-          ./gradlew --no-daemon
-          :intercept-testing:anvilPaperTest --tests '*PaperJourneyTest.aPlayerSees*'
-          :intercept-testing:anvilVelocityTest --tests '*VelocityJourneyTest.aPlayerSees*'
-          :intercept-testing:anvilNeoforgeTest --tests '*NeoForgeJourneyTest.aPlayerSees*'
+      # The marker scenarios run once on each platform, which starts every server the suites use, so Anvil saves
+      # them for the scenario jobs.
+      - name: Prepare the servers of the scenarios
+        run: ./gradlew --no-daemon :intercept-testing:anvilInterceptionTest --tests '*MarkerTest*'
