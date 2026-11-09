@@ -6,8 +6,9 @@ import me.whereareiam.intercept.testing.environment.Platform;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * What an administrator does on one instance of a test network: edits Intercept's files, publishes them and runs
@@ -49,10 +50,9 @@ public final class Administrator {
 	 * @return this administrator
 	 */
 	public Administrator write(Path file, String contents) {
-		Path target = anvil.processes().get(instance).workDirectory().resolve(platform.getFolder()).resolve(file);
+		String path = slashes(platform.getFolder().resolve(file));
 		try {
-			Files.createDirectories(target.getParent());
-			Files.writeString(target, contents);
+			anvil.processes().get(instance).files().write(path, contents);
 		} catch (IOException exception) {
 			throw new UncheckedIOException(exception);
 		}
@@ -91,6 +91,14 @@ public final class Administrator {
 	public Administrator tell(String player, String text) {
 		run(platform.sender(instance), "tellraw " + player + " \"" + text + "\"");
 		return this;
+	}
+
+	// The process's files take a workspace-relative path with forward slashes.
+	private static String slashes(Path path) {
+		List<String> parts = new ArrayList<>();
+		for (Path part : path) parts.add(part.toString());
+
+		return String.join("/", parts);
 	}
 
 	private void run(String process, String command) {
