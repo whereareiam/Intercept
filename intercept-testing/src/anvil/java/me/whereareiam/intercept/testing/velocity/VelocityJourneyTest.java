@@ -55,4 +55,18 @@ final class VelocityJourneyTest {
 		Journey.tell(anvil, LOBBY_B, "Alice", "<lang key=test.news player=Alice>");
 		onB.sees("Fresh news for Alice");
 	}
+
+	@Test
+	@AnvilTest(VelocityNetwork.class)
+	void aPluginKeyLinkedInAllIsShownInTheReadersLanguageOnTheOtherProxy(ScenarioContext anvil) {
+		Journey onB = Journey.join(anvil, "Alice", B);
+
+		// test.link stands for a plugin's key: its text in all/ only names the network's own key test.greeting.
+		Journey.write(anvil, A, FOLDER.resolve(Path.of("translations", "all", "test.yml")), "link: \"{@test.greeting player=name}\"\n");
+		Journey.run(anvil, A, "intercept publish");
+
+		onB.command("language de").sees("Deine Sprache ist jetzt Deutsch.");
+		Journey.tell(anvil, LOBBY_B, "Alice", "<lang key=test.link name=Alice>");
+		onB.sees("Willkommen, Alice!");
+	}
 }

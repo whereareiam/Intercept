@@ -13,7 +13,7 @@ import java.nio.file.Path;
 
 /**
  * Two Paper servers with Intercept and PacketEvents, sharing a database and Redis, and the probe: a plugin with a
- * translator of its own.
+ * translator of its own. Both servers use the remote bundles of {@link Network#bundles()}.
  */
 public final class PaperNetwork implements AnvilScenarioDefinition {
 	public static final String A = "paper-a";
@@ -27,6 +27,7 @@ public final class PaperNetwork implements AnvilScenarioDefinition {
 				.entrypoint(A)
 				.container(Network.postgres())
 				.container(Network.redis())
+				.container(Network.bundles())
 				.server(server(A))
 				.server(server(B))
 				.build();
@@ -42,7 +43,7 @@ public final class PaperNetwork implements AnvilScenarioDefinition {
 				.name(name)
 				.platform(Platforms.PAPER)
 				.distribution(Distribution.remote("26.3", "205"))
-				.workspace(Network.intercept(plan, FOLDER, name).build())
+				.workspace(Network.intercept(plan, FOLDER, name, Network.REMOTE).build())
 				.memoryMegabytes(1536)
 				.build();
 	}
