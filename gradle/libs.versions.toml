@@ -20,7 +20,7 @@ semantica = "dev-64fa3ce"
 
 guice = "7.0.0"
 annotations = "26.0.1"
-jedis = "7.0.0"
+jedis = "8.0.2"
 
 # adventure
 adventure = "5.2.0"
