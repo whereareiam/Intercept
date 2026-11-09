@@ -101,15 +101,15 @@ jobs:
           name: Integration test results
           artifact-name: test-results-integration
 
-  journeys:
-    name: Journeys (${{ matrix.suite }})
+  scenarios:
+    name: Scenarios (${{ matrix.suite }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        # The suites of intercept-testing/build.gradle.kts, one per platform.
-        suite: [paper, velocity, neoforge]
+        # The suites of intercept-testing/build.gradle.kts.
+        suite: [interception, language, translation, publishing]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -121,17 +121,17 @@ jobs:
       # The servers and prepared workspaces the build cache job on dev left, instead of downloading them again.
       - uses: whereareiam/anvil-actions/setup@v1
 
-      - name: Run the ${{ matrix.suite }} journeys
+      - name: Run the ${{ matrix.suite }} scenarios
         env:
           SUITE: ${{ matrix.suite }}
         run: ./gradlew --no-daemon ":intercept-testing:anvil${SUITE^}Test"
 
-      # A failed journey keeps its network, whose console logs tell what each server did.
+      # A failed scenario keeps its network, whose console logs tell what each server did.
       - uses: whereareiam/devops/primitive/report/junit/publish@v3
         if: always()
         with:
-          name: Journey results (${{ matrix.suite }})
-          artifact-name: test-results-journeys-${{ matrix.suite }}
+          name: Scenario results (${{ matrix.suite }})
+          artifact-name: test-results-scenarios-${{ matrix.suite }}
           reports: |
             **/build/reports/tests/**
             intercept-testing/build/anvil/**/anvil-console.log

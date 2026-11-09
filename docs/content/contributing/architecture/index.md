@@ -24,7 +24,7 @@ intercept-platform/
   common                          what a platform provides, and the injector
   bundle                          Paper and Velocity in one jar
   type/platform-paper|velocity|neoforge
-intercept-testing                 Anvil journeys
+intercept-testing                 Anvil scenarios
 ```
 
 Every family's root (`interception`, `persistence`, `replication`) is its wiring and the module others depend on;

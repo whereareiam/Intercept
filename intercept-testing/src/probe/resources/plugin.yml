@@ -2,7 +2,7 @@ name: InterceptProbe
 main: me.whereareiam.intercept.testing.probe.ProbePlugin
 version: '1'
 api-version: '1.21'
-description: A plugin as the journeys see others, with its own texts and its own translator.
+description: A plugin as the scenarios see others, with its own texts and its own translator.
 commands:
   probe:
     description: Sends a key Intercept knows as well.
