@@ -1,5 +1,6 @@
 package me.whereareiam.intercept.testing.probe;
 
+import me.whereareiam.intercept.InterceptAPI;
 import me.whereareiam.semantica.catalog.Layer;
 import me.whereareiam.semantica.common.Semantica;
 import me.whereareiam.semantica.format.adventure.TagPolicy;
@@ -14,6 +15,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +24,8 @@ import java.util.Locale;
 /**
  * A plugin as Intercept meets them: it owns a Semantica of its own, registers its translator in Adventure's global
  * translator as every plugin does, and sends its keys with named arguments. It has a text for
- * {@code test.greeting}, which the network has too, and {@code probe.own}, which only it has.
+ * {@code test.greeting}, which the network has too, and {@code probe.own}, which only it has. It reads a player's
+ * chosen language through {@link InterceptAPI}, as plugins that render their own texts do.
  */
 public final class ProbePlugin extends JavaPlugin {
 	private Translator translator;
@@ -60,9 +63,25 @@ public final class ProbePlugin extends JavaPlugin {
 
 	@Override
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] arguments) {
+		if (command.getName().equals("probe-language")) {
+			sender.sendMessage(Component.text("Intercept reports " + chosen(sender) + "."));
+			return true;
+		}
+
 		String key = command.getName().equals("probe") ? "test.greeting" : "probe.own";
 		sender.sendMessage(Component.translatable(key, TextArgument.of("player", sender.getName())));
 
 		return true;
+	}
+
+	private static @NotNull String chosen(@NotNull CommandSender sender) {
+		if (!(sender instanceof Player player)) return "no player";
+
+		return InterceptAPI.find()
+				.map(intercept -> intercept.languages()
+						.chosen(player.getUniqueId())
+						.map(Locale::toLanguageTag)
+						.orElse("no choice"))
+				.orElse("no Intercept");
 	}
 }

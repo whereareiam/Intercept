@@ -19,11 +19,13 @@ java {
 
 /**
  * The probe: a plugin the Paper scenarios install beside Intercept, which owns a Semantica and registers its own
- * translator, as the network's other plugins do. It carries Semantica inside its jar.
+ * translator, as the network's other plugins do. It carries Semantica inside its jar, and reads players' languages
+ * through Intercept's API, which it compiles against and leaves out of its jar.
  */
 val probe: SourceSet by sourceSets.creating
 
 dependencies {
+    "probeCompileOnly"(projects.interceptApi)
     "probeCompileOnly"(libs.paper)
     "probeImplementation"(libs.semantica.common)
     "probeImplementation"(libs.semantica.syntax.icu)
