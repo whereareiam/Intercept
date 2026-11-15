@@ -40,10 +40,10 @@ module and started in the phases of `StartupPhase`, in this order:
 | `CONFIGURATION` | `settings.yml`, `interception.yml`, `persistence.yml`, `replication.yml` and `commands.yml` are read |
 | `PERSISTENCE` | the database, and the connection to the other instances |
 | `CATALOG` | the catalog, registered as the authority in Adventure's global translator |
-| `RUNTIME` | the shared messages and their folders, players' languages |
+| `RUNTIME` | the shared messages and their folders, players' languages, Intercept's API for other plugins |
 | `INTERCEPTION` | the packet library that hands Intercept the messages on their way to players |
 | `INTEGRATIONS` | PlaceholderAPI |
-| `CONNECTIONS` | players joining and leaving, the commands |
+| `CONNECTIONS` | players joining and leaving, the commands; the API reports Intercept ready |
 
 Within a phase, lifecycles start in the order they were bound. When one fails, the ones started before it, and the
 failed one, stop in reverse and the plugin does not start. Building a lifecycle does no I/O: a file is read through

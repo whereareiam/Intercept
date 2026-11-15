@@ -1,9 +1,10 @@
 {
   "title": "Developers",
-  "description": "Make your plugin's messages translatable",
+  "description": "Make your plugin's messages translatable and read players' languages",
   "icon": "Code",
   "root": true,
   "pages": [
-    "index"
+    "index",
+    "languages"
   ]
 }

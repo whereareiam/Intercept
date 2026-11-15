@@ -20,7 +20,7 @@ When changing behavior:
 ### Core Module Map
 
 - `intercept-api`
-  Only what several families share: `LanguageService` and `LanguageApplier`, `TranslationService`, `MessageService`, the persistence ports `SharedStore` and `LanguageStore`, `ReplicationService` and its messages, `RuntimeLifecycle` and `StartupPhase`, `CommandSource`, `LibraryLoader` and `settings.yml`. Consumers depend on the family api they need, never on one global api.
+  `InterceptAPI`, the door other plugins and mods reach the running Intercept through (registered with the core, ready once Intercept handles players), and what several families share: `LanguageService` and `LanguageApplier`, `TranslationService`, `MessageService`, the persistence ports `SharedStore` and `LanguageStore`, `ReplicationService` and its messages, `RuntimeLifecycle` and `StartupPhase`, `CommandSource`, `LibraryLoader` and `settings.yml`. Consumers depend on the family api they need, never on one global api.
 - `intercept-common`
   The catalog (one Semantica with the layers defaults, remote, shared, local, registered as semantica's authority in Adventure's `GlobalTranslator`), the shared messages and their folders (`translations/` with a folder per language and `all/` for the root locale, `translations/rules/`, `.cache/shared/`), polling and publishing, and players' languages.
 - `intercept-interception/*`
@@ -58,6 +58,7 @@ When changing behavior:
 - Keep responsibilities in the narrowest owning module; a family's root module only wires.
 - Public API surfaces are `intercept-api` and every `*-api` module; they need complete Javadocs.
 - Whatever starts or stops with Intercept is a `RuntimeLifecycle` in the `StartupPhase` it belongs to, bound in its family's configuration module; nothing starts outside a lifecycle. Building a lifecycle does no I/O: configuration files are read by their providers in `CONFIGURATION`, so parts inject `Provider<...>` and read the values when they start.
+- `me.whereareiam.intercept` keeps its name in every jar: other plugins compile against `intercept-api`, published as `me.whereareiam.intercept:api`, and meet the running Intercept's classes, so no platform relocates Intercept's own packages.
 - Paper and Velocity load libraries through Attache. Intercept's classes are compiled against relocated Guice, Guava, Jackson, SnakeYAML and Jdbi, so every library declared through Attache that uses them is relocated the same way in its build file.
 - A platform's entry class only names its host and Attache: the host verifies it before Attache has loaded Guice. Velocity builds it with its own Guice, so it is injected through `jakarta.inject`.
 - NeoForge has no Attache: the mod shades and relocates its libraries, and nests Adventure, semantica's core, its Adventure format, ICU and Cloud as Jar-in-Jar, unrelocated, so mods share them.
