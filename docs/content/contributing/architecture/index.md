@@ -30,6 +30,26 @@ intercept-testing                 Anvil scenarios
 Every family's root (`interception`, `persistence`, `replication`) is its wiring and the module others depend on;
 its `-api` holds contracts and its `-common` the logic.
 
+## Starting and stopping
+
+Every part of Intercept that starts and stops with it is a `RuntimeLifecycle`, bound in its family's configuration
+module and started in the phases of `StartupPhase`, in this order:
+
+| Phase | What starts |
+| --- | --- |
+| `CONFIGURATION` | `settings.yml`, `interception.yml`, `persistence.yml`, `replication.yml` and `commands.yml` are read |
+| `PERSISTENCE` | the database, and the connection to the other instances |
+| `CATALOG` | the catalog, registered as the authority in Adventure's global translator |
+| `RUNTIME` | the shared messages and their folders, players' languages |
+| `INTERCEPTION` | the packet library that hands Intercept the messages on their way to players |
+| `INTEGRATIONS` | PlaceholderAPI |
+| `CONNECTIONS` | players joining and leaving, the commands |
+
+Within a phase, lifecycles start in the order they were bound. When one fails, the ones started before it, and the
+failed one, stop in reverse and the plugin does not start. Building a lifecycle does no I/O: a file is read through
+its provider, which reads it in `CONFIGURATION` and refuses to be read earlier, so a part injects the provider and
+reads the values when it starts.
+
 ## The catalog
 
 One Semantica per instance, with four layers, lowest first: Intercept's own texts from the jar, the remote
