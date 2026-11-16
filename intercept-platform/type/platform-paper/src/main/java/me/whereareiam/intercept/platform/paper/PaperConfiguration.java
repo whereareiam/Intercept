@@ -8,7 +8,7 @@ import me.whereareiam.intercept.interception.library.packetevents.ClientLocales;
 import me.whereareiam.intercept.interception.library.packetevents.PacketEventsInterception;
 import me.whereareiam.intercept.language.LanguageApplier;
 import me.whereareiam.intercept.library.LibraryLoader;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
 import me.whereareiam.intercept.platform.PlatformConfiguration;
 import me.whereareiam.intercept.platform.library.AttacheLibraryLoader;
 import me.whereareiam.intercept.platform.paper.command.PaperCommandManagerProvider;
@@ -36,7 +36,7 @@ public final class PaperConfiguration extends PlatformConfiguration {
 		bind(LibraryManager.class).toInstance(libraries);
 		bindConstant().annotatedWith(Names.named("rewriteClientLocale")).to(true);
 
-		Multibinder<Lifecycle> lifecycles = Multibinder.newSetBinder(binder(), Lifecycle.class);
+		Multibinder<RuntimeLifecycle> lifecycles = Multibinder.newSetBinder(binder(), RuntimeLifecycle.class);
 		lifecycles.addBinding().to(PacketEventsInterception.class);
 		lifecycles.addBinding().to(PaperPlayers.class);
 	}

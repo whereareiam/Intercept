@@ -57,7 +57,7 @@ class DatabaseSharedStoreTest {
 			assertEquals(NOW, snapshot.getMessages().getFirst().getChangedAt());
 			assertTrue(snapshot.getRules().isEmpty());
 		} finally {
-			database.stop();
+			database.shutdown();
 		}
 	}
 
@@ -73,7 +73,7 @@ class DatabaseSharedStoreTest {
 
 			assertEquals(Locale.ROOT, store.load().getMessages().getFirst().getLanguage());
 		} finally {
-			database.stop();
+			database.shutdown();
 		}
 	}
 
@@ -86,7 +86,7 @@ class DatabaseSharedStoreTest {
 
 			assertEquals(0, store.apply(new SharedChanges(List.of(), List.of(), List.of(), List.of())));
 		} finally {
-			database.stop();
+			database.shutdown();
 		}
 	}
 

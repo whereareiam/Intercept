@@ -36,7 +36,7 @@ class DatabaseLanguageStoreTest {
 			store.delete(ALICE);
 			assertEquals(Optional.empty(), store.find(ALICE));
 		} finally {
-			database.stop();
+			database.shutdown();
 		}
 	}
 }

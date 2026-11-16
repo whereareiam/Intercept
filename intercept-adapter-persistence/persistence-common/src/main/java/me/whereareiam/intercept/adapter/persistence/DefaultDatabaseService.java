@@ -14,7 +14,8 @@ import me.whereareiam.intercept.adapter.persistence.entity.RevisionEntity;
 import me.whereareiam.intercept.adapter.persistence.schema.InterceptSchema;
 import me.whereareiam.intercept.adapter.persistence.schema.SchemaInstaller;
 import me.whereareiam.intercept.library.LibraryLoader;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import me.whereareiam.intercept.persistence.database.DatabaseSchema;
 import me.whereareiam.intercept.persistence.database.DatabaseService;
 import me.whereareiam.intercept.persistence.database.Persistence;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class DefaultDatabaseService implements DatabaseService, Lifecycle {
+public final class DefaultDatabaseService implements DatabaseService, RuntimeLifecycle {
 	private final @NotNull Provider<Persistence> persistence;
 	private final @Named("dataPath") @NotNull Path dataPath;
 	private final @NotNull LibraryLoader libraries;
@@ -41,12 +42,12 @@ public final class DefaultDatabaseService implements DatabaseService, Lifecycle 
 	private SchemaInstaller installer;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.PERSISTENCE;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.PERSISTENCE;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		Persistence persistence = this.persistence.get();
 		libraries.load(persistence.getType().name().toLowerCase(Locale.ROOT));
 
@@ -62,7 +63,7 @@ public final class DefaultDatabaseService implements DatabaseService, Lifecycle 
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		if (dataSource != null) dataSource.close();
 
 		dataSource = null;

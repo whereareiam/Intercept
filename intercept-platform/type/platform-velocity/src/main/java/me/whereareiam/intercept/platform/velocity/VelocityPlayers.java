@@ -11,7 +11,8 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageService;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,23 +20,23 @@ import org.jetbrains.annotations.NotNull;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class VelocityPlayers implements Lifecycle {
+public final class VelocityPlayers implements RuntimeLifecycle {
 	private final @NotNull ProxyServer proxy;
 	private final @Named("plugin") @NotNull Object plugin;
 	private final @NotNull LanguageService languages;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.CONNECTIONS;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		proxy.getEventManager().register(plugin, this);
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		proxy.getEventManager().unregisterListener(plugin, this);
 	}
 

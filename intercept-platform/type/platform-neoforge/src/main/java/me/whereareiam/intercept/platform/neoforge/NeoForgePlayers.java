@@ -4,7 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageService;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -15,23 +16,23 @@ import org.jetbrains.annotations.NotNull;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class NeoForgePlayers implements Lifecycle {
+public final class NeoForgePlayers implements RuntimeLifecycle {
 	private final @NotNull LanguageService languages;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.CONNECTIONS;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::loggedIn);
 		NeoForge.EVENT_BUS.addListener(this::loggedOut);
 	}
 
 	// NeoForge cannot remove a listener added as a method reference; Intercept stops only when the server does.
 	@Override
-	public void stop() {
+	public void shutdown() {
 	}
 
 	private void loggedIn(PlayerEvent.PlayerLoggedInEvent event) {

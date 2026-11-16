@@ -5,7 +5,7 @@ import me.whereareiam.intercept.command.CommandSource;
 import me.whereareiam.intercept.interception.library.mixin.PacketTranslation;
 import me.whereareiam.intercept.language.LanguageApplier;
 import me.whereareiam.intercept.library.LibraryLoader;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
 import me.whereareiam.intercept.platform.PlatformConfiguration;
 import me.whereareiam.intercept.platform.neoforge.command.NeoForgeCommandManagerProvider;
 import org.incendo.cloud.CommandManager;
@@ -25,7 +25,7 @@ public final class NeoForgeConfiguration extends PlatformConfiguration {
 
 	@Override
 	protected void configurePlatform() {
-		Multibinder<Lifecycle> lifecycles = Multibinder.newSetBinder(binder(), Lifecycle.class);
+		Multibinder<RuntimeLifecycle> lifecycles = Multibinder.newSetBinder(binder(), RuntimeLifecycle.class);
 		lifecycles.addBinding().to(PacketTranslation.class);
 		lifecycles.addBinding().to(NeoForgePlayers.class);
 	}

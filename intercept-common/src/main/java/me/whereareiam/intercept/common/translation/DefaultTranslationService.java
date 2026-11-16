@@ -8,7 +8,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.intercept.common.Folders;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.shared.SharedSnapshot;
 import me.whereareiam.intercept.translation.TranslationService;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class DefaultTranslationService implements TranslationService, Lifecycle {
+public final class DefaultTranslationService implements TranslationService, RuntimeLifecycle {
 	public static final String DEFAULTS = "defaults";
 	public static final String REMOTE = "remote";
 	public static final String SHARED = "shared";
@@ -69,14 +71,14 @@ public final class DefaultTranslationService implements TranslationService, Life
 	private RememberingSource remote;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.CATALOG;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.CATALOG;
 	}
 
 	@Override
-	public void start() throws IOException {
+	public void initialize() {
 		Settings settings = this.settings.get();
-		Path defaults = writeDefaults();
+		Path defaults = defaults();
 
 		Semantica.Builder builder = Semantica.builder()
 				.syntax(new IcuSyntax())
@@ -94,8 +96,16 @@ public final class DefaultTranslationService implements TranslationService, Life
 		GlobalTranslator.translator().addSource(translator);
 	}
 
+	private @NotNull Path defaults() {
+		try {
+			return writeDefaults();
+		} catch (IOException exception) {
+			throw new UncheckedIOException("Cannot write Intercept's default messages", exception);
+		}
+	}
+
 	@Override
-	public void stop() {
+	public void shutdown() {
 		if (translator != null) GlobalTranslator.translator().removeSource(translator);
 		if (semantica != null) semantica.close();
 

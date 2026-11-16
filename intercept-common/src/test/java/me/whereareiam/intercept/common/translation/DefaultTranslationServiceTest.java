@@ -57,14 +57,14 @@ class DefaultTranslationServiceTest {
 				new Folders(dataPath),
 				logger
 		);
-		translations.start();
+		translations.initialize();
 		try {
 			assertTrue(translations.has("identica.username.taken"));
 			assertEquals(List.of(), warnings);
 			assertEquals("Alex ist vergeben.", plain(translations, Locale.GERMAN));
 			assertEquals("Alex is taken.", plain(translations, Locale.ENGLISH));
 		} finally {
-			translations.stop();
+			translations.shutdown();
 		}
 	}
 
