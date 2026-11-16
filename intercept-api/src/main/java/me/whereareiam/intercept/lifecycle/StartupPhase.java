@@ -15,12 +15,12 @@ public enum StartupPhase {
 	PERSISTENCE,
 	/** The translation catalog is built and registered as the authority in Adventure's global translator. */
 	CATALOG,
-	/** The core starts: the shared messages and their folders, and players' languages. */
+	/** The core starts: the shared messages and their folders, players' languages and Intercept's API. */
 	RUNTIME,
 	/** Intercept starts translating the messages it intercepts on their way to players. */
 	INTERCEPTION,
 	/** The integrations with other plugins start, such as PlaceholderAPI. */
 	INTEGRATIONS,
-	/** Intercept starts handling players and their commands. */
+	/** Intercept starts handling players and their commands, and reports itself ready. */
 	CONNECTIONS
 }
