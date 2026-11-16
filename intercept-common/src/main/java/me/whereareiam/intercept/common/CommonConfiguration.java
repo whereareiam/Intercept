@@ -8,6 +8,8 @@ import com.google.inject.multibindings.OptionalBinder;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.configura.feature.comment.CommentFeature;
 import me.whereareiam.configura.type.Format;
+import me.whereareiam.intercept.common.api.ApiLifecycle;
+import me.whereareiam.intercept.common.api.ReadyLifecycle;
 import me.whereareiam.intercept.common.config.SettingsProvider;
 import me.whereareiam.intercept.common.language.DefaultLanguageService;
 import me.whereareiam.intercept.common.message.DefaultMessageService;
@@ -41,6 +43,8 @@ public final class CommonConfiguration extends AbstractModule {
 		lifecycles.addBinding().to(DefaultTranslationService.class);
 		lifecycles.addBinding().to(DefaultMessageService.class);
 		lifecycles.addBinding().to(DefaultLanguageService.class);
+		lifecycles.addBinding().to(ApiLifecycle.class);
+		lifecycles.addBinding().to(ReadyLifecycle.class);
 	}
 
 	@Provides
