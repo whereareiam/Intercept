@@ -3,5 +3,5 @@ plugins {
 }
 
 toolkitPublish {
-    artifactId.set("intercept-api")
+    artifactId.set("api")
 }
