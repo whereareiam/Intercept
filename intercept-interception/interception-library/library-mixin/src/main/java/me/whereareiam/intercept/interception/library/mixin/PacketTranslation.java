@@ -5,7 +5,8 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.interception.Surface;
 import me.whereareiam.intercept.interception.library.OutgoingMessages;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import me.whereareiam.semantica.format.adventure.MinecraftLocales;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -30,7 +31,7 @@ import java.util.UUID;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class PacketTranslation implements Lifecycle {
+public final class PacketTranslation implements RuntimeLifecycle {
 	private static volatile @Nullable PacketTranslation active;
 
 	private final @NotNull OutgoingMessages messages;
@@ -66,17 +67,17 @@ public final class PacketTranslation implements Lifecycle {
 	}
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.INTERCEPTION;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		active = this;
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		active = null;
 	}
 

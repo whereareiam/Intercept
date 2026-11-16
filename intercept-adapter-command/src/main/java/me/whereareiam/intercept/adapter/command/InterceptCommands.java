@@ -13,7 +13,8 @@ import me.whereareiam.intercept.adapter.command.executor.LanguageCommand;
 import me.whereareiam.intercept.adapter.command.executor.PublishCommand;
 import me.whereareiam.intercept.adapter.command.executor.ReloadCommand;
 import me.whereareiam.intercept.command.CommandSource;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.jetbrains.annotations.NotNull;
@@ -27,23 +28,23 @@ import java.util.function.Function;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class InterceptCommands implements Lifecycle {
+public final class InterceptCommands implements RuntimeLifecycle {
 	private static final String ROOT = "intercept";
 
 	private final @NotNull Provider<CommandManager<CommandSource>> manager;
-	private final @NotNull Commands commands;
+	private final @NotNull Provider<Commands> commands;
 	private final @NotNull LanguageCommand language;
 	private final @NotNull PublishCommand publish;
 	private final @NotNull ReloadCommand reload;
 	private final CommandDefinitionAdapter adapter = new CommandDefinitionAdapter();
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.CONNECTIONS;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		CommandManager<CommandSource> manager = this.manager.get();
 
 		register(manager, "language", List.of(), builder -> language.build(builder));
@@ -52,7 +53,7 @@ public final class InterceptCommands implements Lifecycle {
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 	}
 
 	// A subcommand of /intercept is named after its first alias; Commandant applies every alias of a root command.
@@ -62,7 +63,7 @@ public final class InterceptCommands implements Lifecycle {
 			List<String> parents,
 			Function<Command.Builder<CommandSource>, Command.Builder<CommandSource>> body
 	) {
-		CommandDefinition definition = commands.get(id);
+		CommandDefinition definition = commands.get().get(id);
 		if (!definition.isEnabled()) return;
 
 		String name = definition.getAliases().isEmpty() ? id : definition.getAliases().getFirst();

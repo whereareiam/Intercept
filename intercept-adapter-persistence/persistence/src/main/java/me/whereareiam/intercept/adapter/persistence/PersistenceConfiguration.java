@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import me.whereareiam.intercept.adapter.persistence.store.DatabaseLanguageStore;
 import me.whereareiam.intercept.adapter.persistence.store.DatabaseSharedStore;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
 import me.whereareiam.intercept.persistence.LanguageStore;
 import me.whereareiam.intercept.persistence.SharedStore;
 import me.whereareiam.intercept.persistence.database.DatabaseService;
@@ -21,6 +21,8 @@ public final class PersistenceConfiguration extends AbstractModule {
 		bind(SharedStore.class).to(DatabaseSharedStore.class);
 		bind(LanguageStore.class).to(DatabaseLanguageStore.class);
 
-		Multibinder.newSetBinder(binder(), Lifecycle.class).addBinding().to(DefaultDatabaseService.class);
+		Multibinder<RuntimeLifecycle> lifecycles = Multibinder.newSetBinder(binder(), RuntimeLifecycle.class);
+		lifecycles.addBinding().to(PersistenceProvider.class);
+		lifecycles.addBinding().to(DefaultDatabaseService.class);
 	}
 }

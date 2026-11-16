@@ -7,7 +7,8 @@ import com.google.inject.name.Named;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.intercept.common.translation.DefaultTranslationService;
 import me.whereareiam.intercept.common.Folders;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import me.whereareiam.intercept.message.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.message.PublishResult;
@@ -45,7 +46,7 @@ import java.util.stream.Stream;
  * polling finds it.
  */
 @Singleton
-public final class DefaultMessageService implements MessageService, Lifecycle {
+public final class DefaultMessageService implements MessageService, RuntimeLifecycle {
 	private final SharedStore store;
 	private final ReplicationService replication;
 	private final DefaultTranslationService translations;
@@ -79,14 +80,13 @@ public final class DefaultMessageService implements MessageService, Lifecycle {
 	}
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.RUNTIME;
 	}
 
 	@Override
-	public void start() throws IOException {
-		Files.createDirectories(localRules);
-		use(store.load());
+	public void initialize() {
+		loadShared();
 
 		replication.subscribe(RevisionPublished.class, published -> refresh(published.getRevision()));
 		replication.subscribe(ReloadRequested.class, ignored -> reload());
@@ -100,9 +100,18 @@ public final class DefaultMessageService implements MessageService, Lifecycle {
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		if (poller != null) poller.shutdownNow();
 		poller = null;
+	}
+
+	private void loadShared() {
+		try {
+			Files.createDirectories(localRules);
+			use(store.load());
+		} catch (IOException exception) {
+			throw new UncheckedIOException("Cannot load the shared messages", exception);
+		}
 	}
 
 	@Override

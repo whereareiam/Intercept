@@ -6,7 +6,8 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -14,22 +15,22 @@ import org.jetbrains.annotations.NotNull;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class PacketEventsInterception implements Lifecycle {
+public final class PacketEventsInterception implements RuntimeLifecycle {
 	private final @NotNull MessagePacketListener listener;
 	private PacketListenerCommon registered;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.INTERCEPTION;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		registered = PacketEvents.getAPI().getEventManager().registerListener(listener, PacketListenerPriority.HIGH);
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		if (registered != null) PacketEvents.getAPI().getEventManager().unregisterListener(registered);
 		registered = null;
 	}

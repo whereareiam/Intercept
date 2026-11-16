@@ -4,7 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.language.LanguageService;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -20,22 +21,22 @@ import org.jetbrains.annotations.NotNull;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class PaperPlayers implements Listener, Lifecycle {
+public final class PaperPlayers implements Listener, RuntimeLifecycle {
 	private final @NotNull Plugin plugin;
 	private final @NotNull LanguageService languages;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.CONNECTIONS;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		HandlerList.unregisterAll(this);
 	}
 

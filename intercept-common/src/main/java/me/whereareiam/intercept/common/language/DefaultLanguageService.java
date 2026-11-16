@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.common.translation.DefaultTranslationService;
 import me.whereareiam.intercept.language.LanguageApplier;
 import me.whereareiam.intercept.language.LanguageService;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import me.whereareiam.intercept.model.replication.LanguageChosen;
 import me.whereareiam.intercept.persistence.LanguageStore;
 import me.whereareiam.intercept.replication.ReplicationService;
@@ -24,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class DefaultLanguageService implements LanguageService, Lifecycle {
+public final class DefaultLanguageService implements LanguageService, RuntimeLifecycle {
 	private final @NotNull LanguageStore store;
 	private final @NotNull LanguageApplier applier;
 	private final @NotNull ReplicationService replication;
@@ -33,17 +34,17 @@ public final class DefaultLanguageService implements LanguageService, Lifecycle 
 	private final Set<UUID> loaded = ConcurrentHashMap.newKeySet();
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.RUNTIME;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		replication.subscribe(LanguageChosen.class, this::receive);
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		chosen.clear();
 		loaded.clear();
 	}

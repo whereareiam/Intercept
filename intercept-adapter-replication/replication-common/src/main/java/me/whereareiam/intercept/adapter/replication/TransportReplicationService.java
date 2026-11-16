@@ -6,7 +6,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import lombok.RequiredArgsConstructor;
 import me.whereareiam.intercept.library.LibraryLoader;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.replication.Replicated;
 import me.whereareiam.intercept.replication.ReplicationService;
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class TransportReplicationService implements ReplicationService, Lifecycle {
+public final class TransportReplicationService implements ReplicationService, RuntimeLifecycle {
 	private final @NotNull Provider<Replication> replication;
 	private final @NotNull Provider<Settings> settings;
 	private final @NotNull LibraryLoader libraries;
@@ -40,12 +41,12 @@ public final class TransportReplicationService implements ReplicationService, Li
 	private ReplicationTransport transport;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.REPLICATION;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.PERSISTENCE;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		String configured = settings.get().getInstance();
 		instance = configured.isBlank() ? UUID.randomUUID().toString() : configured.replace(' ', '-');
 
@@ -60,7 +61,7 @@ public final class TransportReplicationService implements ReplicationService, Li
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		if (transport != null) transport.close();
 		transport = null;
 	}

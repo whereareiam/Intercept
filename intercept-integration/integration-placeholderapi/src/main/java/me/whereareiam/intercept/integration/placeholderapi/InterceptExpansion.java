@@ -5,7 +5,8 @@ import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.whereareiam.intercept.language.LanguageService;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
+import me.whereareiam.intercept.lifecycle.StartupPhase;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -19,21 +20,21 @@ import java.util.Locale;
  */
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public final class InterceptExpansion extends PlaceholderExpansion implements Lifecycle {
+public final class InterceptExpansion extends PlaceholderExpansion implements RuntimeLifecycle {
 	private final @NotNull LanguageService languages;
 
 	@Override
-	public @NotNull Phase phase() {
-		return Phase.RUNTIME;
+	public @NotNull StartupPhase phase() {
+		return StartupPhase.INTEGRATIONS;
 	}
 
 	@Override
-	public void start() {
+	public void initialize() {
 		register();
 	}
 
 	@Override
-	public void stop() {
+	public void shutdown() {
 		unregister();
 	}
 

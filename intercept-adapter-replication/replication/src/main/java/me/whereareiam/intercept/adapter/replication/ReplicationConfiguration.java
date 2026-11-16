@@ -3,7 +3,7 @@ package me.whereareiam.intercept.adapter.replication;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.multibindings.OptionalBinder;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
 import me.whereareiam.intercept.replication.ReplicationService;
 import me.whereareiam.intercept.replication.transport.Replication;
 
@@ -18,6 +18,8 @@ public final class ReplicationConfiguration extends AbstractModule {
 		OptionalBinder.newOptionalBinder(binder(), ReplicationService.class)
 				.setBinding()
 				.to(TransportReplicationService.class);
-		Multibinder.newSetBinder(binder(), Lifecycle.class).addBinding().to(TransportReplicationService.class);
+		Multibinder<RuntimeLifecycle> lifecycles = Multibinder.newSetBinder(binder(), RuntimeLifecycle.class);
+		lifecycles.addBinding().to(ReplicationProvider.class);
+		lifecycles.addBinding().to(TransportReplicationService.class);
 	}
 }

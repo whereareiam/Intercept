@@ -14,7 +14,7 @@ import me.whereareiam.intercept.common.message.DefaultMessageService;
 import me.whereareiam.intercept.common.replication.LocalReplicationService;
 import me.whereareiam.intercept.common.translation.DefaultTranslationService;
 import me.whereareiam.intercept.language.LanguageService;
-import me.whereareiam.intercept.lifecycle.Lifecycle;
+import me.whereareiam.intercept.lifecycle.RuntimeLifecycle;
 import me.whereareiam.intercept.message.MessageService;
 import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.replication.ReplicationService;
@@ -36,7 +36,8 @@ public final class CommonConfiguration extends AbstractModule {
 				.setDefault()
 				.to(LocalReplicationService.class);
 
-		Multibinder<Lifecycle> lifecycles = Multibinder.newSetBinder(binder(), Lifecycle.class);
+		Multibinder<RuntimeLifecycle> lifecycles = Multibinder.newSetBinder(binder(), RuntimeLifecycle.class);
+		lifecycles.addBinding().to(SettingsProvider.class);
 		lifecycles.addBinding().to(DefaultTranslationService.class);
 		lifecycles.addBinding().to(DefaultMessageService.class);
 		lifecycles.addBinding().to(DefaultLanguageService.class);

@@ -53,7 +53,7 @@ public final class TestDatabases {
 
 		DefaultDatabaseService database = new DefaultDatabaseService(() -> persistence, folder, groups -> {
 		}, Logger.getAnonymousLogger());
-		database.start();
+		database.initialize();
 		if (type == DatabaseType.POSTGRES) clear(database);
 
 		return database;
