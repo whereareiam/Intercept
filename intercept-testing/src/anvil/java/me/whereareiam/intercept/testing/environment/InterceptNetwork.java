@@ -52,7 +52,7 @@ public @interface InterceptNetwork {
 
 	/**
 	 * Whether both instances download the remote bundles of {@link me.whereareiam.intercept.testing.fixture.Bundles}
-	 * from a web server in a container.
+	 * from a web server in a container, and in which layout.
 	 */
-	boolean remote() default false;
+	RemoteBundles remote() default RemoteBundles.NONE;
 }

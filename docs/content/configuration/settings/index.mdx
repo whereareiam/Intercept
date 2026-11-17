@@ -29,12 +29,34 @@ Intercept keeps them off, with a warning, while `url` or `product` is empty.
 
 </Setting>
 
-<Setting name="remote.url" depth={2} takes="a URL" default="empty" affects="where the bundles and their `manifest.json` are">
+<Setting name="remote.url" depth={2} takes="a URL" default="empty" affects="where the bundles and their manifest are">
+</Setting>
+
+<Setting name="remote.layout" depth={2} takes="`PATHS` or `DIGESTS`" default="`PATHS`" affects="where below `url` the manifest and the bundles are">
+
+- `PATHS`: `manifest.json` and `<product>/<language>.json`, the folder `semantica-cli bundle` writes, served as it is.
+- `DIGESTS`: a file depot that serves each file by its digest. The manifest is read at `remote.manifest`,
+  which the depot redirects to its current revision, and each bundle at `sha256-<hash>/<language>.json`, with the
+  hash the manifest lists for it.
+
+Either way a bundle is used only when its SHA-256 equals the manifest's hash.
+
+```yaml
+remote:
+  enabled: true
+  url: "https://depot.example.net/translations/"
+  layout: DIGESTS
+  product: game
+```
+
+</Setting>
+
+<Setting name="remote.manifest" depth={2} takes="a path below `url`" default='`"@manifest"`' affects="where a file depot serves the manifest; read with `layout: DIGESTS` only">
 </Setting>
 
 <Setting name="remote.product" depth={2} takes="a string" default="empty" affects="whose bundles this server uses, such as the name of its game mode">
 
-Each product has one bundle per language, `<product>/<language>.json`.
+Each product has one bundle per language, listed in the manifest.
 
 </Setting>
 

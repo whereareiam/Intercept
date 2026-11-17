@@ -24,7 +24,7 @@ Or one suite at a time:
 | --- | --- | --- |
 | `interception` | a marker in a system message shows the chosen language; a published rule translates a plugin's plain text on the other server | all; rules on Paper |
 | `language` | a language chosen on one instance applies on the other at once | all |
-| `translation` | a translatable component rendered as it is sent; a plugin with its own translator leaves the network's keys to Intercept and keeps its others; texts from remote bundles | NeoForge; Paper; Paper |
+| `translation` | a translatable component rendered as it is sent; a plugin with its own translator leaves the network's keys to Intercept and keeps its others; texts from remote bundles, in both layouts | NeoForge; Paper; Paper and NeoForge |
 | `publishing` | a message published on one instance shown on the other; a plugin key linked in `translations/all/` shown in German on the other | all |
 
 ## Writing a scenario
@@ -56,8 +56,9 @@ class PublishedMessageTest {
 }
 ```
 
-`@InterceptNetwork` takes the platform and `remote = true` to serve the remote bundles of `fixture/Bundles` from a
-web server container. `Administrator.tell` sends a system message as a plugin without translations would; on
+`@InterceptNetwork` takes the platform and `remote = PATHS` or `remote = DIGESTS` to serve the remote bundles of
+`fixture/Bundles` from a web server container, as a translations repository's CI writes them or as a file depot serves
+them. `Administrator.tell` sends a system message as a plugin without translations would; on
 Velocity it comes from the Paper server behind the proxy, so it passes the proxy. The texts every network starts
 with are in `fixture/Texts`.
 

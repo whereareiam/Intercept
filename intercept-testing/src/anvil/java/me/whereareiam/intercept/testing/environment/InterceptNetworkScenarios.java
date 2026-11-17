@@ -53,11 +53,11 @@ public final class InterceptNetworkScenarios implements AnvilScenarioFactory<Int
 	@Override
 	public @NotNull AnvilScenario create(@NotNull InterceptNetwork network) {
 		AnvilScenario.AnvilScenarioBuilder scenario = AnvilScenario.builder()
-				.name("intercept-" + network.platform().name().toLowerCase(Locale.ROOT) + (network.remote() ? "-remote" : ""))
+				.name("intercept-" + network.platform().name().toLowerCase(Locale.ROOT) + remoteName(network))
 				.entrypoint(A)
 				.container(Containers.postgres())
 				.container(Containers.redis());
-		if (network.remote()) scenario.container(Containers.bundles());
+		if (network.remote() != RemoteBundles.NONE) scenario.container(Containers.bundles(network.remote()));
 
 		return switch (network.platform()) {
 			case PAPER -> scenario.server(paper(A, network)).server(paper(B, network)).build();
@@ -126,9 +126,9 @@ public final class InterceptNetworkScenarios implements AnvilScenarioFactory<Int
 	// Intercept's configuration files and the local texts of Texts, in the platform's folder.
 	private static WorkspacePlan.WorkspacePlanBuilder intercept(WorkspacePlan.WorkspacePlanBuilder plan, String instance, InterceptNetwork network) {
 		Path folder = network.platform().getFolder();
-		String settings = SETTINGS.formatted(instance) + (network.remote() ? Bundles.SETTINGS : "");
+		String settings = SETTINGS.formatted(instance) + Bundles.settings(network.remote());
 
-		plan.asset(asset("intercept-settings-" + instance + (network.remote() ? "-remote" : ""), settings, folder.resolve("settings.yml")))
+		plan.asset(asset("intercept-settings-" + instance + remoteName(network), settings, folder.resolve("settings.yml")))
 				.asset(asset("intercept-persistence", PERSISTENCE, folder.resolve("persistence.yml")))
 				.asset(asset("intercept-replication", REPLICATION, folder.resolve("replication.yml")));
 		for (Map.Entry<Path, String> text : Texts.local().entrySet()) {
@@ -137,6 +137,10 @@ public final class InterceptNetworkScenarios implements AnvilScenarioFactory<Int
 		}
 
 		return plan;
+	}
+
+	private static String remoteName(InterceptNetwork network) {
+		return network.remote() == RemoteBundles.NONE ? "" : "-remote-" + network.remote().name().toLowerCase(Locale.ROOT);
 	}
 
 	private static WorkspaceAsset asset(String group, AssetSource source, Path target) {
