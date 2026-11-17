@@ -53,13 +53,15 @@ public final class Containers {
 	}
 
 	/**
-	 * A web server with the files of {@link Bundles}, as a translations repository's CI publishes them.
+	 * A web server with the files of {@link Bundles}, laid out as a translations repository's CI publishes them or as a
+	 * file depot serves them.
 	 *
+	 * @param layout how the files lie, {@link RemoteBundles#PATHS} or {@link RemoteBundles#DIGESTS}
 	 * @return the container
 	 */
-	public static ContainerProcess bundles() {
+	public static ContainerProcess bundles(RemoteBundles layout) {
 		StringBuilder script = new StringBuilder("mkdir -p /www");
-		for (Map.Entry<String, String> file : Bundles.files().entrySet())
+		for (Map.Entry<String, String> file : Bundles.files(layout).entrySet())
 			script.append(" && ").append(write("/www/" + file.getKey(), file.getValue()));
 		script.append(" && exec httpd -f -p 8080 -h /www");
 

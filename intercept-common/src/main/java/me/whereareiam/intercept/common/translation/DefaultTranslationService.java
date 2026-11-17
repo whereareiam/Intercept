@@ -14,13 +14,14 @@ import me.whereareiam.intercept.model.config.Settings;
 import me.whereareiam.intercept.model.shared.SharedSnapshot;
 import me.whereareiam.intercept.translation.TranslationService;
 import me.whereareiam.semantica.common.Semantica;
-import me.whereareiam.semantica.Text;
+import me.whereareiam.semantica.Message;
 import me.whereareiam.semantica.catalog.Layer;
 import me.whereareiam.semantica.format.adventure.TagPolicy;
 import me.whereareiam.semantica.format.adventure.v5.AdventureRenderer;
 import me.whereareiam.semantica.format.adventure.v5.AdventureTranslator;
 import me.whereareiam.semantica.source.Source;
 import me.whereareiam.semantica.source.file.FileSource;
+import me.whereareiam.semantica.source.http.BundleLayout;
 import me.whereareiam.semantica.source.http.HttpSource;
 import me.whereareiam.semantica.syntax.icu.IcuSyntax;
 import net.kyori.adventure.text.Component;
@@ -120,8 +121,8 @@ public final class DefaultTranslationService implements TranslationService, Runt
 
 	@Override
 	public @NotNull Component render(@NotNull String key, @NotNull Map<String, ?> arguments, @NotNull Locale language) {
-		Text text = Text.of(key).with(arguments);
-		return renderer.render(semantica().resolve(text, language));
+		Message message = Message.of(key).with(arguments);
+		return renderer.render(semantica().resolve(message, language));
 	}
 
 	@Override
@@ -184,11 +185,19 @@ public final class DefaultTranslationService implements TranslationService, Runt
 	private HttpSource remoteSource(Settings.Remote bundles) {
 		return HttpSource.builder(URI.create(bundles.getUrl()))
 				.product(bundles.getProduct())
+				.layout(layout(bundles))
 				.prefixes(bundles.getPrefixes().toArray(String[]::new))
 				.locales(languages())
 				.interval(bundles.getInterval())
 				.cache(folders.cache("remote"))
 				.build();
+	}
+
+	private static BundleLayout layout(Settings.Remote bundles) {
+		return switch (bundles.getLayout()) {
+			case PATHS -> BundleLayout.paths();
+			case DIGESTS -> BundleLayout.digests(bundles.getManifest());
+		};
 	}
 
 	// Intercept's own texts ship in the jar; they are copied out so the file source reads them like any folder.
